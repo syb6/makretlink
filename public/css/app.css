@@ -1,0 +1,407 @@
+/* ============================================================
+   MarketLink stylesheet — light & dark theme
+   Theme switching is data-bs-theme on <html> (Bootstrap 5.3);
+   MarketLink vars are defined per theme below.
+   ============================================================ */
+
+:root,
+[data-bs-theme="light"] {
+    --ml-green: #2e7d32;
+    --ml-green-dark: #1b5e20;
+    --ml-green-light: #e8f5e9;
+    --ml-amber: #f9a825;
+    --ml-brown: #4e342e;
+
+    --ml-body-bg: #fbfaf5;
+    --ml-body-color: #33391f;
+    --ml-surface: #ffffff;
+    --ml-border: #e7e5d8;
+    --ml-muted: #6c7562;
+    --ml-shadow: rgba(46, 125, 50, .14);
+    --ml-hero-overlay: rgba(27, 94, 32, .92), rgba(46, 125, 50, .82);
+    --ml-hero-text: #ffffff;
+    --ml-thumb-bg: #eef3e6;
+
+    --bs-body-bg: var(--ml-body-bg);
+    --bs-body-color: var(--ml-body-color);
+    --bs-border-color: var(--ml-border);
+}
+
+[data-bs-theme="dark"] {
+    --ml-green: #66bb6a;
+    --ml-green-dark: #43a047;
+    --ml-green-light: #243b26;
+    --ml-amber: #ffb300;
+    --ml-brown: #a1887f;
+
+    --ml-body-bg: #14181a;
+    --ml-body-color: #d5ddd3;
+    --ml-surface: #1d2326;
+    --ml-border: #2e373b;
+    --ml-muted: #93a08f;
+    --ml-shadow: rgba(0, 0, 0, .45);
+    --ml-hero-overlay: rgba(10, 40, 14, .93), rgba(16, 60, 22, .85);
+    --ml-hero-text: #ffffff;
+    --ml-thumb-bg: #232c2b;
+
+    --bs-body-bg: var(--ml-body-bg);
+    --bs-body-color: var(--ml-body-color);
+    --bs-border-color: var(--ml-border);
+    --bs-secondary-bg: #232a2d;
+    --bs-tertiary-bg: #1a2023;
+}
+
+/* Bootstrap's .text-dark is static — remap it so dark mode stays readable */
+[data-bs-theme="dark"] .text-dark {
+    color: var(--ml-body-color) !important;
+}
+
+body {
+    font-family: 'Nunito', system-ui, sans-serif;
+    color: var(--ml-body-color);
+    background-color: var(--ml-body-bg);
+}
+
+h1, h2, h3, h4, h5, h6, .navbar-brand {
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Make Bootstrap components follow the MarketLink palette */
+.card, .modal-content, .dropdown-menu {
+    background-color: var(--ml-surface);
+    border-color: var(--ml-border);
+    color: var(--ml-body-color);
+}
+.form-control, .form-select, .form-check-input {
+    background-color: var(--ml-surface);
+    border-color: #b9c0b3;
+    color: var(--ml-body-color);
+}
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-select {
+    border-color: #3d484c;
+}
+.form-control:focus, .form-select:focus {
+    border-color: var(--ml-green);
+    box-shadow: 0 0 0 .2rem color-mix(in srgb, var(--ml-green) 25%, transparent);
+}
+.alert-light {
+    background-color: var(--ml-surface);
+    border-color: var(--ml-border);
+    color: var(--ml-body-color);
+}
+.text-muted { color: var(--ml-muted) !important; }
+hr { border-color: var(--ml-border); opacity: 1; }
+a { color: var(--ml-green); }
+
+.text-ml-green { color: var(--ml-green) !important; }
+.bg-ml-green { background-color: var(--ml-green) !important; }
+.bg-ml-green-light { background-color: var(--ml-green-light) !important; }
+
+.btn-ml {
+    --bs-btn-bg: var(--ml-green);
+    --bs-btn-border-color: var(--ml-green);
+    --bs-btn-hover-bg: var(--ml-green-dark);
+    --bs-btn-hover-border-color: var(--ml-green-dark);
+    --bs-btn-active-bg: var(--ml-green-dark);
+    --bs-btn-active-border-color: var(--ml-green-dark);
+    --bs-btn-color: #fff;
+    --bs-btn-hover-color: #fff;
+    color: #fff;
+}
+.btn-outline-ml {
+    --bs-btn-color: var(--ml-green);
+    --bs-btn-border-color: var(--ml-green);
+    --bs-btn-hover-bg: var(--ml-green);
+    --bs-btn-hover-border-color: var(--ml-green);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-active-bg: var(--ml-green);
+    --bs-btn-active-color: #fff;
+}
+
+/* ---------- Navbar ---------- */
+.marketlink-navbar {
+    background-color: var(--ml-surface);
+    box-shadow: 0 2px 12px var(--ml-shadow);
+}
+.brand-leaf {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--ml-green-dark), var(--ml-green));
+    color: #fff;
+    margin-right: .35rem;
+}
+.marketlink-navbar .nav-link {
+    font-weight: 600;
+    color: var(--ml-body-color);
+}
+.marketlink-navbar .nav-link.active,
+.marketlink-navbar .nav-link:hover {
+    color: var(--ml-green) !important;
+}
+
+/* ---------- Hero ---------- */
+.marketlink-hero {
+    background:
+        linear-gradient(120deg, var(--ml-hero-overlay)),
+        url('https://images.unsplash.com/photo-1488459716781-31db52582fe9?auto=format&fit=crop&w=1600&q=60') center/cover no-repeat;
+    color: var(--ml-hero-text);
+    padding: 6rem 0 7rem;
+}
+.hero-chip {
+    display: inline-block;
+    background: rgba(255, 255, 255, .15);
+    border: 1px solid rgba(255, 255, 255, .35);
+    padding: .35rem 1rem;
+    border-radius: 50rem;
+    font-size: .85rem;
+    font-weight: 600;
+    letter-spacing: .4px;
+}
+
+/* ---------- Cards ---------- */
+.product-card, .card-ml {
+    border: 1px solid var(--ml-border);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--ml-surface);
+    transition: transform .18s ease, box-shadow .18s ease;
+}
+.product-card:hover, .card-ml:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px var(--ml-shadow);
+}
+.product-card .product-thumb {
+    height: 170px;
+    width: 100%;
+    object-fit: cover;
+    background: var(--ml-thumb-bg);
+    transition: transform .25s ease;
+}
+.product-card:hover .product-thumb {
+    transform: scale(1.04);
+}
+.product-price {
+    font-weight: 700;
+    color: var(--ml-green);
+}
+.badge-soft {
+    background: var(--ml-green-light);
+    color: var(--ml-green);
+    font-weight: 600;
+}
+
+/* ---------- Status pills (theme-aware via color-mix) ---------- */
+.status-pill {
+    font-size: .75rem;
+    font-weight: 700;
+    padding: .3rem .7rem;
+    border-radius: 50rem;
+    text-transform: capitalize;
+}
+.status-placed, .status-pending, .status-draft {
+    background: color-mix(in srgb, #f9a825 22%, var(--ml-surface));
+    color: #b28704;
+}
+.status-accepted {
+    background: color-mix(in srgb, #1e88e5 20%, var(--ml-surface));
+    color: #1565c0;
+}
+.status-declined, .status-rejected, .status-sold_out, .status-full {
+    background: color-mix(in srgb, #e53935 18%, var(--ml-surface));
+    color: #c62828;
+}
+[data-bs-theme="dark"] .status-declined,
+[data-bs-theme="dark"] .status-rejected,
+[data-bs-theme="dark"] .status-sold_out,
+[data-bs-theme="dark"] .status-full {
+    color: #ff8a80;
+}
+.status-ready_for_pickup {
+    background: color-mix(in srgb, #7e57c2 20%, var(--ml-surface));
+    color: #5e35b1;
+}
+[data-bs-theme="dark"] .status-ready_for_pickup { color: #b39ddb; }
+.status-completed, .status-approved, .status-active,
+.status-available, .status-published, .status-visible {
+    background: color-mix(in srgb, #43a047 20%, var(--ml-surface));
+    color: #2e7d32;
+}
+[data-bs-theme="dark"] .status-completed,
+[data-bs-theme="dark"] .status-approved,
+[data-bs-theme="dark"] .status-active,
+[data-bs-theme="dark"] .status-available,
+[data-bs-theme="dark"] .status-published,
+[data-bs-theme="dark"] .status-visible {
+    color: #a5d6a7;
+}
+.status-inactive, .status-archived, .status-unavailable, .status-cancelled {
+    background: color-mix(in srgb, #8d6e63 20%, var(--ml-surface));
+    color: #5d4037;
+}
+[data-bs-theme="dark"] .status-inactive,
+[data-bs-theme="dark"] .status-archived,
+[data-bs-theme="dark"] .status-unavailable,
+[data-bs-theme="dark"] .status-cancelled {
+    color: #bcaaa4;
+}
+.status-suspended {
+    background: color-mix(in srgb, #e53935 18%, var(--ml-surface));
+    color: #c62828;
+}
+[data-bs-theme="dark"] .status-suspended { color: #ff8a80; }
+.status-hidden {
+    background: color-mix(in srgb, #546e7a 18%, var(--ml-surface));
+    color: #455a64;
+}
+[data-bs-theme="dark"] .status-hidden { color: #b0bec5; }
+
+/* ---------- Dashboards ---------- */
+.stat-card {
+    border: none;
+    border-radius: 14px;
+    color: #fff;
+}
+.stat-card .stat-icon {
+    font-size: 2rem;
+    opacity: .85;
+}
+.stat-green { background: linear-gradient(135deg, #2e7d32, #43a047); }
+.stat-blue { background: linear-gradient(135deg, #155fa0, #1e88e5); }
+.stat-amber { background: linear-gradient(135deg, #b26a00, #ef8f00); }
+.stat-purple { background: linear-gradient(135deg, #4527a0, #673ab7); }
+
+/* ---------- Sidebar ---------- */
+.dash-sidebar .nav-link {
+    color: var(--ml-body-color);
+    border-radius: 10px;
+    padding: .55rem .9rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+}
+.dash-sidebar .nav-link:hover { background: var(--ml-green-light); color: var(--ml-green); }
+.dash-sidebar .nav-link.active {
+    background: var(--ml-green);
+    color: #fff;
+}
+
+/* ---------- Tables ---------- */
+.table-ml {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--ml-body-color);
+    --bs-table-border-color: var(--ml-border);
+}
+.table-ml thead { background: var(--ml-green-light); }
+.table-ml thead th {
+    color: var(--ml-green);
+    font-weight: 700;
+    font-size: .82rem;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+}
+
+/* ---------- Footer ---------- */
+.marketlink-footer {
+    background: #16211a;
+    color: #cfd8cf;
+}
+.marketlink-footer a { color: #cfd8cf; text-decoration: none; }
+.marketlink-footer a:hover { color: #fff; }
+
+/* ---------- Chatbot ---------- */
+.chatbot-window {
+    position: fixed;
+    bottom: 90px;
+    right: 24px;
+    width: 340px;
+    max-width: calc(100vw - 32px);
+    height: 440px;
+    background: var(--ml-surface);
+    border: 1px solid var(--ml-border);
+    border-radius: 16px;
+    box-shadow: 0 18px 48px var(--ml-shadow);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 1050;
+}
+.chatbot-window.open { display: flex; }
+.chatbot-head {
+    background: var(--ml-green);
+    color: #fff;
+    padding: .9rem 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+}
+.chatbot-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: .6rem;
+    background: var(--ml-body-bg);
+}
+.chatbot-msg {
+    max-width: 85%;
+    padding: .55rem .85rem;
+    border-radius: 14px;
+    font-size: .875rem;
+    line-height: 1.4;
+}
+.chatbot-msg.bot {
+    background: var(--ml-surface);
+    border: 1px solid var(--ml-border);
+    align-self: flex-start;
+}
+.chatbot-msg.user {
+    background: var(--ml-green);
+    color: #fff;
+    align-self: flex-end;
+}
+.chatbot-msg a { color: inherit; font-weight: 600; }
+.chatbot-fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: none;
+    background: var(--ml-green);
+    color: #fff;
+    font-size: 1.4rem;
+    box-shadow: 0 10px 24px var(--ml-shadow);
+    z-index: 1050;
+}
+.chatbot-fab:hover { background: var(--ml-green-dark); }
+
+/* ---------- Misc ---------- */
+#map { height: 420px; border-radius: 14px; z-index: 1; }
+.avatar-sm {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--ml-green-light);
+}
+.section-title { font-weight: 700; }
+.section-title .accent { color: var(--ml-green); }
+
+/* ---------- Theme toggle ---------- */
+.theme-toggle {
+    border: none;
+    background: transparent;
+    color: var(--ml-body-color);
+    font-size: 1.05rem;
+    padding: .25rem .5rem;
+    border-radius: 8px;
+}
+.theme-toggle:hover { background: var(--ml-green-light); }

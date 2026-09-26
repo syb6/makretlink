@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400" role="img" aria-label="Fruits">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffebee"/><stop offset="1" stop-color="#ef9a9a"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#g)"/>
+  <circle cx="300" cy="185" r="110" fill="#ffffff" opacity="0.45"/>
+  <text x="300" y="200" font-size="120" text-anchor="middle" dominant-baseline="middle">🍎</text>
+</svg>
