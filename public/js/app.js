@@ -91,6 +91,33 @@
             }
         }
 
+        /* ---------- Offline / online banner ---------- */
+        var offlineBanner = document.getElementById('offlineBanner');
+        if (offlineBanner) {
+            var offlineTimer = null;
+            var offlineMsg = offlineBanner.querySelector('[data-offline-msg]');
+            var onlineMsg = offlineBanner.querySelector('[data-online-msg]');
+
+            var showBanner = function (backOnline) {
+                clearTimeout(offlineTimer);
+                offlineBanner.classList.toggle('online', backOnline);
+                offlineMsg.classList.toggle('d-none', backOnline);
+                onlineMsg.classList.toggle('d-none', !backOnline);
+                offlineBanner.classList.add('show');
+
+                if (backOnline) {
+                    // Reassurance notice — auto-hide after a moment.
+                    offlineTimer = setTimeout(function () {
+                        offlineBanner.classList.remove('show');
+                    }, 3500);
+                }
+            };
+
+            if (!navigator.onLine) showBanner(false);
+            window.addEventListener('offline', function () { showBanner(false); });
+            window.addEventListener('online', function () { showBanner(true); });
+        }
+
         /* ---------- Back-to-top button ---------- */
         var backToTop = document.getElementById('backToTop');
         if (backToTop) {

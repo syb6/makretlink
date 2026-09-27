@@ -28,14 +28,13 @@
         <div class="row g-4">
             @forelse ($farmers as $farmer)
                 <div class="col-sm-6 col-lg-4">
-                    <div class="card-ml h-100 p-4 d-flex flex-column position-relative">
-                        @auth
-                            @if (auth()->user()->isCustomer())
-                                @php
-                                    $isFavFarmer = \App\Models\FavoriteFarmer::where('customer_id', auth()->user()->customerProfile->id)
-                                        ->where('farmer_id', $farmer->id)->exists();
-                                @endphp
-                                <button type="button" class="fav-btn favorite-farmer-btn"
+                    <div class="card-ml h-100 p-4 d-flex flex-column position-relative">                            @auth
+                                @if (auth()->user()->isCustomer())
+                                    @php
+                                        // Set passed from the controller — no per-card query.
+                                        $isFavFarmer = isset($favoriteFarmerIds) && $favoriteFarmerIds->contains($farmer->id);
+                                    @endphp
+                                    <button type="button" class="fav-btn favorite-farmer-btn"
                                         data-url="{{ route('favorites.toggle.farmer') }}"
                                         data-farmer-id="{{ $farmer->id }}"
                                         title="{{ $isFavFarmer ? 'Remove from favorites' : 'Save to favorites' }}"

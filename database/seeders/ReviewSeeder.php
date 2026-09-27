@@ -2,12 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\CustomerProfile;
 use App\Models\FarmerReview;
 use App\Models\Order;
 use App\Models\ProductReview;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Carbon;
 
 class ReviewSeeder extends Seeder
 {

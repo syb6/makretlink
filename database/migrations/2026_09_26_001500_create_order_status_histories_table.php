@@ -18,7 +18,7 @@ return new class extends Migration
                 'declined',
                 'ready_for_pickup',
                 'completed',
-                'cancelled'
+                'cancelled',
             ]);
             $table->foreignId('changed_by')->nullable()
                 ->constrained('users')->nullOnDelete();

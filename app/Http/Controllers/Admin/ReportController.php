@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\FarmerMarket;
-use App\Models\FarmerProfile;
 use App\Models\Order;
 use Illuminate\Support\Facades\DB;
 

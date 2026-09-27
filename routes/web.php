@@ -5,9 +5,9 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\MarketController as AdminMarketController;
 use App\Http\Controllers\Admin\ModerationController;
+use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
-use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Customer\CartController;
@@ -38,6 +38,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::post('/assistant', [HomeController::class, 'assistant'])->name('assistant');
 
 Route::get('/markets', [MarketController::class, 'index'])->name('markets.index');
+Route::get('/markets/map', [MarketController::class, 'mapData'])->name('markets.map');
 Route::get('/markets/{market}', [MarketController::class, 'show'])->name('markets.show');
 
 Route::get('/farmers', [FarmerController::class, 'index'])->name('farmers.index');

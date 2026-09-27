@@ -3,7 +3,7 @@
 @section('title', 'Contact Us')
 
 @push('styles')
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="{{ asset('vendor/leaflet/leaflet.css') }}">
 @endpush
 
 @section('content')
@@ -26,6 +26,7 @@
                 </div>
 
                 <form method="POST" action="{{ route('contact.send') }}" class="card-ml p-4">
+                    <x-form-errors />
                     @csrf
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Name</label>
@@ -51,7 +52,8 @@
 </section>
 
 @push('scripts')
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="{{ asset('vendor/leaflet/leaflet.js') }}"></script>
+<script>if (typeof L === 'undefined') document.write('<script src="https:\/\/unpkg.com\/leaflet@1.9.4\/dist\/leaflet.js"><\/script>');</script>
 <script>
     (function () {
         var map = L.map('map').setView([40.7128, -74.006], 14);

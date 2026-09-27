@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
@@ -34,6 +35,19 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Haversine support for the test suite: PDO's bundled SQLite build
+        // ships without trig functions, so register the ones the Market::nearby
+        // scope uses. No effect on MySQL (production) — native functions there.
+        if (config('database.default') === 'sqlite') {
+            $pdo = DB::connection()->getPdo();
+
+            $pdo->sqliteCreateFunction('radians', fn ($deg) => deg2rad((float) $deg), 1);
+            $pdo->sqliteCreateFunction('cos', fn ($x) => cos((float) $x), 1);
+            $pdo->sqliteCreateFunction('sin', fn ($x) => sin((float) $x), 1);
+            $pdo->sqliteCreateFunction('asin', fn ($x) => asin(max(-1.0, min(1.0, (float) $x))), 1);
+            $pdo->sqliteCreateFunction('sqrt', fn ($x) => sqrt(max(0.0, (float) $x)), 1);
+            $pdo->sqliteCreateFunction('pow', fn ($b, $e) => pow((float) $b, (float) $e), 2);
+        }
         if (config('app.env') === 'production') {
             URL::forceScheme('https');
         }

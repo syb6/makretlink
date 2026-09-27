@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\FarmerReviewFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class FarmerReview extends Model
 {
-    /** @use HasFactory<\Database\Factories\FarmerReviewFactory> */
+    /** @use HasFactory<FarmerReviewFactory> */
     use HasFactory;
 
     protected $fillable = [

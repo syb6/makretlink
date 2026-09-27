@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\FarmerMarketScheduleFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class FarmerMarketSchedule extends Model
 {
-    /** @use HasFactory<\Database\Factories\FarmerMarketScheduleFactory> */
+    /** @use HasFactory<FarmerMarketScheduleFactory> */
     use HasFactory;
 
     protected $fillable = [

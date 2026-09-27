@@ -54,7 +54,7 @@ class ProfileController extends Controller
             $profileData['profile_image'] = $images->replace(
                 $request->file('profile_image'),
                 $user->customerProfile->profile_image,
-                'customer-' . $user->customerProfile->id
+                'customer-'.$user->customerProfile->id
             );
         }
 

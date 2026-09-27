@@ -21,7 +21,9 @@ class PasswordResetMail extends Mailable
     use Queueable, SerializesModels;
 
     public string $resetUrl;
+
     public string $userName;
+
     public int $expiryMinutes;
 
     public function __construct(string $email, string $token, int $expiryMinutes = 30)

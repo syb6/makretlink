@@ -1,6 +1,8 @@
 @php
     $product = $stock->product;
     $market = $stock->farmerMarket->market;
+    // $favoriteProductIds (set of ids) is passed by the controllers — no per-card query.
+    $isFavProduct = isset($favoriteProductIds) && $favoriteProductIds->contains($product->id);
 @endphp
 <div class="col-sm-6 col-md-4 col-lg-3">
     <div class="product-card h-100">
@@ -9,10 +11,6 @@
             <span class="product-badge">{{ $stock->available_quantity > 0 ? 'In Stock' : 'Sold Out' }}</span>
             @auth
                 @if (auth()->user()->isCustomer())
-                    @php
-                        $isFavProduct = \App\Models\FavoriteProduct::where('customer_id', auth()->user()->customerProfile->id)
-                            ->where('product_id', $product->id)->exists();
-                    @endphp
                     <button type="button" class="fav-btn favorite-product-btn"
                             data-url="{{ route('favorites.toggle.product') }}"
                             data-product-id="{{ $product->id }}"

@@ -21,7 +21,7 @@
                         <span class="input-group-text"><i class="bi bi-envelope"></i></span>
                         <input id="email" type="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}" required placeholder="name@example.com">
                     </div>
-                    @error('email')<div class="invalid-feedback-ml show">{{ $message }}</div>@enderror
+                    
                 </div>
 
                 <div class="mb-3">
@@ -32,7 +32,7 @@
                         <span class="input-group-text"><i class="bi bi-lock"></i></span>
                         <input id="password" type="password" name="password" class="form-control @error('password') is-invalid @enderror" required placeholder="Enter your password">
                     </div>
-                    @error('password')<div class="invalid-feedback-ml show">{{ $message }}</div>@enderror
+                    
                     <div class="text-end mt-1">
                         <a href="{{ route('password.request') }}" class="small text-decoration-none fw-semibold">Forgot password?</a>
                     </div>

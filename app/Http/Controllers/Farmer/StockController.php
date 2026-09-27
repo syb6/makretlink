@@ -4,15 +4,16 @@ namespace App\Http\Controllers\Farmer;
 
 use App\Http\Controllers\Controller;
 use App\Models\FarmerMarket;
+use App\Models\FarmerProfile;
 use App\Models\StockTemplate;
 use App\Models\WeeklyStock;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class StockController extends Controller
 {
-    private function farmer(): \App\Models\FarmerProfile
+    private function farmer(): FarmerProfile
     {
         return Auth::user()->farmerProfile;
     }
@@ -53,7 +54,7 @@ class StockController extends Controller
             'quantity' => ['required', 'numeric', 'min:0'],
         ]);
 
-        abort_unless(in_array($data['farmer_market_id'], $this->myFarmerMarketIds(), true), 403);
+        abort_unless(in_array((int) $data['farmer_market_id'], $this->myFarmerMarketIds(), true), 403);
         abort_unless($this->farmer()->products()->whereKey($data['product_id'])->exists(), 403);
 
         $weekStart = Carbon::parse($data['week_start'])->startOfWeek(Carbon::SUNDAY)->toDateString();
@@ -110,7 +111,7 @@ class StockController extends Controller
             'default_quantity' => ['required', 'numeric', 'min:0'],
         ]);
 
-        abort_unless(in_array($data['farmer_market_id'], $this->myFarmerMarketIds(), true), 403);
+        abort_unless(in_array((int) $data['farmer_market_id'], $this->myFarmerMarketIds(), true), 403);
 
         StockTemplate::updateOrCreate(
             ['product_id' => $data['product_id'], 'farmer_market_id' => $data['farmer_market_id']],
@@ -128,7 +129,7 @@ class StockController extends Controller
             'farmer_market_id' => ['required', 'exists:farmer_markets,id'],
         ]);
 
-        abort_unless(in_array($data['farmer_market_id'], $this->myFarmerMarketIds(), true), 403);
+        abort_unless(in_array((int) $data['farmer_market_id'], $this->myFarmerMarketIds(), true), 403);
 
         $weekStart = Carbon::parse($data['week_start'])->startOfWeek(Carbon::SUNDAY)->toDateString();
         $templates = StockTemplate::with('product')

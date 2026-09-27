@@ -10,7 +10,9 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 @endif
-@if (isset($errors) && $errors->any())
+@if (isset($errors) && $errors->any() && ! request()->routeIs('login', 'register', 'password.request', 'password.reset', 'checkout.index', 'contact'))
+    {{-- Validation errors are rendered once inside each form via <x-form-errors />.
+         This catch-all only covers routes whose blade has no form summary. --}}
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
         <strong>Please fix the following:</strong>
         <ul class="mb-0">

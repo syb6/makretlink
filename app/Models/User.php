@@ -13,11 +13,12 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Mail;
 
 class User extends Authenticatable implements CanResetPasswordContract
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, SoftDeletes, CanResetPasswordTrait;
+    use CanResetPasswordTrait, HasFactory, Notifiable, SoftDeletes;
 
     /**
      * Route the broker's reset token through our branded mailable
@@ -25,7 +26,7 @@ class User extends Authenticatable implements CanResetPasswordContract
      */
     public function sendPasswordResetNotification($token): void
     {
-        \Illuminate\Support\Facades\Mail::to($this->email)
+        Mail::to($this->email)
             ->send(new PasswordResetMail($this->email, $token, (int) config('auth.passwords.users.expire', 30)));
     }
 
@@ -104,14 +105,14 @@ class User extends Authenticatable implements CanResetPasswordContract
     public function avatarUrl(): ?string
     {
         if ($this->profile_photo_path) {
-            return asset('storage/' . $this->profile_photo_path);
+            return asset('storage/'.$this->profile_photo_path);
         }
 
         $roleImage = $this->isCustomer()
             ? $this->customerProfile?->profile_image
             : ($this->isFarmer() ? $this->farmerProfile?->profile_image : null);
 
-        return $roleImage ? asset('storage/' . $roleImage) : null;
+        return $roleImage ? asset('storage/'.$roleImage) : null;
     }
 
     /** Initials for the CSS avatar fallback (max two letters). */
@@ -121,7 +122,7 @@ class User extends Authenticatable implements CanResetPasswordContract
         $first = mb_substr($parts[0] ?? '', 0, 1);
         $last = count($parts) > 1 ? mb_substr(end($parts), 0, 1) : '';
 
-        return mb_strtoupper($first . $last);
+        return mb_strtoupper($first.$last);
     }
 
     public function isFarmer(): bool

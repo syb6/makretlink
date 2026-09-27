@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Services\ProfileImageService;
 use App\Models\Market;
 use App\Models\MarketSchedule;
+use App\Services\ProfileImageService;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 
 class MarketController extends Controller
@@ -59,7 +60,7 @@ class MarketController extends Controller
 
         try {
             $market->delete();
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             return back()->with('error', 'Cannot delete: this market has orders attached. Set it inactive instead.');
         }
 

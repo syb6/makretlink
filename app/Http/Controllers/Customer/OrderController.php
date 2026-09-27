@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Models\Cart;
+use App\Models\CartItem;
+use App\Models\FarmerReview;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\ProductReview;
-use App\Models\FarmerReview;
 use App\Models\WeeklyStock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -81,13 +83,14 @@ class OrderController extends Controller
     {
         $this->authorizeOrder($order);
 
-        $cart = \App\Models\Cart::firstOrCreate(['customer_id' => Auth::user()->customerProfile->id]);
+        $cart = Cart::firstOrCreate(['customer_id' => Auth::user()->customerProfile->id]);
         $added = 0;
         $skipped = 0;
 
         foreach ($order->items as $item) {
             if (! $item->product_id || ! $order->farmer_market_id) {
                 $skipped++;
+
                 continue;
             }
 
@@ -98,19 +101,20 @@ class OrderController extends Controller
 
             if (! $stock || $stock->available_quantity <= 0) {
                 $skipped++;
+
                 continue;
             }
 
             $qty = min((float) $item->quantity, (float) $stock->available_quantity);
 
-            $existing = \App\Models\CartItem::where('cart_id', $cart->id)
+            $existing = CartItem::where('cart_id', $cart->id)
                 ->where('product_id', $item->product_id)
                 ->where('farmer_market_id', $order->farmer_market_id)
                 ->first();
 
             $newQty = min(($existing?->quantity ?? 0) + $qty, (float) $stock->available_quantity);
 
-            \App\Models\CartItem::updateOrCreate(
+            CartItem::updateOrCreate(
                 ['cart_id' => $cart->id, 'product_id' => $item->product_id, 'farmer_market_id' => $order->farmer_market_id],
                 ['quantity' => $newQty, 'price' => $item->unit_price]
             );

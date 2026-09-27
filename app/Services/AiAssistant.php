@@ -7,6 +7,8 @@ use App\Models\FarmerProfile;
 use App\Models\Market;
 use App\Models\MarketSchedule;
 use App\Models\WeeklyStock;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 
 /**
@@ -102,7 +104,7 @@ class AiAssistant
      * Answer a customer question.
      *
      * @param  array<int, array{role: string, content: string}>  $history  Recent conversation turns (oldest first).
-     * @param  array<int, array{label: string, url: string}>     $seenLinks Links already shown to this customer.
+     * @param  array<int, array{label: string, url: string}>  $seenLinks  Links already shown to this customer.
      * @return array{reply: string, links: array<int, array{label: string, url: string}>, source: string}
      */
     public function ask(string $message, array $history = [], array $seenLinks = []): array
@@ -235,7 +237,7 @@ TXT;
         $stocks = WeeklyStock::query()
             ->where('status', 'available')
             ->where('available_quantity', '>', 0)
-            ->where('week_start', '>=', now()->startOfWeek(\Illuminate\Support\Carbon::SUNDAY)->toDateString())
+            ->where('week_start', '>=', now()->startOfWeek(Carbon::SUNDAY)->toDateString())
             ->whereHas('product', fn ($p) => $p->where('status', 'active')
                 ->whereHas('farmer', fn ($f) => $f->where('approval_status', 'approved')))
             ->whereHas('farmerMarket', fn ($fm) => $fm->where('status', 'active')
@@ -407,9 +409,9 @@ TXT;
      * Extract meaningful keywords from the message (stopwords removed),
      * expanded with catalog synonyms ("bread" -> baked goods, "milk" -> dairy).
      *
-     * @return \Illuminate\Support\Collection<int, string>
+     * @return Collection<int, string>
      */
-    private function keywords(string $message): \Illuminate\Support\Collection
+    private function keywords(string $message): Collection
     {
         $words = collect(preg_split('/[^a-z0-9]+/', strtolower($message), -1, PREG_SPLIT_NO_EMPTY) ?: [])
             ->reject(fn ($w) => in_array($w, [

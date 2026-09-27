@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\CartFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Cart extends Model
 {
-    /** @use HasFactory<\Database\Factories\CartFactory> */
+    /** @use HasFactory<CartFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -32,7 +33,7 @@ class Cart extends Model
     }
 
     /** Number of distinct items in the given user's cart (0 if none). */
-    public static function countFor(\App\Models\User $user): int
+    public static function countFor(User $user): int
     {
         $customer = $user->customerProfile;
 

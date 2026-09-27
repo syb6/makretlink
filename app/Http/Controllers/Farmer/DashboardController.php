@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Farmer;
 
 use App\Http\Controllers\Controller;
-use App\Models\FarmerReview;
 use App\Models\FarmerMarket;
+use App\Models\FarmerReview;
+use App\Models\Market;
+use App\Models\MarketSchedule;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Services\ProfileImageService;
@@ -52,13 +54,13 @@ class DashboardController extends Controller
 
         $joinedMarketIds = $stalls->pluck('market_id');
 
-        $availableMarkets = \App\Models\Market::where('status', 'active')
+        $availableMarkets = Market::where('status', 'active')
             ->whereNotIn('id', $joinedMarketIds)
             ->orderBy('name')
             ->get();
 
         // Days each active market is open (used to enable/disable the day checkboxes)
-        $openDays = \App\Models\MarketSchedule::whereIn('market_id', \App\Models\Market::where('status', 'active')->pluck('id'))
+        $openDays = MarketSchedule::whereIn('market_id', Market::where('status', 'active')->pluck('id'))
             ->where('is_closed', false)
             ->orderBy('day_of_week')
             ->get();
@@ -87,7 +89,7 @@ class DashboardController extends Controller
             $data['profile_image'] = app(ProfileImageService::class)->replace(
                 $request->file('profile_image'),
                 $farmer->profile_image,
-                'farmer-' . $farmer->id
+                'farmer-'.$farmer->id
             );
         }
 
@@ -130,7 +132,7 @@ class DashboardController extends Controller
 
         abort_unless($farmer->isApproved(), 403, 'Your stall must be approved by an administrator first.');
 
-        abort_unless(\App\Models\Market::where('id', $data['market_id'])->where('status', 'active')->exists(), 422, 'That market is not active.');
+        abort_unless(Market::where('id', $data['market_id'])->where('status', 'active')->exists(), 422, 'That market is not active.');
 
         $stall = FarmerMarket::updateOrCreate(
             ['farmer_id' => $farmer->id, 'market_id' => $data['market_id']],
@@ -143,7 +145,7 @@ class DashboardController extends Controller
 
         // Weekly presence (only days the market actually operates)
         $days = collect($data['days'] ?? [])
-            ->filter(fn ($d) => \App\Models\MarketSchedule::where('market_id', $data['market_id'])
+            ->filter(fn ($d) => MarketSchedule::where('market_id', $data['market_id'])
                 ->where('day_of_week', $d)
                 ->where('is_closed', false)
                 ->exists());

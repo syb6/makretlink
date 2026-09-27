@@ -115,7 +115,9 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .catch(function () {
                 typing.remove();
-                addMsg('Sorry, something went wrong. Please try again in a moment.', 'bot');
+                addMsg(navigator.onLine
+                    ? 'Sorry — I could not reach the server just now. Please try again in a moment.'
+                    : 'You appear to be offline. Reconnect to the internet and try again.', 'bot');
             })
             .finally(function () {
                 setPending(false);

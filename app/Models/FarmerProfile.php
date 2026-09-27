@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\FarmerProfileFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class FarmerProfile extends Model
 {
-    /** @use HasFactory<\Database\Factories\FarmerProfileFactory> */
+    /** @use HasFactory<FarmerProfileFactory> */
     use HasFactory, SoftDeletes;
 
     protected $fillable = [

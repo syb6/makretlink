@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
-    /** @use HasFactory<\Database\Factories\ProductFactory> */
+    /** @use HasFactory<ProductFactory> */
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -39,11 +40,11 @@ class Product extends Model
     public function getPlaceholderKeyAttribute(): string
     {
         $map = [
-            'vegetables'      => 'vegetables',
-            'fruits'          => 'fruits',
-            'dairy-eggs'      => 'dairy-eggs',
-            'baked-goods'     => 'baked-goods',
-            'herbs-greens'    => 'herbs-greens',
+            'vegetables' => 'vegetables',
+            'fruits' => 'fruits',
+            'dairy-eggs' => 'dairy-eggs',
+            'baked-goods' => 'baked-goods',
+            'herbs-greens' => 'herbs-greens',
             'honey-preserves' => 'honey-preserves',
         ];
 
@@ -59,7 +60,7 @@ class Product extends Model
     {
         return $this->image
             ? asset('storage/'.$this->image)
-            : asset('images/placeholders/'.$this->placeholder_key.'.svg');
+            : asset('images/placeholders/'.$this->placeholder_key.'.png');
     }
 
     public function farmer(): BelongsTo

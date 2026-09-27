@@ -41,7 +41,7 @@
                     <label class="form-label fw-semibold" for="email">Email address</label>
                     <input id="email" type="email" name="email" class="form-control @error('email') is-invalid @enderror"
                            value="{{ old('email') }}" required placeholder="name@example.com" autofocus>
-                    @error('email')<div class="invalid-feedback-ml show">{{ $message }}</div>@enderror
+                    
                 </div>
                 <button type="submit" class="btn btn-ml w-100 mb-3"><i class="bi bi-send me-1"></i> Send reset link</button>
                 <div class="text-center small">

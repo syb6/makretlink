@@ -34,7 +34,7 @@ return new class extends Migration
                 'declined',
                 'ready_for_pickup',
                 'completed',
-                'cancelled'
+                'cancelled',
             ])->default('placed')->index();
 
             $table->decimal('total_amount', 12, 2);

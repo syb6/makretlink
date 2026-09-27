@@ -97,6 +97,6 @@ class PasswordResetController extends Controller
         // Expired (> 30 min), invalid or already-used token — say why plainly.
         return back()
             ->withInput($request->only('email'))
-            ->withErrors(['email' => __($status) . ' Request a fresh link below — links stay valid for 30 minutes and can only be used once.']);
+            ->withErrors(['email' => __($status).' Request a fresh link below — links stay valid for 30 minutes and can only be used once.']);
     }
 }

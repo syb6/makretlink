@@ -33,11 +33,11 @@ class ProfileController extends Controller
             $user->profile_photo_path = $images->replace(
                 $request->file('profile_photo'),
                 $user->profile_photo_path,
-                'profiles/admin-' . $user->id
+                'profiles/admin-'.$user->id
             );
         }
 
-        if (!empty($data['password'])) {
+        if (! empty($data['password'])) {
             $user->password = Hash::make($data['password']);
         }
 

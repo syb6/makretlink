@@ -8,8 +8,6 @@ use App\Models\OrderItem;
 use App\Models\PickupSlot;
 use App\Models\WeeklyStock;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class OrderSeeder extends Seeder
 {

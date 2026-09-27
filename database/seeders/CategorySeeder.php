@@ -11,20 +11,19 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            'Vegetables' => '🥬',
-            'Fruits' => '🍎',
-            'Dairy & Eggs' => '🥛',
-            'Baked Goods' => '🍞',
-            'Herbs & Greens' => '🌿',
-            'Honey & Preserves' => '🍯',
+            'Vegetables' => 'vegetables.png',
+            'Fruits' => 'fruits.png',
+            'Dairy & Eggs' => 'dairy-eggs.png',
+            'Baked Goods' => 'baked-goods.png',
+            'Herbs & Greens' => 'herbs-greens.png',
+            'Honey & Preserves' => 'honey-preserves.png',
         ];
 
-        foreach ($categories as $name => $emoji) {
-            Category::create([
-                'name' => $name,
-                'slug' => Str::slug($name),
-                'status' => 'active',
-            ]);
+        foreach ($categories as $name => $image) {
+            Category::updateOrCreate(
+                ['slug' => Str::slug($name)],
+                ['name' => $name, 'status' => 'active', 'image' => $image]
+            );
         }
     }
 }

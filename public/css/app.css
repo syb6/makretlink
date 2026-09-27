@@ -716,6 +716,24 @@ a.logo-brand:hover {
     padding: 8px 18px;
     border-radius: var(--radius-sm);
 }
+.spin-icon {
+    display: inline-block;
+    animation: spin 0.9s linear infinite;
+}
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+.nearby-market-item {
+    transition: var(--transition);
+}
+.nearby-market-item:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: var(--card-shadow);
+    color: inherit;
+}
 .nav-bar-wrapper {
     background-color: var(--primary);
 }
@@ -3768,4 +3786,217 @@ body.page-leaving {
 }
 [data-bs-theme='dark'] .dev-reset-url {
   color: var(--primary);
+}
+
+/* ---------- Offline / online banner (browser connection state) ---------- */
+.offline-banner {
+    position: fixed;
+    top: 14px;
+    left: 50%;
+    transform: translate(-50%, -140%);
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: min(92vw, 560px);
+    padding: 10px 18px;
+    border-radius: var(--radius-pill);
+    background: #b3261e;
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 500;
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.25);
+    opacity: 0;
+    transition:
+        transform 0.35s cubic-bezier(0.22, 0.8, 0.32, 1),
+        opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.offline-banner.show {
+    transform: translate(-50%, 0);
+    opacity: 1;
+}
+
+.offline-banner.online {
+    background: #216e39;
+}
+
+.offline-banner i {
+    font-size: 1.05rem;
+    flex-shrink: 0;
+}
+
+[data-bs-theme='dark'] .offline-banner {
+    background: #d64a42;
+}
+
+[data-bs-theme='dark'] .offline-banner.online {
+    background: #2e8b4f;
+}
+
+/* ---------- Leaflet maps: themed light + dark ---------- */
+.leaflet-container {
+    background: var(--surface-2);
+    font-family: Poppins, sans-serif;
+}
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+    background: var(--surface);
+    color: var(--dark);
+    box-shadow: var(--card-shadow-lg);
+}
+
+.leaflet-popup-content-wrapper {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+}
+
+.leaflet-popup-content b {
+    font-family: 'Playfair Display', serif;
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+    color: var(--muted);
+}
+
+.leaflet-container a.leaflet-popup-close-button:hover {
+    color: var(--dark);
+}
+
+.leaflet-control-attribution {
+    background: color-mix(in srgb, var(--surface) 82%, transparent) !important;
+    color: var(--muted) !important;
+}
+
+.leaflet-control-attribution a {
+    color: var(--primary-dark) !important;
+}
+
+[data-bs-theme='dark'] .leaflet-control-attribution {
+    background: color-mix(in srgb, var(--surface) 88%, transparent) !important;
+}
+
+.leaflet-bar a,
+.leaflet-bar a:hover {
+    background: var(--surface);
+    color: var(--dark);
+    border-bottom-color: var(--border-color);
+}
+
+.leaflet-bar a:hover {
+    background: var(--primary-light);
+    color: var(--primary-contrast);
+}
+
+.leaflet-marker-icon.market-you-marker {
+    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.3));
+}
+
+/* Dark mode: soften OSM raster tiles so bright maps don't glare. */
+[data-bs-theme='dark'] .leaflet-tile {
+    filter: brightness(0.82) contrast(1.05) saturate(0.85);
+}
+
+/* Mobile: the banner becomes a full-width top bar (no blob wrapping). */
+@media (max-width: 575.98px) {
+    .offline-banner {
+        left: 0;
+        right: 0;
+        top: 0;
+        max-width: none;
+        transform: translateY(-140%);
+        border-radius: 0 0 var(--radius-md) var(--radius-md);
+        padding: 10px 16px;
+    }
+
+    .offline-banner.show {
+        transform: translateY(0);
+    }
+}
+
+/* ---------- Hero: full-bleed photo background (Ken Burns) ---------- */
+.hero-bg-photo {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.hero-bg-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    will-change: transform;
+    animation: hero-kenburns 36s ease-in-out infinite alternate;
+}
+
+@keyframes hero-kenburns {
+    from {
+        transform: scale(1) translate3d(0, 0, 0);
+    }
+    to {
+        transform: scale(1.12) translate3d(-1.5%, -2%, 0);
+    }
+}
+
+/* Themed scrim: keeps headline text readable over the photo in both themes. */
+.hero-bg-scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(
+            100deg,
+            color-mix(in srgb, var(--cream) 92%, transparent) 0%,
+            color-mix(in srgb, var(--cream) 72%, transparent) 42%,
+            color-mix(in srgb, var(--cream) 30%, transparent) 100%
+        );
+}
+
+[data-bs-theme='dark'] .hero-bg-scrim {
+    background:
+        linear-gradient(
+            100deg,
+            color-mix(in srgb, var(--cream) 94%, transparent) 0%,
+            color-mix(in srgb, var(--cream) 78%, transparent) 42%,
+            color-mix(in srgb, var(--cream) 38%, transparent) 100%
+        );
+}
+
+/* ---------- Hero: staggered pure-CSS entrance (no JS dependency) ---------- */
+/* Opt in via .js-anim? No — these run regardless of JS so first paint animates.
+   Elements start hidden only when the animation is supported and motion is OK. */
+@keyframes ml-in-up {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 26px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+.ml-in {
+    animation: ml-in-up 0.7s cubic-bezier(0.22, 0.8, 0.32, 1) both;
+    animation-delay: var(--d, 0ms);
+    will-change: opacity, transform;
+}
+
+/* Entrance vs parallax conflict: the .js-anim parallax uses its own transform on
+   .hero-content / .hero-image-wrapper (parents), while .ml-in animates the
+   elements themselves — no property collision, both compose safely. */
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-bg-photo img {
+        animation: none;
+    }
+
+    .ml-in {
+        animation: none;
+    }
 }

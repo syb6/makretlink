@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Services\ProfileImageService;
 use App\Models\Category;
+use App\Services\ProfileImageService;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -62,7 +63,7 @@ class CategoryController extends Controller
     {
         try {
             $category->delete();
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             return back()->with('error', 'Cannot delete: category has products.');
         }
 

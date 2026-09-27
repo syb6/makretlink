@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\FavoriteProduct;
 use App\Models\Market;
 use App\Models\MarketSchedule;
 use App\Models\Product;
 use App\Models\ProductReview;
 use App\Models\WeeklyStock;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
 
 class ProductController extends Controller
 {
@@ -26,7 +29,7 @@ class ProductController extends Controller
             ->where('status', 'available')
             ->where('available_quantity', '>', 0)
             // Only current or upcoming weeks — stale stock from past weeks must not be sellable.
-            ->where('week_start', '>=', now()->startOfWeek(\Illuminate\Support\Carbon::SUNDAY)->toDateString())
+            ->where('week_start', '>=', now()->startOfWeek(Carbon::SUNDAY)->toDateString())
             ->with(['product.category', 'product.farmer.user', 'farmerMarket.market'])
             ->whereHas('product', fn ($p) => $p
                 ->where('status', 'active')
@@ -65,8 +68,16 @@ class ProductController extends Controller
         $page = max(1, (int) $request->query('page', 1));
         $chunk = $stocks->slice(($page - 1) * $perPage, $perPage)->values();
 
+        // One query for the customer's favorite products instead of one per card
+        // (N+1 across the grid — the set is passed into the card partial).
+        $favoriteProductIds = collect();
+        if ($request->user()?->isCustomer()) {
+            $favoriteProductIds = FavoriteProduct::where('customer_id', $request->user()->customerProfile->id)
+                ->pluck('product_id');
+        }
+
         return view('products.index', [
-            'stocks' => new \Illuminate\Pagination\LengthAwarePaginator(
+            'stocks' => new LengthAwarePaginator(
                 $chunk,
                 $stocks->count(),
                 $perPage,
@@ -77,6 +88,7 @@ class ProductController extends Controller
             'markets' => Market::where('status', 'active')->orderBy('name')->get(),
             'days' => MarketSchedule::DAYS,
             'filters' => compact('search', 'category', 'market', 'day', 'min', 'max', 'sort'),
+            'favoriteProductIds' => $favoriteProductIds,
         ]);
     }
 
@@ -126,7 +138,7 @@ class ProductController extends Controller
             ->get()
             ->map(fn ($s) => [
                 'id' => $s->id,
-                'label' => $s->farmerMarket->market->name . ' — ' . ($s->farmerMarket->stall_name ?? $s->product->farmer->business_name),
+                'label' => $s->farmerMarket->market->name.' — '.($s->farmerMarket->stall_name ?? $s->product->farmer->business_name),
                 'available' => (float) $s->available_quantity,
                 'unit' => $s->product->unit,
                 'price' => (float) $s->product->price,

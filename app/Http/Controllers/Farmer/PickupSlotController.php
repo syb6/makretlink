@@ -41,7 +41,7 @@ class PickupSlotController extends Controller
             'max_orders' => ['nullable', 'integer', 'min:1'],
         ]);
 
-        abort_unless(in_array($data['farmer_market_id'], $this->myFarmerMarketIds(), true), 403);
+        abort_unless(in_array((int) $data['farmer_market_id'], $this->myFarmerMarketIds(), true), 403);
 
         PickupSlot::create($data + ['status' => 'active']);
 

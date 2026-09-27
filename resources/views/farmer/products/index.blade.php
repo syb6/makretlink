@@ -31,7 +31,7 @@
                             </div>
                             <div class="row g-2 mb-2">
                                 <div class="col-6">
-                                    <label class="form-label small fw-semibold">Price ($)</label>
+                                    <label class="form-label small fw-semibold">Price (Rs)</label>
                                     <input type="number" step="0.01" min="0.01" name="price" class="form-control form-control-sm" required value="{{ old('price') }}">
                                 </div>
                                 <div class="col-6">
@@ -42,6 +42,13 @@
                             <div class="mb-2">
                                 <label class="form-label small fw-semibold">Description</label>
                                 <textarea name="description" rows="2" class="form-control form-control-sm"></textarea>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label small fw-semibold">Status</label>
+                                <select name="status" class="form-select form-select-sm">
+                                    <option value="active" selected>Active — visible to customers</option>
+                                    <option value="inactive">Inactive — hidden</option>
+                                </select>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label small fw-semibold">Product picture</label>
@@ -135,7 +142,7 @@
                         </div>
                         <div class="row g-2 mb-2">
                             <div class="col-6">
-                                <label class="form-label small fw-semibold">Price ($)</label>
+                                <label class="form-label small fw-semibold">Price (Rs)</label>
                                 <input type="number" step="0.01" min="0.01" name="price" class="form-control form-control-sm" value="{{ $product->price }}" required>
                             </div>
                             <div class="col-6">

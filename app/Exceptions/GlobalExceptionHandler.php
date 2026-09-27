@@ -11,7 +11,9 @@ use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\Request;
 use Illuminate\Session\TokenMismatchException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -68,6 +70,12 @@ class GlobalExceptionHandler
     {
         // Structured JSON for API/AJAX callers (assistant widget, fetch()).
         $exceptions->render(function (Throwable $e, Request $request) {
+            // Validation: the framework already responds correctly (422 JSON
+            // for API callers, redirect with session errors for web forms).
+            if ($e instanceof ValidationException) {
+                return null;
+            }
+
             if (! ($request->expectsJson() || $request->ajax())) {
                 return null; // browser flow handled by the next renderable
             }
@@ -92,6 +100,11 @@ class GlobalExceptionHandler
                 return null;
             }
 
+            // Web-form validation redirects back with errors (never a page).
+            if ($e instanceof ValidationException) {
+                return null;
+            }
+
             $status = self::statusFor($e);
 
             // Local debug keeps Laravel's detailed screen ONLY for real 500s
@@ -112,7 +125,7 @@ class GlobalExceptionHandler
             $headers = $e instanceof HttpExceptionInterface ? $e->getHeaders() : [];
 
             return response()->view('errors.minimal', [
-                'exception' => new \Symfony\Component\HttpKernel\Exception\HttpException($status),
+                'exception' => new HttpException($status),
                 'hint' => $e instanceof MethodNotAllowedHttpException
                     ? collect(explode(',', (string) ($headers['Allow'] ?? '')))->map(fn ($m) => trim($m))->filter()->implode(', ')
                     : null,

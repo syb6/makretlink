@@ -35,9 +35,9 @@
                     @auth
                         @if (auth()->user()->isCustomer())
                             @php
+                                // Set passed from the controller — no extra query.
                                 $isFavFarmer = auth()->user()->customerProfile
-                                    && \App\Models\FavoriteFarmer::where('customer_id', auth()->user()->customerProfile->id)
-                                        ->where('farmer_id', $farmer->id)->exists();
+                                    && isset($favoriteFarmerIds) && $favoriteFarmerIds->contains($farmer->id);
                             @endphp
                             <button type="button"
                                     class="btn btn-sm {{ $isFavFarmer ? 'btn-ml' : 'btn-outline-ml' }} mb-3 favorite-farmer-btn"

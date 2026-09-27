@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Handles profile photo storage for every role.
@@ -20,7 +21,7 @@ class ProfileImageService
         // gives every upload a unique, cache-bustable filename.
         $path = $file->storeAs(
             'profiles',
-            $prefix . '-' . substr(hash('sha256', $file->getClientOriginalName() . microtime()), 0, 10) . '.' . $file->getClientOriginalExtension(),
+            $prefix.'-'.substr(hash('sha256', $file->getClientOriginalName().microtime()), 0, 10).'.'.$file->getClientOriginalExtension(),
             'public'
         );
 
@@ -32,7 +33,7 @@ class ProfileImageService
     public function delete(?string $path): void
     {
         if ($path && $this->isManagedPath($path)) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($path);
+            Storage::disk('public')->delete($path);
         }
     }
 

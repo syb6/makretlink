@@ -41,26 +41,26 @@
                     <div class="col-md-6 mb-3">
                         <label for="fullName" class="form-label">Full Name</label>
                         <input type="text" class="form-control @error('name') is-invalid @enderror" id="fullName" name="name" value="{{ old('name') }}" required placeholder="e.g. Jane Smith">
-                        @error('name')<div class="invalid-feedback-ml show">{{ $message }}</div>@enderror
+                        
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="phoneNumber" class="form-label">Phone</label>
                         <input type="tel" class="form-control @error('phone') is-invalid @enderror" id="phoneNumber" name="phone" value="{{ old('phone') }}" required placeholder="+1 (555) 000-0000">
-                        @error('phone')<div class="invalid-feedback-ml show">{{ $message }}</div>@enderror
+                        
                     </div>
                 </div>
 
                 <div class="mb-3">
                     <label for="emailAddress" class="form-label">Email Address</label>
                     <input type="email" class="form-control @error('email') is-invalid @enderror" id="emailAddress" name="email" value="{{ old('email') }}" required placeholder="name@example.com">
-                    @error('email')<div class="invalid-feedback-ml show">{{ $message }}</div>@enderror
+                    
                 </div>
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="accountPassword" class="form-label">Password</label>
                         <input type="password" class="form-control @error('password') is-invalid @enderror" id="accountPassword" name="password" required placeholder="Create a password">
-                        @error('password')<div class="invalid-feedback-ml show">{{ $message }}</div>@enderror
+                        
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="passwordConfirmation" class="form-label">Confirm Password</label>
@@ -72,7 +72,7 @@
                 <div class="role-fields role-customer {{ $role === 'customer' ? '' : 'd-none' }}">
                     <label class="form-label">Delivery / contact address <span class="text-danger">*</span></label>
                     <textarea name="address" rows="2" class="form-control @error('address') is-invalid @enderror" placeholder="Street, city...">{{ old('address') }}</textarea>
-                    @error('address')<div class="invalid-feedback-ml show">{{ $message }}</div>@enderror
+                    
                 </div>
 
                 {{-- Farmer fields --}}
@@ -81,7 +81,7 @@
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Stall / business name <span class="text-danger">*</span></label>
                             <input type="text" name="business_name" class="form-control @error('business_name') is-invalid @enderror" value="{{ old('business_name') }}">
-                            @error('business_name')<div class="invalid-feedback-ml show">{{ $message }}</div>@enderror
+                            
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Contact person <span class="optional-tag">(optional)</span></label>

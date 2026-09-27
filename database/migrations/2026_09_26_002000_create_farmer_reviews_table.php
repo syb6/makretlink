@@ -11,7 +11,6 @@ return new class extends Migration
         Schema::create('farmer_reviews', function (Blueprint $table) {
             $table->id();
 
-            
             $table->foreignId('customer_id')
                 ->constrained('customer_profiles');
             $table->foreignId('farmer_id')

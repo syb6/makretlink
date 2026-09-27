@@ -23,8 +23,20 @@
          the hero image and delay LCP; the CSS is render-blocking anyway. --}}
 
     <link rel="shortcut icon" href="{{asset('favicon.ico')}}" type="image/x-icon">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    {{-- Self-hosted first (theme survives dead internet); CDN fallback if a local file is missing --}}
+    <link href="{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+    <script>
+        // If a self-hosted library file is missing (partial deploy), pull it from
+        // the CDN so the page still renders. No effect when the file exists.
+        function mlCssFallback(localUrl, cdnUrl) {
+            fetch(localUrl, { method: 'HEAD' })
+                .then(function (r) { if (!r.ok) { var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = cdnUrl; document.head.appendChild(l); } })
+                .catch(function () { var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = cdnUrl; document.head.appendChild(l); });
+        }
+        mlCssFallback('{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css');
+        mlCssFallback('{{ asset('vendor/bootstrap-icons/css/bootstrap-icons.min.css') }}', 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css');
+    </script>
+    <link href="{{ asset('vendor/bootstrap-icons/css/bootstrap-icons.min.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/app.min.css') }}?v={{ filemtime(public_path('css/app.min.css')) }}">
     @stack('styles')
 </head>
@@ -39,6 +51,7 @@
 
 @if (! $isAdminArea)
     @include('layouts.partials.navbar')
+    @include('layouts.partials.offline-banner')
 @endif
 
 <main id="main" tabindex="-1" class="flex-grow-1">
@@ -61,7 +74,8 @@
 
 <button class="back-to-top" id="backToTop" type="button" aria-label="Back to top"><i class="bi bi-arrow-up"></i></button>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ asset('vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+<script>if (typeof bootstrap === 'undefined') document.write('<script src="https:\/\/cdn.jsdelivr.net\/npm\/bootstrap@5.3.3\/dist\/js\/bootstrap.bundle.min.js"><\/script>');</script>
 <script src="{{ asset('js/app.min.js') }}?v={{ filemtime(public_path('js/app.min.js')) }}"></script>
 @auth
     <script>

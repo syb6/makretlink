@@ -2,15 +2,16 @@
 
 namespace App\Models;
 
+use App\Notifications\OrderStatusUpdate;
+use Database\Factories\OrderFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Notifications\OrderStatusUpdate;
 
 class Order extends Model
 {
-    /** @use HasFactory<\Database\Factories\OrderFactory> */
+    /** @use HasFactory<OrderFactory> */
     use HasFactory;
 
     public const STATUSES = [
@@ -156,7 +157,7 @@ class Order extends Model
     public static function generateOrderNumber(): string
     {
         do {
-            $number = 'ORD-' . now()->format('Ymd') . '-' . strtoupper(bin2hex(random_bytes(3)));
+            $number = 'ORD-'.now()->format('Ymd').'-'.strtoupper(bin2hex(random_bytes(3)));
         } while (self::where('order_number', $number)->exists());
 
         return $number;

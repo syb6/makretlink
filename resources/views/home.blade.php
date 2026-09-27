@@ -5,19 +5,28 @@
 @section('content')
 {{-- Hero --}}
 <section class="hero-section" id="home">
+    {{-- Full-bleed background photo: slow Ken Burns zoom, themed scrim on top --}}
+    <div class="hero-bg-photo" aria-hidden="true">
+        <img src="{{ asset('images/hero-bg.webp') }}"
+             srcset="{{ asset('images/hero-bg-800.webp') }} 800w, {{ asset('images/hero-bg.webp') }} 1600w"
+             sizes="100vw"
+             alt="" width="1600" height="900" fetchpriority="high" decoding="async">
+    </div>
+    <div class="hero-bg-scrim" aria-hidden="true"></div>
     <div class="hero-bg-glow" aria-hidden="true"></div>
     <div class="hero-bg-glow-2" aria-hidden="true"></div>
     <div class="container hero-grid">
+        {{-- Staggered entrance: pure CSS, no JS dependency (ml-in + --d delay) --}}
         <div class="hero-content">
-            <span class="badge-sub">LOCAL &bull; FRESH &bull; COMMUNITY</span>
-            <h1 class="hero-title">Fresh From Local Farmers, Made Easy for You.</h1>
-            <p class="hero-description">Discover local farmers, explore fresh weekly produce, and reserve what you need online for convenient, hassle-free market pickup.</p>
-            <div class="hero-btns">
+            <span class="badge-sub ml-in" style="--d: 60ms">LOCAL &bull; FRESH &bull; COMMUNITY</span>
+            <h1 class="hero-title ml-in" style="--d: 160ms">Fresh From Local Farmers, Made Easy for You.</h1>
+            <p class="hero-description ml-in" style="--d: 280ms">Discover local farmers, explore fresh weekly produce, and reserve what you need online for convenient, hassle-free market pickup.</p>
+            <div class="hero-btns ml-in" style="--d: 400ms">
                 <a href="{{ route('markets.index') }}" class="btn btn-ml">Explore Markets</a>
                 <a href="{{ route('products.index') }}" class="btn btn-outline-ml">Browse Products</a>
             </div>
             @if ($announcements->isNotEmpty())
-                <div class="mt-4 p-3 rounded-4" style="background: var(--surface); border: 1px solid var(--border-color); max-width: 480px;">
+                <div class="mt-4 p-3 rounded-4 ml-in" style="--d: 520ms; background: color-mix(in srgb, var(--surface) 88%, transparent); backdrop-filter: blur(6px); border: 1px solid var(--border-color); max-width: 480px;">
                     <div class="fw-semibold mb-2 small"><i class="bi bi-megaphone me-2" style="color: var(--primary-dark)"></i>Announcements</div>
                     @foreach ($announcements as $a)
                         <div class="small mb-1"><span class="opacity-75">{{ $a->published_at?->format('M j') }} —</span> {{ $a->title }}</div>
@@ -25,10 +34,9 @@
                 </div>
             @endif
         </div>
-        <div class="hero-image-wrapper text-center">
+        <div class="hero-image-wrapper text-center ml-in" style="--d: 300ms">
             <picture>
-                <source srcset="https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=800&q=70&fm=avif" type="image/avif">
-                <img src="https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=800&q=80"
+                <img src="{{ asset('images/hero-basket.webp') }}"
                      alt="Fresh organic vegetables" class="hero-img"
                      width="800" height="533" fetchpriority="high"
                      onerror="this.style.display='none'">
@@ -102,7 +110,7 @@
                         <img src="{{ $market->image_url }}" alt="{{ $market->name }}"
                              width="600" height="400" loading="lazy"
                              onerror="this.onerror=null;this.src=this.dataset.fallback;"
-                             data-fallback="{{ asset('images/placeholders/market.svg') }}">
+                             data-fallback="{{ asset('images/placeholders/market.png') }}">
                     </div>
                     <div class="market-details">
                         <h3 class="market-title">{{ $market->name }}</h3>

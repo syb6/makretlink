@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\FarmerProfile;
+use App\Models\FavoriteMarket;
 use App\Models\Market;
 use App\Models\MarketSchedule;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
 class MarketController extends Controller
 {
@@ -25,10 +26,18 @@ class MarketController extends Controller
             ->paginate(9)
             ->withQueryString();
 
+        // Favorite set for the market cards (one query instead of one per card).
+        $favoriteMarketIds = collect();
+        if ($request->user()?->isCustomer()) {
+            $favoriteMarketIds = FavoriteMarket::where('customer_id', $request->user()->customerProfile->id)
+                ->pluck('market_id');
+        }
+
         return view('markets.index', [
             'markets' => $markets,
             'days' => MarketSchedule::DAYS,
             'selectedDay' => $day,
+            'favoriteMarketIds' => $favoriteMarketIds,
         ]);
     }
 
@@ -43,7 +52,7 @@ class MarketController extends Controller
             ->whereHas('farmer', fn ($f) => $f->where('approval_status', 'approved'))
             ->whereHas('weeklyStocks', fn ($q) => $q
                 ->whereIn('farmer_market_id', $stalls->pluck('id'))
-                ->where('week_start', '>=', now()->startOfWeek(\Illuminate\Support\Carbon::SUNDAY)->toDateString())
+                ->where('week_start', '>=', now()->startOfWeek(Carbon::SUNDAY)->toDateString())
                 ->where('status', 'available')
                 ->where('available_quantity', '>', 0))
             ->with(['farmer.user', 'category'])

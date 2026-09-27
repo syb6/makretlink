@@ -24,14 +24,14 @@
                     <label class="form-label fw-semibold" for="email">Email address</label>
                     <input id="email" type="email" name="email" class="form-control @error('email') is-invalid @enderror"
                            value="{{ old('email', $email) }}" required>
-                    @error('email')<div class="invalid-feedback-ml show">{{ $message }}</div>@enderror
+                    
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label fw-semibold" for="password">New password</label>
                     <input id="password" type="password" name="password" class="form-control @error('password') is-invalid @enderror"
                            required autocomplete="new-password" placeholder="At least 8 characters">
-                    @error('password')<div class="invalid-feedback-ml show">{{ $message }}</div>@enderror
+                    
                 </div>
 
                 <div class="mb-3">

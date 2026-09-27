@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Order;
-use App\Models\User;
 use App\Notifications\OrderStatusUpdate;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Notification;
@@ -34,6 +33,7 @@ class NotificationSeeder extends Seeder
                     new OrderStatusUpdate($order, 'placed', 'New pre-order received.', 'farmer'),
                     ['database']
                 );
+
                 continue;
             }
 

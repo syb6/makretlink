@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\FarmerProfile;
+use App\Models\FavoriteFarmer;
+use App\Models\FavoriteProduct;
+use App\Models\Market;
 use App\Models\WeeklyStock;
 use Illuminate\Http\Request;
 
@@ -29,11 +32,23 @@ class FarmerController extends Controller
             ->paginate(12)
             ->withQueryString();
 
+        // Favorite sets for the cards (one query each instead of one per card).
+        $favoriteFarmerIds = collect();
+        $favoriteProductIds = collect();
+        if ($request->user()?->isCustomer()) {
+            $favoriteFarmerIds = FavoriteFarmer::where('customer_id', $request->user()->customerProfile->id)
+                ->pluck('farmer_id');
+            $favoriteProductIds = FavoriteProduct::where('customer_id', $request->user()->customerProfile->id)
+                ->pluck('product_id');
+        }
+
         return view('farmers.index', [
             'farmers' => $farmers,
-            'markets' => \App\Models\Market::where('status', 'active')->orderBy('name')->get(),
+            'markets' => Market::where('status', 'active')->orderBy('name')->get(),
             'search' => $search,
             'selectedMarket' => $marketId,
+            'favoriteFarmerIds' => $favoriteFarmerIds,
+            'favoriteProductIds' => $favoriteProductIds,
         ]);
     }
 
@@ -51,9 +66,20 @@ class FarmerController extends Controller
             ->orderByDesc('week_start')
             ->get();
 
+        // Favorite sets for the stock cards + the farmer favorite button.
+        $favoriteFarmerIds = collect();
+        $favoriteProductIds = collect();
+        if (auth()->check() && auth()->user()->isCustomer()) {
+            $customerId = auth()->user()->customerProfile->id;
+            $favoriteFarmerIds = FavoriteFarmer::where('customer_id', $customerId)->pluck('farmer_id');
+            $favoriteProductIds = FavoriteProduct::where('customer_id', $customerId)->pluck('product_id');
+        }
+
         return view('farmers.show', [
             'farmer' => $farmer,
             'stocks' => $stocks,
+            'favoriteFarmerIds' => $favoriteFarmerIds,
+            'favoriteProductIds' => $favoriteProductIds,
         ]);
     }
 }

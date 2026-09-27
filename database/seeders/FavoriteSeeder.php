@@ -3,12 +3,12 @@
 namespace Database\Seeders;
 
 use App\Models\CustomerProfile;
+use App\Models\FarmerProfile;
 use App\Models\FavoriteFarmer;
 use App\Models\FavoriteMarket;
 use App\Models\FavoriteProduct;
 use App\Models\Market;
 use App\Models\Product;
-use App\Models\FarmerProfile;
 use Illuminate\Database\Seeder;
 
 class FavoriteSeeder extends Seeder

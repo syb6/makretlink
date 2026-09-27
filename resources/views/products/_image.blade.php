@@ -1,7 +1,7 @@
 @php
     // Accepts: $product (required unless $categoryImage), $class, $alt, $eager, $style
     //          $categoryImage + $category renders a representative category tile.
-    $imgGeneral = asset('images/placeholders/general.svg');
+    $imgGeneral = asset('images/placeholders/general.png');
 
     $categoryKeyMap = [
         'vegetables'      => 'vegetables',
@@ -16,7 +16,7 @@
         // Admin-uploaded category photo wins; otherwise the themed placeholder.
         $imgSrc = $category->image
             ? asset('storage/'.$category->image)
-            : asset('images/placeholders/'.($categoryKeyMap[$category->slug] ?? 'general').'.svg');
+            : asset('images/placeholders/'.($categoryKeyMap[$category->slug] ?? 'general').'.png');
         $imgAlt = $alt ?? $category->name;
     } else {
         $imgSrc = $product->image_url;

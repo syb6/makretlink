@@ -107,7 +107,10 @@
                                 <button class="btn btn-outline-danger w-100"><i class="bi bi-x-circle me-1"></i> Cancel order</button>
                             </form>
                         @endif
-                        <a href="{{ route('orders.reorder', $order) }}" class="btn btn-outline-ml"><i class="bi bi-arrow-repeat me-1"></i> Reorder items</a>
+                        <form method="POST" action="{{ route('orders.reorder', $order) }}">
+                            @csrf
+                            <button class="btn btn-outline-ml w-100"><i class="bi bi-arrow-repeat me-1"></i> Reorder items</button>
+                        </form>
                         @if ($order->farmerMarket?->market)
                             <a href="{{ route('markets.show', $order->farmerMarket->market) }}" class="btn btn-outline-ml"><i class="bi bi-geo-alt me-1"></i> View market</a>
                         @endif
