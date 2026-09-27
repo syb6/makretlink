@@ -1,13 +1,9 @@
 @php
-    // Reusable image picker.
-    // Accepts: $name (input name), $id (input/preview id, defaults to $name),
-    //          $existing (image path or full URL, nullable), $label, $hint,
-    //          $placeholder (CSS class for the empty tile icon), $removeUrl
-    //          (POST endpoint to delete the current image, optional).
     $id = $id ?? $name;
     $label = $label ?? 'Picture';
     $hint = $hint ?? 'JPG, PNG or WebP · max 2 MB · square works best';
     $placeholder = $placeholder ?? 'bi-image';
+    $existing = $existing ?? null;
     $src = $existing
         ? (str_starts_with($existing, 'http') || str_starts_with($existing, asset('')) ? $existing : asset('storage/' . $existing))
         : null;

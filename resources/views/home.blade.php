@@ -38,7 +38,7 @@
 </section>
 
 {{-- Blend the hero into the page background --}}
-<hr class="section-divider-fade" style="background: linear-gradient(180deg, var(--cream), var(--light-bg));" aria-hidden="true">
+<hr class="section-divider-fade" style="background: linear-gradient(180deg, var(--light-bg), var(--cream));" aria-hidden="true">
 
 {{-- Feature strip --}}
 <section class="features-section">

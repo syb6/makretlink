@@ -39,7 +39,6 @@ Route::post('/assistant', [HomeController::class, 'assistant'])->name('assistant
 
 Route::get('/markets', [MarketController::class, 'index'])->name('markets.index');
 Route::get('/markets/{market}', [MarketController::class, 'show'])->name('markets.show');
-Route::get('/markets-map-data', [MarketController::class, 'mapData'])->name('markets.map');
 
 Route::get('/farmers', [FarmerController::class, 'index'])->name('farmers.index');
 Route::get('/farmers/{farmer}', [FarmerController::class, 'show'])->name('farmers.show');

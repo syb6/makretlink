@@ -18,9 +18,9 @@
             </button>
             @auth
                 @if (auth()->user()->isCustomer())
-                    <a class="cart-badge-btn" href="{{ route('cart.index') }}" title="Pre-order basket">
+                    <a class="cart-badge-btn" href="{{ route('cart.index') }}" title="Cart">
                         <i class="bi bi-bag-check-fill text-success fs-5"></i>
-                        <span class="cart-text d-none d-sm-inline">Pre-Order Basket</span>
+                        <span class="cart-text d-none d-sm-inline">Cart</span>
                         @php $cartCount = \App\Models\Cart::countFor(auth()->user()); @endphp
                         <span id="cart-count" class="cart-count {{ $cartCount ? '' : 'd-none' }}">
                             {{ $cartCount }}
@@ -35,7 +35,7 @@
                 <div class="dropdown">
                     <button class="profile-badge dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="border:none;background:var(--primary-light)">
                         @include('layouts.partials._avatar', ['user' => auth()->user(), 'size' => 28])
-                        <span class="d-none d-sm-inline">{{ explode(' ', trim(auth()->user()->name))[0] }}</span>
+                        <span class="d-none d-lg-inline">{{ explode(' ', trim(auth()->user()->name))[0] }}</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow">
                         @if (auth()->user()->isCustomer())

@@ -61,7 +61,7 @@ class UserSeeder extends Seeder
         // Customers
         $customerData = [
             ['Oliver Shopper', 'customer1@marketlink.test', '12 Maple Street, Green Valley'],
-            ['Priya Fresh', 'customer2@marketlink.test', '48 Birch Avenue, Green Valley'],
+            ['Priya Fresh', 'mysidtuaham@gmail.com', '48 Birch Avenue, Green Valley'],
             ['Diego Mercado', 'customer3@marketlink.test', '7 Cedar Lane, Riverside'],
             ['Emma Weekend', 'customer4@marketlink.test', '230 Oak Drive, Green Valley'],
         ];

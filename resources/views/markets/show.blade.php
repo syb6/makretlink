@@ -19,7 +19,25 @@
         <div class="row g-4">
             <div class="col-lg-7">
                 <span class="badge-sub">LOCAL MARKET</span>
-                <h1 class="section-title mb-2">{{ $market->name }}</h1>
+                <h1 class="section-title mb-2 d-flex align-items-center flex-wrap gap-2">
+                    {{ $market->name }}
+                    @auth
+                        @if (auth()->user()->isCustomer())
+                            @php
+                                $isFavMarket = \App\Models\FavoriteMarket::where('customer_id', auth()->user()->customerProfile->id)
+                                    ->where('market_id', $market->id)->exists();
+                            @endphp
+                            <button type="button"
+                                    class="btn btn-sm {{ $isFavMarket ? 'btn-ml' : 'btn-outline-ml' }} favorite-market-btn"
+                                    data-url="{{ route('favorites.toggle.market') }}"
+                                    data-market-id="{{ $market->id }}"
+                                    aria-pressed="{{ $isFavMarket ? 'true' : 'false' }}">
+                                <i class="bi {{ $isFavMarket ? 'bi-heart-fill' : 'bi-heart' }} me-1"></i>
+                                {{ $isFavMarket ? 'Saved' : 'Save' }}
+                            </button>
+                        @endif
+                    @endauth
+                </h1>
                 <p class="text-muted"><i class="bi bi-geo-alt me-1"></i>{{ $market->address }}</p>
                 @if ($market->description)
                     <p>{{ $market->description }}</p>

@@ -122,6 +122,10 @@ class Order extends Model
     /**
      * SRS: "Notifications: Email or in-app alerts for order updates and pickup readiness."
      * In-app via the notifications table; email via the configured mailer.
+     *
+     * Mail failures are contained per-recipient: a rejected email (bad
+     * address, provider hiccup) must never roll back a placed order or a
+     * status change — the in-app notification is the source of truth.
      */
     public function notifyParties(string $status, ?string $note, ?User $actor): void
     {
@@ -129,17 +133,23 @@ class Order extends Model
         $order = $this->fresh() ?? $this;
 
         if ($order->customer?->user && ($actor?->id !== $order->customer->user->id)) {
-            $order->customer->user->notify(
-                new OrderStatusUpdate($order, $status, $note, 'customer')
-            );
+            $this->notifySafely($order->customer->user, new OrderStatusUpdate($order, $status, $note, 'customer'));
         }
 
         $farmerUser = $order->farmerMarket?->farmer?->user;
 
         if ($farmerUser && ($actor?->id !== $farmerUser->id)) {
-            $farmerUser->notify(
-                new OrderStatusUpdate($order, $status, $note, 'farmer')
-            );
+            $this->notifySafely($farmerUser, new OrderStatusUpdate($order, $status, $note, 'farmer'));
+        }
+    }
+
+    /** Send a notification, containing any transport failure to the log. */
+    private function notifySafely(User $user, OrderStatusUpdate $notification): void
+    {
+        try {
+            $user->notify($notification);
+        } catch (\Throwable $e) {
+            report($e); // logged with full context; app flow continues
         }
     }
 

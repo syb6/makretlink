@@ -61,7 +61,8 @@ class HomeController extends Controller
      * Stateful per browser session: keeps a short conversation history so
      * follow-ups work, and remembers which product links were already shown
      * so the widget never repeats itself. Groq-powered when GROQ_API_KEY is
-     * set; rule-based fallback otherwise.
+     * set; rule-based fallback otherwise. Any unexpected failure degrades to
+     * a graceful JSON reply — the widget never red-screens.
      */
     public function assistant(Request $request): JsonResponse
     {
@@ -72,7 +73,17 @@ class HomeController extends Controller
         $history = Session::get('chat_history', []);
         $seenLinks = Session::get('chat_seen_links', []);
 
-        $result = $this->assistant->ask($data['message'], $history, $seenLinks);
+        try {
+            $result = $this->assistant->ask($data['message'], $history, $seenLinks);
+        } catch (\Throwable $e) {
+            report($e);
+
+            $result = [
+                'reply' => 'Sorry — I hit a snag while thinking that over. Please try again in a moment.',
+                'links' => [['label' => 'Browse all products', 'url' => route('products.index')]],
+                'source' => 'error',
+            ];
+        }
 
         // Record the turn + the links we just showed (bounded memory).
         $history[] = ['role' => 'user', 'content' => $data['message']];

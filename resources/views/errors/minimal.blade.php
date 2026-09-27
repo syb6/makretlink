@@ -6,8 +6,11 @@
     $code = $exception->getStatusCode();
 
     $art = [
-        404 => ['icon' => 'bi-search-heart',        'title' => 'This path grew over',      'text' => 'The page you are looking for was moved, harvested, or never planted. Let us guide you back to fresh produce.'],
+        401 => ['icon' => 'bi-box-arrow-in-right',   'title' => 'Sign in first',            'text' => 'You need to be signed in to see this page. Sign in and we will take you right back.'],
         403 => ['icon' => 'bi-shield-lock',          'title' => 'Members-only stall',       'text' => 'You do not have permission to enter this area. If you believe this is a mistake, try signing in with the right account.'],
+        404 => ['icon' => 'bi-search-heart',        'title' => 'This path grew over',      'text' => 'The page you are looking for was moved, harvested, or never planted. Let us guide you back to fresh produce.'],
+        405 => ['icon' => 'bi-signpost-split',      'title' => 'Wrong turn, wrong method', 'text' => 'This address does not accept that kind of request. The link may be outdated — head back and try again from the app.'],
+        413 => ['icon' => 'bi-cloud-arrow-up',      'title' => 'That file is too big',     'text' => 'The upload exceeded the allowed size. Try a smaller file and send it again.'],
         419 => ['icon' => 'bi-hourglass-split',      'title' => 'Your session expired',     'text' => 'For security reasons the page expired while you were away. Refresh and try again — your basket is safe.'],
         429 => ['icon' => 'bi-speedometer',          'title' => 'Easy there, farmer',       'text' => 'Too many requests in a short time. Take a short breath and try again in a moment.'],
         500 => ['icon' => 'bi-tools',                'title' => 'Something broke on our side', 'text' => 'An unexpected error occurred while loading this page. Our team has been notified — please try again shortly.'],
@@ -30,6 +33,12 @@
 
         <h1 class="error-title anim-up" style="animation-delay: 180ms">{{ $view['title'] }}</h1>
         <p class="error-text anim-up" style="animation-delay: 240ms">{{ $view['text'] }}</p>
+
+        @if (! empty($hint))
+            <p class="small text-muted anim-up" style="animation-delay: 260ms">
+                <i class="bi bi-lightbulb me-1"></i> This endpoint accepts: <strong>{{ $hint }}</strong>
+            </p>
+        @endif
 
         <div class="error-actions anim-up" style="animation-delay: 300ms">
             <a href="{{ route('home') }}" class="btn btn-ml"><i class="bi bi-house-door me-1"></i> Back to Home</a>

@@ -3,13 +3,16 @@
 @section('title', 'Farmers')
 
 @section('content')
+<section class="page-banner anim-up">
+    <i class="bi bi-flower2 page-banner-icon" aria-hidden="true"></i>
+    <div class="container">
+        <span class="badge-sub">MEET THE GROWERS</span>
+        <h1 class="section-title mb-1">Our Farmers</h1>
+        <p class="section-subtitle mb-0">Meet the people growing your food.</p>
+    </div>
+</section>
 <section class="py-4 py-md-5">
     <div class="container">
-        <div class="text-center mb-4">
-            <span class="badge-sub">MEET THE GROWERS</span>
-            <h1 class="section-title mb-1">Our Farmers</h1>
-            <p class="section-subtitle mb-0">Meet the people growing your food.</p>
-        </div>
 
         <form method="GET" class="d-flex gap-2 flex-wrap justify-content-center mb-4">
             <input type="text" name="q" class="form-control" style="max-width:220px" placeholder="Search farmers..." value="{{ $search }}">
@@ -25,7 +28,22 @@
         <div class="row g-4">
             @forelse ($farmers as $farmer)
                 <div class="col-sm-6 col-lg-4">
-                    <div class="card-ml h-100 p-4 d-flex flex-column">
+                    <div class="card-ml h-100 p-4 d-flex flex-column position-relative">
+                        @auth
+                            @if (auth()->user()->isCustomer())
+                                @php
+                                    $isFavFarmer = \App\Models\FavoriteFarmer::where('customer_id', auth()->user()->customerProfile->id)
+                                        ->where('farmer_id', $farmer->id)->exists();
+                                @endphp
+                                <button type="button" class="fav-btn favorite-farmer-btn"
+                                        data-url="{{ route('favorites.toggle.farmer') }}"
+                                        data-farmer-id="{{ $farmer->id }}"
+                                        title="{{ $isFavFarmer ? 'Remove from favorites' : 'Save to favorites' }}"
+                                        aria-label="Toggle favorite farmer">
+                                    <i class="bi {{ $isFavFarmer ? 'bi-heart-fill' : 'bi-heart' }}"></i>
+                                </button>
+                            @endif
+                        @endauth
                         <div class="d-flex align-items-center gap-3 mb-3">
                             <span class="brand-leaf">{{ strtoupper(substr($farmer->business_name, 0, 1)) }}</span>
                             <div>

@@ -21,6 +21,12 @@
                 </div>
             @endif
 
+            @if (session('reset-newest'))
+                <div class="small text-muted mb-2">
+                    <i class="bi bi-envelope-check me-1"></i> A fresh link is on its way to your inbox. Only the <strong>newest</strong> email's link works — older reset links are no longer valid.
+                </div>
+            @endif
+
             @if (session('reset-url'))
                 {{-- Dev mode (log mailer): the "email" is shown here instead --}}
                 <div class="dev-reset-link">

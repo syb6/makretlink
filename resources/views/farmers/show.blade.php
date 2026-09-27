@@ -32,6 +32,23 @@
                 </div>
                 <div class="col-md-4">
                     <h6 class="fw-bold mb-2">Operating at</h6>
+                    @auth
+                        @if (auth()->user()->isCustomer())
+                            @php
+                                $isFavFarmer = auth()->user()->customerProfile
+                                    && \App\Models\FavoriteFarmer::where('customer_id', auth()->user()->customerProfile->id)
+                                        ->where('farmer_id', $farmer->id)->exists();
+                            @endphp
+                            <button type="button"
+                                    class="btn btn-sm {{ $isFavFarmer ? 'btn-ml' : 'btn-outline-ml' }} mb-3 favorite-farmer-btn"
+                                    data-url="{{ route('favorites.toggle.farmer') }}"
+                                    data-farmer-id="{{ $farmer->id }}"
+                                    aria-pressed="{{ $isFavFarmer ? 'true' : 'false' }}">
+                                <i class="bi {{ $isFavFarmer ? 'bi-heart-fill' : 'bi-heart' }} me-1"></i>
+                                {{ $isFavFarmer ? 'Saved to favorites' : 'Save to favorites' }}
+                            </button>
+                        @endif
+                    @endauth
                     @foreach ($farmer->farmerMarkets as $fm)
                         <div class="mb-2">
                             <a href="{{ route('markets.show', $fm->market) }}" class="fw-semibold text-decoration-none">{{ $fm->market->name }}</a>

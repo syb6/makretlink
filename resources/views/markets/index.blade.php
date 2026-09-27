@@ -7,13 +7,16 @@
 @endpush
 
 @section('content')
+<section class="page-banner anim-up">
+    <i class="bi bi-geo-alt-fill page-banner-icon" aria-hidden="true"></i>
+    <div class="container">
+        <span class="badge-sub">COMMUNITY HUBS</span>
+        <h1 class="section-title">Farmers Markets</h1>
+        <p class="section-subtitle mb-0">Find a market near you and see who is trading there.</p>
+    </div>
+</section>
 <section class="py-4 py-md-5">
     <div class="container">
-        <div class="text-center mb-5">
-            <span class="badge-sub">COMMUNITY HUBS</span>
-            <h1 class="section-title">Farmers Markets</h1>
-            <p class="section-subtitle mb-4">Find a market near you and see who is trading there.</p>
-        </div>
 
         <div class="row g-4">
             <div class="col-lg-4">
@@ -39,8 +42,23 @@
                 <div class="row g-4">
                     @forelse ($markets as $market)
                         <div class="col-md-6">
-                            <div class="market-card h-100">
+                            <div class="market-card h-100 position-relative">
                                 <div class="market-img-box">
+                                    @auth
+                                        @if (auth()->user()->isCustomer())
+                                            @php
+                                                $isFavMarket = \App\Models\FavoriteMarket::where('customer_id', auth()->user()->customerProfile->id)
+                                                    ->where('market_id', $market->id)->exists();
+                                            @endphp
+                                            <button type="button" class="fav-btn favorite-market-btn"
+                                                    data-url="{{ route('favorites.toggle.market') }}"
+                                                    data-market-id="{{ $market->id }}"
+                                                    title="{{ $isFavMarket ? 'Remove from favorites' : 'Save to favorites' }}"
+                                                    aria-label="Toggle favorite market">
+                                                <i class="bi {{ $isFavMarket ? 'bi-heart-fill' : 'bi-heart' }}"></i>
+                                            </button>
+                                        @endif
+                                    @endauth
                                     <span class="market-status-tag {{ $market->status === 'active' ? '' : 'inactive' }}">Open</span>
                                     <img src="{{ $market->image_url }}" alt="{{ $market->name }}"
                                          width="600" height="400" loading="lazy"

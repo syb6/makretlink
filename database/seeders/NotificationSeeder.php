@@ -6,12 +6,17 @@ use App\Models\Order;
 use App\Models\User;
 use App\Notifications\OrderStatusUpdate;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Notification;
 
 class NotificationSeeder extends Seeder
 {
     /**
      * Replays real order statuses as in-app notifications for the demo users
      * (skipping the actor who caused the change, exactly like production flow).
+     *
+     * Database channel only: seeding must never depend on a working mail
+     * transport (in production the @marketlink.test demo mailboxes don't
+     * exist; under Resend's sandbox sender they are rejected outright).
      */
     public function run(): void
     {
@@ -24,20 +29,30 @@ class NotificationSeeder extends Seeder
 
             // New orders ring the farmer's bell
             if (in_array($order->status, ['placed'], true) && $farmerUser) {
-                $farmerUser->notify(new OrderStatusUpdate($order, 'placed', 'New pre-order received.', 'farmer'));
+                Notification::sendNow(
+                    $farmerUser,
+                    new OrderStatusUpdate($order, 'placed', 'New pre-order received.', 'farmer'),
+                    ['database']
+                );
                 continue;
             }
 
             // Accepted / ready / completed go to the customer
             if ($order->customer?->user) {
-                $order->customer->user->notify(
-                    new OrderStatusUpdate($order, $order->status, null, 'customer')
+                Notification::sendNow(
+                    $order->customer->user,
+                    new OrderStatusUpdate($order, $order->status, null, 'customer'),
+                    ['database']
                 );
             }
 
             // Completed orders also notify the farmer (sale closed)
             if ($order->status === 'completed' && $farmerUser) {
-                $farmerUser->notify(new OrderStatusUpdate($order, 'completed', null, 'farmer'));
+                Notification::sendNow(
+                    $farmerUser,
+                    new OrderStatusUpdate($order, 'completed', null, 'farmer'),
+                    ['database']
+                );
             }
         }
     }

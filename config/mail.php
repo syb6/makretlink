@@ -61,6 +61,7 @@ return [
             // ],
         ],
 
+        // API key comes from config/services.php -> services.resend.key (RESEND_API_KEY).
         'resend' => [
             'transport' => 'resend',
         ],

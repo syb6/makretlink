@@ -52,26 +52,35 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Favorite product toggle on product page
-    var favBtn = document.querySelector('.favorite-product-btn');
-    if (favBtn) {
-        favBtn.addEventListener('click', function () {
-            fetch(favBtn.dataset.url, {
+    // Favorite toggles: products, farmers and markets all share one handler.
+    // Each button carries data-url plus data-product-id / data-farmer-id /
+    // data-market-id; the matching *_id key is sent to the server.
+    document.querySelectorAll('.favorite-product-btn, .favorite-farmer-btn, .favorite-market-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var payload = {};
+            ['productId', 'farmerId', 'marketId'].forEach(function (key) {
+                if (btn.dataset[key] !== undefined) {
+                    payload[key.replace(/[A-Z]/g, function (m) { return '_' + m.toLowerCase(); })] = btn.dataset[key];
+                }
+            });
+
+            fetch(btn.dataset.url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': csrf ? csrf.content : '',
                     'Accept': 'application/json',
                 },
-                body: JSON.stringify({ product_id: favBtn.dataset.productId }),
+                body: JSON.stringify(payload),
             })
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
-                    var icon = favBtn.querySelector('i');
+                    var icon = btn.querySelector('i');
                     if (data.state === 'added') {
-                        icon.className = 'bi bi-heart-fill';
+                        if (icon) { icon.className = 'bi bi-heart-fill'; }
                         toast('Saved to favorites ♥', true);
                     } else {
-                        icon.className = 'bi bi-heart';
+                        if (icon) { icon.className = 'bi bi-heart'; }
                         toast('Removed from favorites.', true);
                     }
                 })
@@ -81,5 +90,5 @@ document.addEventListener('DOMContentLoaded', function () {
                         : 'You appear to be offline. Reconnect and try again.', false);
                 });
         });
-    }
+    });
 });

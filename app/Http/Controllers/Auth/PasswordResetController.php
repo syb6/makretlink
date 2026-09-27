@@ -33,6 +33,12 @@ class PasswordResetController extends Controller
 
         $response = back()->with('reset-status', __($status));
 
+        // Each request replaces the previous token. With a real mailer the
+        // user often has several emails open; only the newest link works.
+        if ($status === Password::RESET_LINK_SENT && config('mail.default') !== 'log') {
+            $response->with('reset-newest', true);
+        }
+
         // Local/dev convenience: with the "log" mail driver no real email is
         // sent, so surface the reset link directly instead of hiding it in
         // storage/logs. On production SMTP this block never runs.

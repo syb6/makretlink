@@ -3,13 +3,16 @@
 @section('title', 'Products')
 
 @section('content')
+<section class="page-banner anim-up">
+    <i class="bi bi-basket2-fill page-banner-icon" aria-hidden="true"></i>
+    <div class="container">
+        <span class="badge-sub">FRESH ARRIVALS</span>
+        <h1 class="section-title mb-1">Browse Products</h1>
+        <p class="section-subtitle mb-0">Live weekly stock — filter by category, market, day and price.</p>
+    </div>
+</section>
 <section class="py-4 py-md-5">
     <div class="container">
-        <div class="text-center mb-4">
-            <span class="badge-sub">FRESH ARRIVALS</span>
-            <h1 class="section-title mb-1">Browse Products</h1>
-            <p class="section-subtitle mb-0">Live weekly stock — filter by category, market, day and price.</p>
-        </div>
 
         <form method="GET" class="card card-ml p-3 mb-4">
             <div class="row g-2 align-items-end">
