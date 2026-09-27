@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\URL; 
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,9 +21,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // The app is Bootstrap 5 (no Tailwind). Laravel's default paginator
-        // emits Tailwind markup whose chevron SVGs render unconstrained without
-        // Tailwind CSS, producing giant arrows. Use Bootstrap markup globally.
+        if (config('app.env') === 'production') {
+            URL::forceScheme('https');
+        }
         Paginator::defaultView('pagination::bootstrap-5');
         Paginator::defaultSimpleView('pagination::simple-bootstrap-5');
     }
