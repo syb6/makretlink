@@ -1,39 +1,39 @@
 @extends('layouts.app')
 
-@section('title', 'Manage Users')
+@section('title', 'Users & Farmers')
+@section('admin_title', 'Users & Farmers')
 
 @section('content')
-<div class="container-fluid py-4">
-    <div class="row g-4">
-        <div class="col-lg-2 col-md-3">@include('layouts.partials.admin-sidebar')</div>
+<div class="app-container">
+    @include('layouts.partials.admin-sidebar')
+    <div class="main-wrapper">
+        @include('layouts.partials.admin-header')
 
-        <div class="col-lg-10 col-md-9">
-            <h1 class="section-title mb-4">Users & <span class="accent">Farmers</span></h1>
-
-            <form method="GET" class="row g-2 mb-3">
-                <div class="col-md-4">
-                    <input type="text" name="q" class="form-control form-control-sm" placeholder="Search name or email..." value="{{ $search }}">
+        <main class="p-3 p-md-4">
+            <div class="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-4">
+                <div>
+                    <h2 class="h3 mb-1">Users &amp; Farmers</h2>
+                    <p class="text-muted mb-0">Approve farmer applications and manage account status.</p>
                 </div>
-                <div class="col-md-3">
-                    <select name="role" class="form-select form-select-sm">
+                <form method="GET" class="d-flex gap-2 flex-wrap">
+                    <input type="text" name="q" class="form-control form-control-sm" placeholder="Search name or email..." value="{{ $search }}">
+                    <select name="role" class="form-select form-select-sm w-auto">
                         <option value="">All roles</option>
                         <option value="admin" {{ $role === 'admin' ? 'selected' : '' }}>Admins</option>
                         <option value="farmer" {{ $role === 'farmer' ? 'selected' : '' }}>Farmers</option>
                         <option value="customer" {{ $role === 'customer' ? 'selected' : '' }}>Customers</option>
                     </select>
-                </div>
-                <div class="col-md-3">
-                    <select name="status" class="form-select form-select-sm">
+                    <select name="status" class="form-select form-select-sm w-auto">
                         <option value="">All statuses</option>
                         @foreach (['active', 'inactive', 'suspended'] as $s)
                             <option value="{{ $s }}" {{ $status === $s ? 'selected' : '' }}>{{ ucfirst($s) }}</option>
                         @endforeach
                     </select>
-                </div>
-                <div class="col-md-2"><button class="btn btn-ml btn-sm w-100">Filter</button></div>
-            </form>
+                    <button class="btn btn-ml btn-sm">Filter</button>
+                </form>
+            </div>
 
-            <div class="card-ml p-2">
+            <div class="dashboard-card flush">
                 <div class="table-responsive">
                     <table class="table table-ml align-middle mb-0">
                         <thead>
@@ -95,9 +95,15 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="p-2">{{ $users->links() }}</div>
+                <div class="p-3">{{ $users->links() }}</div>
             </div>
-        </div>
+        </main>
+
+        <footer class="admin-footer">
+            <div class="container text-center">
+                <p class="text-muted small mb-0">&copy; {{ now()->year }} MarketLink Administration Portal.</p>
+            </div>
+        </footer>
     </div>
 </div>
 @endsection

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Customer;
 use App\Http\Controllers\Controller;
 use App\Models\FavoriteProduct;
 use App\Models\Order;
+use App\Services\ProfileImageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -30,7 +31,7 @@ class ProfileController extends Controller
         return view('customer.profile', ['user' => Auth::user()->load('customerProfile')]);
     }
 
-    public function update(Request $request)
+    public function update(Request $request, ProfileImageService $images)
     {
         $user = Auth::user();
 
@@ -38,7 +39,7 @@ class ProfileController extends Controller
             'name' => ['required', 'string', 'max:120'],
             'phone' => ['required', 'string', 'max:30'],
             'address' => ['required', 'string', 'max:1000'],
-            'profile_image' => ['nullable', 'image', 'max:2048'],
+            'profile_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048', 'dimensions:min_width=64,min_height=64'],
             'password' => ['nullable', 'confirmed', 'min:8'],
         ]);
 
@@ -50,7 +51,11 @@ class ProfileController extends Controller
         $profileData = ['address' => $data['address']];
 
         if ($request->hasFile('profile_image')) {
-            $profileData['profile_image'] = $request->file('profile_image')->store('profiles', 'public');
+            $profileData['profile_image'] = $images->replace(
+                $request->file('profile_image'),
+                $user->customerProfile->profile_image,
+                'customer-' . $user->customerProfile->id
+            );
         }
 
         $user->customerProfile->update($profileData);

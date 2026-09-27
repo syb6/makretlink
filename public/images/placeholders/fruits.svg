@@ -1,10 +1,37 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400" role="img" aria-label="Fruits">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#ffebee"/><stop offset="1" stop-color="#ef9a9a"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F7F7F3"/><stop offset="1" stop-color="#FBE9E0"/>
     </linearGradient>
   </defs>
-  <rect width="600" height="400" fill="url(#g)"/>
-  <circle cx="300" cy="185" r="110" fill="#ffffff" opacity="0.45"/>
-  <text x="300" y="200" font-size="120" text-anchor="middle" dominant-baseline="middle">🍎</text>
+  <rect width="600" height="400" fill="url(#bg)"/>
+  <circle cx="300" cy="185" r="125" fill="#FFFFFF" opacity="0.5"/>
+  <ellipse cx="300" cy="322" rx="150" ry="18" fill="#5F6B14" opacity="0.10"/>
+
+  <!-- apple -->
+  <g transform="translate(240 215)">
+    <path d="M0 -58 C 34 -70, 68 -46, 62 -2 C 57 38, 28 66, 0 66 C -28 66, -57 38, -62 -2 C -68 -46, -34 -70, 0 -58 Z" fill="#D9534F"/>
+    <path d="M-30 -34 C -44 -22, -46 6, -36 28" stroke="#FFFFFF" stroke-width="10" opacity="0.35" fill="none" stroke-linecap="round"/>
+    <path d="M0 -58 C -2 -74, 2 -86, 8 -96" stroke="#7A5230" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M8 -92 C 26 -104, 44 -102, 52 -92 C 38 -80, 20 -80, 8 -92 Z" fill="#6F9B3F"/>
+  </g>
+
+  <!-- orange with leaf -->
+  <g transform="translate(372 228)">
+    <circle cx="0" cy="0" r="56" fill="#F0A63C"/>
+    <circle cx="-18" cy="-18" r="14" fill="#FFFFFF" opacity="0.35"/>
+    <path d="M0 -56 C 4 -70, 14 -78, 26 -82 C 24 -68, 16 -58, 0 -56 Z" fill="#6F9B3F"/>
+  </g>
+
+  <!-- grapes bunch -->
+  <g transform="translate(300 128)">
+    <circle cx="-16" cy="10" r="12" fill="#8E6BB5"/>
+    <circle cx="16" cy="10" r="12" fill="#8E6BB5"/>
+    <circle cx="0" cy="30" r="12" fill="#7C58A3"/>
+    <circle cx="-16" cy="34" r="12" fill="#8E6BB5"/>
+    <circle cx="16" cy="34" r="12" fill="#8E6BB5"/>
+    <circle cx="0" cy="54" r="12" fill="#7C58A3"/>
+    <path d="M0 -2 C 0 -14, -4 -22, -10 -28" stroke="#5F7A2B" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <path d="M0 -26 C 12 -36, 26 -36, 34 -28 C 22 -18, 8 -18, 0 -26 Z" fill="#88A93C"/>
+  </g>
 </svg>

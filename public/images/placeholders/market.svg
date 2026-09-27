@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Market placeholder">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F2F5DC"/>
+      <stop offset="1" stop-color="#E4EBC5"/>
+    </linearGradient>
+    <linearGradient id="stall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#A2B231"/>
+      <stop offset="1" stop-color="#889721"/>
+    </linearGradient>
+  </defs>
+  <circle cx="100" cy="100" r="100" fill="url(#bg)"/>
+  <g>
+    <rect x="42" y="96" width="116" height="58" rx="6" fill="#FFFFFF"/>
+    <rect x="42" y="96" width="116" height="58" rx="6" fill="none" stroke="#D8DEB4" stroke-width="3"/>
+    <path d="M34 66 L58 42 L142 42 L166 66 Q166 76 154 76 Q142 76 142 68 Q142 76 130 76 Q118 76 118 68 Q118 76 106 76 Q94 76 94 68 Q94 76 82 76 Q70 76 70 68 Q70 76 58 76 Q46 76 46 70 Q42 70 34 66 Z" fill="url(#stall)"/>
+    <rect x="54" y="42" width="92" height="10" rx="4" fill="#7A8820"/>
+    <rect x="58" y="110" width="34" height="26" rx="3" fill="#F0A468"/>
+    <rect x="104" y="110" width="38" height="26" rx="3" fill="#EBF0C8"/>
+    <circle cx="70" cy="150" r="7" fill="#D96C4F"/>
+    <circle cx="88" cy="152" r="6" fill="#E8B04B"/>
+    <rect x="120" y="142" width="24" height="12" rx="3" fill="#9BB53C"/>
+  </g>
+</svg>

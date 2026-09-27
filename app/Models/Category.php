@@ -14,8 +14,15 @@ class Category extends Model
     protected $fillable = [
         'name',
         'slug',
+        'image',
         'status',
     ];
+
+    /** Uploaded category photo, else null (UI falls back to themed SVG). */
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->image ? asset('storage/' . $this->image) : null;
+    }
 
     public function products(): HasMany
     {

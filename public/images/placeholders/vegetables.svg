@@ -1,10 +1,38 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400" role="img" aria-label="Vegetables">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#e8f5e9"/><stop offset="1" stop-color="#a5d6a7"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F7F7F3"/><stop offset="1" stop-color="#EBF0C8"/>
     </linearGradient>
   </defs>
-  <rect width="600" height="400" fill="url(#g)"/>
-  <circle cx="300" cy="185" r="110" fill="#ffffff" opacity="0.45"/>
-  <text x="300" y="200" font-size="120" text-anchor="middle" dominant-baseline="middle">🥬</text>
+  <rect width="600" height="400" fill="url(#bg)"/>
+  <circle cx="300" cy="185" r="125" fill="#FFFFFF" opacity="0.5"/>
+  <ellipse cx="300" cy="322" rx="150" ry="18" fill="#5F6B14" opacity="0.10"/>
+
+  <!-- carrot -->
+  <g transform="translate(215 150) rotate(-8)">
+    <path d="M0 30 C -26 90, -14 150, 0 158 C 14 150, 26 90, 0 30 Z" fill="#E8833A"/>
+    <path d="M-8 60 C -3 62, 3 62, 8 60" stroke="#C96A24" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M-6 95 C -2 97, 2 97, 6 95" stroke="#C96A24" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M-4 128 C -1 130, 1 130, 4 128" stroke="#C96A24" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M0 30 C -18 6, -34 0, -44 -14 C -22 -16, -8 -6, 0 30 Z" fill="#6F9B3F"/>
+    <path d="M0 30 C 0 -2, -2 -18, 4 -32 C 16 -14, 12 8, 0 30 Z" fill="#88A93C"/>
+    <path d="M0 30 C 18 8, 32 0, 44 -12 C 24 -18, 8 -8, 0 30 Z" fill="#6F9B3F"/>
+  </g>
+
+  <!-- tomato -->
+  <g transform="translate(385 205)">
+    <circle cx="0" cy="0" r="72" fill="#D9534F"/>
+    <ellipse cx="-24" cy="-26" rx="18" ry="12" fill="#FFFFFF" opacity="0.35" transform="rotate(-28 -24 -26)"/>
+    <path d="M0 -70 C -6 -84, -2 -92, 2 -98" stroke="#5F7A2B" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <path d="M0 -66 L -34 -74 C -26 -58, -12 -54, 0 -66 Z" fill="#5F7A2B"/>
+    <path d="M0 -66 L 34 -74 C 26 -58, 12 -54, 0 -66 Z" fill="#6F9B3F"/>
+    <path d="M0 -66 L -6 -96 L 6 -96 Z" fill="#5F7A2B"/>
+  </g>
+
+  <!-- lettuce -->
+  <g transform="translate(300 300)">
+    <ellipse cx="0" cy="0" rx="46" ry="26" fill="#9DBF4B"/>
+    <path d="M-40 -4 C -20 -22, 20 -22, 40 -4 C 22 6, -22 6, -40 -4 Z" fill="#B7D060"/>
+    <path d="M-30 6 C -12 -6, 12 -6, 30 6" stroke="#7FA035" stroke-width="4" fill="none" stroke-linecap="round"/>
+  </g>
 </svg>

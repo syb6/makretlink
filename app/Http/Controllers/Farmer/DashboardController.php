@@ -7,6 +7,7 @@ use App\Models\FarmerReview;
 use App\Models\FarmerMarket;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Services\ProfileImageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -79,11 +80,15 @@ class DashboardController extends Controller
             'contact_person' => ['required', 'string', 'max:120'],
             'address' => ['required', 'string', 'max:1000'],
             'description' => ['nullable', 'string', 'max:2000'],
-            'profile_image' => ['nullable', 'image', 'max:2048'],
+            'profile_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048', 'dimensions:min_width=64,min_height=64'],
         ]);
 
         if ($request->hasFile('profile_image')) {
-            $data['profile_image'] = $request->file('profile_image')->store('farmers', 'public');
+            $data['profile_image'] = app(ProfileImageService::class)->replace(
+                $request->file('profile_image'),
+                $farmer->profile_image,
+                'farmer-' . $farmer->id
+            );
         }
 
         $farmer->update($data);

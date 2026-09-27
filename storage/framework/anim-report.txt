@@ -1,0 +1,100 @@
+ {
+  "width": 1440,
+  "page": "/",
+  "revealCount": 23,
+  "revealStuckBeforeScroll": 23,
+  "overflowPx": 0,
+  "brokenImgs": [],
+  "scrollProgress": true,
+  "jsAnimFlag": true
+ },
+ {
+  "width": 1440,
+  "page": "/products",
+  "revealCount": 13,
+  "revealStuckBeforeScroll": 0,
+  "overflowPx": 0,
+  "brokenImgs": [],
+  "scrollProgress": true,
+  "jsAnimFlag": true
+ },
+ {
+  "width": 1440,
+  "page": "/login",
+  "revealCount": 1,
+  "revealStuckBeforeScroll": 0,
+  "overflowPx": 0,
+  "brokenImgs": [],
+  "scrollProgress": true,
+  "jsAnimFlag": true
+ },
+ {
+  "width": 1440,
+  "page": "/markets",
+  "revealCount": 4,
+  "revealStuckBeforeScroll": 4,
+  "overflowPx": 0,
+  "brokenImgs": [],
+  "scrollProgress": true,
+  "jsAnimFlag": true
+ },
+ {
+  "width": 1440,
+  "page": "/about",
+  "revealCount": 4,
+  "revealStuckBeforeScroll": 4,
+  "overflowPx": 0,
+  "brokenImgs": [],
+  "scrollProgress": true,
+  "jsAnimFlag": true
+ },
+ {
+  "width": 390,
+  "page": "/",
+  "revealCount": 23,
+  "revealStuckBeforeScroll": 0,
+  "overflowPx": 0,
+  "brokenImgs": [],
+  "scrollProgress": true,
+  "jsAnimFlag": true
+ },
+ {
+  "width": 390,
+  "page": "/products",
+  "revealCount": 13,
+  "revealStuckBeforeScroll": 13,
+  "overflowPx": 0,
+  "brokenImgs": [],
+  "scrollProgress": true,
+  "jsAnimFlag": true
+ },
+ {
+  "width": 390,
+  "page": "/login",
+  "revealCount": 1,
+  "revealStuckBeforeScroll": 0,
+  "overflowPx": 0,
+  "brokenImgs": [],
+  "scrollProgress": true,
+  "jsAnimFlag": true
+ },
+ {
+  "width": 390,
+  "page": "/markets",
+  "revealCount": 4,
+  "revealStuckBeforeScroll": 0,
+  "overflowPx": 0,
+  "brokenImgs": [],
+  "scrollProgress": true,
+  "jsAnimFlag": true
+ },
+ {
+  "width": 390,
+  "page": "/about",
+  "revealCount": 4,
+  "revealStuckBeforeScroll": 0,
+  "overflowPx": 0,
+  "brokenImgs": [],
+  "scrollProgress": true,
+  "jsAnimFlag": true
+ }

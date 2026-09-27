@@ -3,29 +3,30 @@
 @section('title', 'My Reviews')
 
 @section('content')
-<section class="py-5">
+<section class="py-4 py-md-5">
     <div class="container">
-        <h1 class="section-title mb-4">Customer <span class="accent">Reviews</span></h1>
+        <span class="badge-sub">FARMER MANAGEMENT PORTAL</span>
+        <h1 class="section-title mb-4">Customer Reviews</h1>
 
         <div class="row g-4">
             @forelse ($reviews as $review)
                 <div class="col-lg-6">
                     <div class="card-ml p-4 h-100">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="d-flex justify-content-between align-items-start mb-2 gap-2">
                             <div>
                                 <strong>{{ $review->customer->user->name }}</strong>
                                 <div class="small text-muted">Order {{ $review->order?->order_number }} · {{ $review->created_at->format('M j, Y') }}</div>
                             </div>
-                            <span>
+                            <span class="stars">
                                 @for ($i = 1; $i <= 5; $i++)
-                                    <i class="bi {{ $i <= $review->rating ? 'bi-star-fill text-warning' : 'bi-star text-muted' }} small"></i>
+                                    <i class="bi {{ $i <= $review->rating ? 'bi-star-fill' : 'bi-star' }} small"></i>
                                 @endfor
                             </span>
                         </div>
                         <p class="small mb-2">{{ $review->comment ?? '—' }}</p>
 
                         @if ($review->farmer_reply)
-                            <div class="bg-ml-green-light rounded-3 p-2 small">
+                            <div class="reply-box small">
                                 <strong>Your reply:</strong> {{ $review->farmer_reply }}
                             </div>
                         @else

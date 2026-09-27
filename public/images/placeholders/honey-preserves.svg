@@ -1,10 +1,37 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400" role="img" aria-label="Honey and preserves">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#fffde7"/><stop offset="1" stop-color="#ffe082"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F7F7F3"/><stop offset="1" stop-color="#FBF0D3"/>
     </linearGradient>
   </defs>
-  <rect width="600" height="400" fill="url(#g)"/>
-  <circle cx="300" cy="185" r="110" fill="#ffffff" opacity="0.45"/>
-  <text x="300" y="200" font-size="120" text-anchor="middle" dominant-baseline="middle">🍯</text>
+  <rect width="600" height="400" fill="url(#bg)"/>
+  <circle cx="300" cy="185" r="125" fill="#FFFFFF" opacity="0.5"/>
+  <ellipse cx="300" cy="322" rx="150" ry="18" fill="#5F6B14" opacity="0.10"/>
+
+  <!-- honey jar -->
+  <g transform="translate(258 210)">
+    <rect x="-44" y="-88" width="88" height="20" rx="8" fill="#8A5A2B"/>
+    <path d="M-38 -68 L 38 -68 C 44 -52, 46 -36, 46 -18 L 46 66 C 46 76, 40 82, 30 82 L -30 82 C -40 82, -46 76, -46 66 L -46 -18 C -46 -36, -44 -52, -38 -68 Z" fill="#E9A83C"/>
+    <rect x="-46" y="-14" width="92" height="26" rx="6" fill="#FFF6E3"/>
+    <path d="M-30 -56 C -34 -40, -36 -28, -36 -14" stroke="#FFFFFF" stroke-width="9" opacity="0.4" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- dipper with drip -->
+  <g transform="translate(342 120)">
+    <rect x="-5" y="-30" width="10" height="96" rx="5" fill="#C08A45"/>
+    <g fill="#E9A83C">
+      <ellipse cx="0" cy="72" rx="30" ry="12"/>
+      <ellipse cx="-18" cy="60" rx="9" ry="11"/>
+      <ellipse cx="18" cy="60" rx="9" ry="11"/>
+    </g>
+    <path d="M0 92 C -5 104, -5 114, 0 122 C 5 114, 5 104, 0 92 Z" fill="#E9A83C"/>
+  </g>
+
+  <!-- jam jar -->
+  <g transform="translate(352 252)">
+    <rect x="-30" y="-46" width="60" height="14" rx="6" fill="#B5443F"/>
+    <path d="M-26 -32 L 26 -32 C 30 -20, 32 -10, 32 0 L 32 44 C 32 52, 27 58, 19 58 L -19 58 C -27 58, -32 52, -32 44 L -32 0 C -32 -10, -30 -20, -26 -32 Z" fill="#C9554F"/>
+    <rect x="-32" y="0" width="64" height="20" rx="5" fill="#FFF6E3"/>
+    <circle cx="0" cy="30" r="6" fill="#A93B36"/>
+  </g>
 </svg>

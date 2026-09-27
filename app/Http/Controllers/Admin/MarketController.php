@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Services\ProfileImageService;
 use App\Models\Market;
 use App\Models\MarketSchedule;
 use Illuminate\Http\Request;
@@ -19,6 +20,10 @@ class MarketController extends Controller
     public function store(Request $request)
     {
         $data = $this->validated($request);
+
+        if ($request->hasFile('image')) {
+            $data['image'] = app(ProfileImageService::class)->replace($request->file('image'), null, 'market');
+        }
         $data['slug'] = null; // not used by schema; kept for clarity
 
         $market = Market::create(collect($data)->except('slug')->all());
@@ -30,7 +35,13 @@ class MarketController extends Controller
 
     public function update(Request $request, Market $market)
     {
-        $market->update($this->validated($request));
+        $data = $this->validated($request);
+
+        if ($request->hasFile('image')) {
+            $data['image'] = app(ProfileImageService::class)->replace($request->file('image'), $market->image, 'market');
+        }
+
+        $market->update($data);
         $this->saveSchedules($request, $market);
 
         return back()->with('success', 'Market updated.');
@@ -63,6 +74,7 @@ class MarketController extends Controller
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'description' => ['nullable', 'string', 'max:2000'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048', 'dimensions:min_width=200,min_height=120'],
             'status' => ['required', 'in:active,inactive'],
         ]);
     }

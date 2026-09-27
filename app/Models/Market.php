@@ -19,8 +19,17 @@ class Market extends Model
         'longitude',
         'map_provider',
         'description',
+        'image',
         'status',
     ];
+
+    /** Market photo if uploaded, otherwise a fixed local fallback. */
+    public function getImageUrlAttribute(): string
+    {
+        return $this->image
+            ? asset('storage/' . $this->image)
+            : asset('images/placeholders/market.svg');
+    }
 
     public function schedules(): HasMany
     {

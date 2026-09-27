@@ -1,83 +1,98 @@
 @extends('layouts.app')
 
 @section('title', 'Manage Markets')
+@section('admin_title', 'Manage Markets')
 
 @section('content')
-<div class="container-fluid py-4">
-    <div class="row g-4">
-        <div class="col-lg-2 col-md-3">@include('layouts.partials.admin-sidebar')</div>
+<div class="app-container">
+    @include('layouts.partials.admin-sidebar')
+    <div class="main-wrapper">
+        @include('layouts.partials.admin-header')
 
-        <div class="col-lg-10 col-md-9">
-            <h1 class="section-title mb-4">Manage <span class="accent">Markets</span></h1>
+        <main class="p-3 p-md-4">
+            <div class="mb-4">
+                <h2 class="h3 mb-1">Manage Markets</h2>
+                <p class="text-muted mb-0">Create markets, set weekly schedules and keep listings active.</p>
+            </div>
 
-            <div class="card-ml p-4 mb-4">
-                <h5 class="fw-bold mb-3"><i class="bi bi-plus-circle me-2"></i>Add market</h5>
-                <form method="POST" action="{{ route('admin.markets.store') }}">
-                    @csrf
-                    <div class="row g-2">
-                        <div class="col-md-4">
-                            <label class="form-label small fw-semibold">Name</label>
-                            <input type="text" name="name" class="form-control form-control-sm" required>
+            <div class="dashboard-card mb-4">
+                <div class="dashboard-card-header"><h3 class="h5 mb-0"><i class="bi bi-plus-circle text-success me-2"></i>Add Market</h3></div>
+                <div class="dashboard-card-body">
+                    <x-form-errors />
+<form method="POST" action="{{ route('admin.markets.store') }}" enctype="multipart/form-data">
+                        @csrf
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold">Name</label>
+                                <input type="text" name="name" class="form-control form-control-sm" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold">Address</label>
+                                <input type="text" name="address" class="form-control form-control-sm" required>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-semibold">Latitude</label>
+                                <input type="number" step="0.000001" name="latitude" class="form-control form-control-sm">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-semibold">Longitude</label>
+                                <input type="number" step="0.000001" name="longitude" class="form-control form-control-sm">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold">Description</label>
+                                <textarea name="description" rows="2" class="form-control form-control-sm"></textarea>
+                            </div>
+                            <input type="hidden" name="status" value="active">
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label small fw-semibold">Address</label>
-                            <input type="text" name="address" class="form-control form-control-sm" required>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label small fw-semibold">Latitude</label>
-                            <input type="number" step="0.000001" name="latitude" class="form-control form-control-sm">
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label small fw-semibold">Longitude</label>
-                            <input type="number" step="0.000001" name="longitude" class="form-control form-control-sm">
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label small fw-semibold">Description</label>
-                            <textarea name="description" rows="2" class="form-control form-control-sm"></textarea>
-                        </div>
-                        <input type="hidden" name="status" value="active">
-                    </div>
 
-                    <label class="form-label small fw-semibold mt-3">Weekly schedule (leave blank = closed)</label>
-                    <div class="row g-2">
-                        @foreach (['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'] as $i => $day)
-                            <div class="col-md-3 col-6">
-                                <div class="border rounded p-2">
-                                    <div class="small fw-semibold mb-1">{{ $day }}</div>
-                                    <div class="d-flex gap-1">
-                                        <input type="time" name="days[{{ $i }}][open]" class="form-control form-control-sm" placeholder="Open">
-                                        <input type="time" name="days[{{ $i }}][close]" class="form-control form-control-sm" placeholder="Close">
+                        <div class="mt-2">
+                            <label class="form-label small fw-semibold">Market picture</label>
+                            @include('components.image-picker', ['name' => 'image', 'label' => 'market picture', 'hint' => 'JPG, PNG or WebP · max 2 MB · wide photos look best', 'placeholder' => 'bi-shop'])
+                        </div>
+
+                        <label class="form-label small fw-semibold mt-3">Weekly schedule (leave blank = closed)</label>
+                        <div class="row g-2">
+                            @foreach (['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'] as $i => $day)
+                                <div class="col-md-3 col-6">
+                                    <div class="border rounded p-2">
+                                        <div class="small fw-semibold mb-1">{{ $day }}</div>
+                                        <div class="d-flex gap-1">
+                                            <input type="time" name="days[{{ $i }}][open]" class="form-control form-control-sm" aria-label="{{ $day }} opening time">
+                                            <input type="time" name="days[{{ $i }}][close]" class="form-control form-control-sm" aria-label="{{ $day }} closing time">
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        @endforeach
-                    </div>
+                            @endforeach
+                        </div>
 
-                    <button class="btn btn-ml mt-3">Create market</button>
-                </form>
+                        <button class="btn btn-ml mt-3">Create market</button>
+                    </form>
+                </div>
             </div>
 
             @foreach ($markets as $market)
-                <div class="card-ml p-3 mb-3">
-                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
-                        <div>
-                            <h5 class="fw-bold mb-1">{{ $market->name }} <span class="status-pill status-{{ $market->status }}">{{ $market->status }}</span></h5>
-                            <div class="small text-muted mb-1"><i class="bi bi-geo-alt me-1"></i>{{ $market->address }}</div>
-                            <div class="small">
-                                @foreach ($market->schedules->sortBy('day_of_week') as $s)
-                                    <span class="badge badge-soft {{ $s->is_closed ? 'opacity-50' : '' }}">
-                                        {{ \App\Models\MarketSchedule::DAYS[$s->day_of_week] }}: {{ $s->is_closed ? 'closed' : $s->opening_time.'–'.$s->closing_time }}
-                                    </span>
-                                @endforeach
+                <div class="dashboard-card">
+                    <div class="dashboard-card-body">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                            <div>
+                                <h5 class="fw-bold mb-1">{{ $market->name }} <span class="status-pill status-{{ $market->status }}">{{ $market->status }}</span></h5>
+                                <div class="small text-muted mb-1"><i class="bi bi-geo-alt me-1"></i>{{ $market->address }}</div>
+                                <div class="small">
+                                    @foreach ($market->schedules->sortBy('day_of_week') as $s)
+                                        <span class="badge badge-soft {{ $s->is_closed ? 'opacity-50' : '' }} mb-1">
+                                            {{ \App\Models\MarketSchedule::DAYS[$s->day_of_week] }}: {{ $s->is_closed ? 'closed' : $s->opening_time.'–'.$s->closing_time }}
+                                        </span>
+                                    @endforeach
+                                </div>
                             </div>
-                        </div>
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-sm btn-outline-ml" data-bs-toggle="modal" data-bs-target="#editMarket-{{ $market->id }}"><i class="bi bi-pencil"></i> Edit</button>
-                            <form method="POST" action="{{ route('admin.markets.destroy', $market) }}" data-confirm="Delete this market?">
-                                @csrf
-                                @method('DELETE')
-                                <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
-                            </form>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-outline-ml" data-bs-toggle="modal" data-bs-target="#editMarket-{{ $market->id }}"><i class="bi bi-pencil"></i> Edit</button>
+                                <form method="POST" action="{{ route('admin.markets.destroy', $market) }}" data-confirm="Delete this market?">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -85,7 +100,7 @@
                 {{-- Edit modal --}}
                 <div class="modal fade" id="editMarket-{{ $market->id }}" tabindex="-1">
                     <div class="modal-dialog modal-lg">
-                        <form method="POST" action="{{ route('admin.markets.update', $market) }}" class="modal-content">
+                        <form method="POST" action="{{ route('admin.markets.update', $market) }}" enctype="multipart/form-data" class="modal-content">
                             @csrf
                             @method('PUT')
                             <div class="modal-header">
@@ -118,6 +133,10 @@
                                         </select>
                                     </div>
                                     <div class="col-12">
+                                        <label class="form-label small fw-semibold">Market picture</label>
+                                        @include('components.image-picker', ['name' => 'image', 'id' => 'image-'.$market->id, 'label' => 'market picture', 'hint' => 'JPG, PNG or WebP · max 2 MB · wide photos look best', 'existing' => $market->image, 'placeholder' => 'bi-shop'])
+                                    </div>
+                                    <div class="col-12">
                                         <label class="form-label small fw-semibold">Description</label>
                                         <textarea name="description" rows="2" class="form-control form-control-sm">{{ $market->description }}</textarea>
                                     </div>
@@ -133,8 +152,8 @@
                                             <div class="border rounded p-2">
                                                 <div class="small fw-semibold mb-1">{{ $day }}</div>
                                                 <div class="d-flex gap-1">
-                                                    <input type="time" name="days[{{ $i }}][open]" value="{{ $sched?->opening_time && ! $sched->is_closed ? $sched->opening_time->format('H:i') : '' }}" class="form-control form-control-sm">
-                                                    <input type="time" name="days[{{ $i }}][close]" value="{{ $sched?->closing_time && ! $sched->is_closed ? $sched->closing_time->format('H:i') : '' }}" class="form-control form-control-sm">
+                                                    <input type="time" name="days[{{ $i }}][open]" value="{{ $sched?->opening_time && ! $sched->is_closed ? $sched->opening_time->format('H:i') : '' }}" class="form-control form-control-sm" aria-label="{{ $day }} opening time">
+                                                    <input type="time" name="days[{{ $i }}][close]" value="{{ $sched?->closing_time && ! $sched->is_closed ? $sched->closing_time->format('H:i') : '' }}" class="form-control form-control-sm" aria-label="{{ $day }} closing time">
                                                 </div>
                                             </div>
                                         </div>
@@ -150,7 +169,13 @@
             @endforeach
 
             <div class="mt-3">{{ $markets->links() }}</div>
-        </div>
+        </main>
+
+        <footer class="admin-footer">
+            <div class="container text-center">
+                <p class="text-muted small mb-0">&copy; {{ now()->year }} MarketLink Administration Portal.</p>
+            </div>
+        </footer>
     </div>
 </div>
 @endsection

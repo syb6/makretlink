@@ -42,7 +42,11 @@ document.addEventListener('DOMContentLoaded', function () {
                         toast(data.message || 'Could not add to cart.', false);
                     }
                 })
-                .catch(function () { toast('Could not add to cart.', false); })
+                .catch(function () {
+                    toast(navigator.onLine
+                        ? 'Could not add to cart — the server did not respond. Check your connection and try again.'
+                        : 'You appear to be offline. Reconnect and try again.', false);
+                })
                 .finally(function () { btn.disabled = false; });
         });
     });
@@ -71,7 +75,11 @@ document.addEventListener('DOMContentLoaded', function () {
                         toast('Removed from favorites.', true);
                     }
                 })
-                .catch(function () { toast('Action failed.', false); });
+                .catch(function () {
+                    toast(navigator.onLine
+                        ? 'That action did not go through — the server did not respond. Please try again.'
+                        : 'You appear to be offline. Reconnect and try again.', false);
+                });
         });
     }
 });

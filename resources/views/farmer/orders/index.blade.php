@@ -3,18 +3,19 @@
 @section('title', 'Pre-Orders')
 
 @section('content')
-<section class="py-5">
+<section class="py-4 py-md-5">
     <div class="container">
-        <h1 class="section-title mb-4">Incoming <span class="accent">Pre-Orders</span></h1>
+        <span class="badge-sub">FARMER MANAGEMENT PORTAL</span>
+        <h1 class="section-title mb-4">Incoming Pre-Orders</h1>
 
-        <div class="d-flex gap-2 flex-wrap mb-3">
-            <a href="{{ route('farmer.orders.index') }}" class="btn btn-sm {{ ! $status ? 'btn-ml' : 'btn-outline-ml' }}">All</a>
+        <div class="pill-nav mb-3">
+            <a href="{{ route('farmer.orders.index') }}" class="{{ ! $status ? 'active' : '' }}">All</a>
             @foreach ($statuses as $s)
-                <a href="?status={{ $s }}" class="btn btn-sm {{ $status === $s ? 'btn-ml' : 'btn-outline-ml' }}">{{ str_replace('_', ' ', $s) }}</a>
+                <a href="?status={{ $s }}" class="{{ $status === $s ? 'active' : '' }}">{{ str_replace('_', ' ', $s) }}</a>
             @endforeach
         </div>
 
-        <div class="card-ml p-2">
+        <div class="dashboard-card flush">
             <div class="table-responsive">
                 <table class="table table-ml align-middle mb-0">
                     <thead>
@@ -36,9 +37,9 @@
                                 </td>
                                 <td class="small">{{ $order->customer?->user?->name ?? 'Guest' }}<br><span class="text-muted">{{ $order->customer_phone }}</span></td>
                                 <td class="small">{{ $order->pickup_date?->format('M j') }}<br><span class="text-muted">{{ $order->pickup_start_time?->format('g:i A') }}–{{ $order->pickup_end_time?->format('g:i A') }}</span></td>
-                                <td class="fw-semibold">${{ number_format($order->total_amount, 2) }}</td>
+                                <td class="fw-semibold">Rs {{ number_format($order->total_amount, 2) }}</td>
                                 <td><span class="status-pill status-{{ $order->status }}">{{ str_replace('_', ' ', $order->status) }}</span></td>
-                                <td class="text-end">
+                                <td class="text-end text-nowrap">
                                     @if ($order->status === 'placed')
                                         <form method="POST" action="{{ route('farmer.orders.accept', $order) }}" class="d-inline">
                                             @csrf
@@ -68,7 +69,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="p-2">{{ $orders->links() }}</div>
+            <div class="p-3">{{ $orders->links() }}</div>
         </div>
     </div>
 </section>

@@ -35,7 +35,7 @@ class OrderLifecycleTest extends TestCase
         $order = Order::latest('id')->first();
         $this->assertNotNull($order);
         $this->assertEquals('placed', $order->status);
-        $this->assertEquals(9.00, (float) $order->total_amount); // 2kg x $4.50
+        $this->assertEquals(9.00, (float) $order->total_amount); // 2kg x Rs 4.50
         $this->assertCount(1, $order->items);
         $this->assertEquals('Customer', $order->customer_name);
         $this->assertEquals($this->farmer->business_name, $order->farmer_name);

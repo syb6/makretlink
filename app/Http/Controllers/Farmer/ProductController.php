@@ -46,7 +46,9 @@ class ProductController extends Controller
         $data['slug'] = $this->uniqueSlug($data['name'], $this->farmerId());
 
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('products', 'public');
+            $data['image'] = app(ProfileImageService::class)->replace(
+                $request->file('image'), null, 'product'
+            );
         }
 
         Product::create($data);
@@ -69,7 +71,9 @@ class ProductController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('products', 'public');
+            $data['image'] = app(ProfileImageService::class)->replace(
+                $request->file('image'), $product->image, 'product'
+            );
         }
 
         $product->update($data);

@@ -3,7 +3,7 @@
 @section('title', $farmer->business_name)
 
 @section('content')
-<section class="py-5">
+<section class="py-4 py-md-5">
     <div class="container">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb small">
@@ -16,7 +16,7 @@
             <div class="row g-4 align-items-center">
                 <div class="col-md-8">
                     <div class="d-flex align-items-center gap-3 mb-2">
-                        <span class="brand-leaf" style="width:64px;height:64px;font-size:1.8rem;border-radius:18px;">
+                        <span class="brand-leaf" style="width:60px;height:60px;font-size:1.7rem;border-radius:16px;">
                             {{ strtoupper(substr($farmer->business_name, 0, 1)) }}
                         </span>
                         <div>
@@ -49,7 +49,10 @@
             </div>
         </div>
 
-        <h2 class="section-title h4 mb-3">Current weekly stock</h2>
+        <div class="text-center mb-4">
+            <span class="badge-sub">WEEKLY AVAILABILITY</span>
+            <h2 class="section-title h3">Current weekly stock</h2>
+        </div>
         <div class="row g-4">
             @forelse ($stocks as $stock)
                 @include('products._card', ['stock' => $stock])
@@ -60,5 +63,4 @@
     </div>
 </section>
 
-@include('chatbot.widget')
 @endsection

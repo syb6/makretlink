@@ -3,10 +3,13 @@
 @section('title', 'Weekly Stock')
 
 @section('content')
-<section class="py-5">
+<section class="py-4 py-md-5">
     <div class="container">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
-            <h1 class="section-title mb-0">Weekly <span class="accent">Stock</span></h1>
+            <div>
+                <span class="badge-sub">FARMER MANAGEMENT PORTAL</span>
+                <h1 class="section-title mb-0">Weekly Stock</h1>
+            </div>
             <div class="btn-group">
                 <a href="?week={{ $prevWeek }}" class="btn btn-outline-ml btn-sm">&larr; {{ \Carbon\Carbon::parse($prevWeek)->format('M j') }}</a>
                 <span class="btn btn-outline-secondary btn-sm disabled">Week of {{ $weekStart->format('M j, Y') }}</span>
@@ -16,90 +19,96 @@
 
         <div class="row g-4">
             <div class="col-lg-4">
-                <div class="card-ml p-4 mb-4">
-                    <h5 class="fw-bold mb-3"><i class="bi bi-plus-circle me-2"></i>Add stock</h5>
-                    <form method="POST" action="{{ route('farmer.stock.store') }}">
-                        @csrf
-                        <div class="mb-2">
-                            <label class="form-label small fw-semibold">Product</label>
-                            <select name="product_id" class="form-select form-select-sm" required>
-                                <option value="">&mdash; choose &mdash;</option>
-                                @foreach ($products as $p)
-                                    <option value="{{ $p->id }}">{{ $p->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label small fw-semibold">Stall / market</label>
-                            <select name="farmer_market_id" class="form-select form-select-sm" required>
-                                <option value="">&mdash; choose &mdash;</option>
-                                @foreach ($farmerMarkets as $fm)
-                                    <option value="{{ $fm->id }}">{{ $fm->market->name }} ({{ $fm->stall_name ?? 'stall' }})</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <input type="hidden" name="week_start" value="{{ $weekStart->toDateString() }}">
-                        <div class="mb-3">
-                            <label class="form-label small fw-semibold">Quantity available</label>
-                            <input type="number" step="0.5" min="0" name="quantity" class="form-control form-control-sm" required>
-                        </div>
-                        <button class="btn btn-ml w-100 btn-sm">Save weekly stock</button>
-                    </form>
+                <div class="dashboard-card mb-4">
+                    <div class="dashboard-card-header"><h3 class="h6 mb-0"><i class="bi bi-plus-circle text-success me-2"></i>Add Stock</h3></div>
+                    <div class="dashboard-card-body">
+                        <form method="POST" action="{{ route('farmer.stock.store') }}">
+                            @csrf
+                            <div class="mb-2">
+                                <label class="form-label small fw-semibold">Product</label>
+                                <select name="product_id" class="form-select form-select-sm" required>
+                                    <option value="">&mdash; choose &mdash;</option>
+                                    @foreach ($products as $p)
+                                        <option value="{{ $p->id }}">{{ $p->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label small fw-semibold">Stall / market</label>
+                                <select name="farmer_market_id" class="form-select form-select-sm" required>
+                                    <option value="">&mdash; choose &mdash;</option>
+                                    @foreach ($farmerMarkets as $fm)
+                                        <option value="{{ $fm->id }}">{{ $fm->market->name }} ({{ $fm->stall_name ?? 'stall' }})</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <input type="hidden" name="week_start" value="{{ $weekStart->toDateString() }}">
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">Quantity available</label>
+                                <input type="number" step="0.5" min="0" name="quantity" class="form-control form-control-sm" required>
+                            </div>
+                            <button class="btn btn-ml w-100 btn-sm">Save weekly stock</button>
+                        </form>
+                    </div>
                 </div>
 
-                <div class="card-ml p-4 mb-4">
-                    <h5 class="fw-bold mb-3"><i class="bi bi-file-earmark-arrow-down me-2"></i>Apply templates</h5>
-                    <p class="small text-muted">Copies saved default quantities into the selected week for products that have no stock row yet.</p>
-                    <form method="POST" action="{{ route('farmer.stock.templates.apply') }}">
-                        @csrf
-                        <input type="hidden" name="week_start" value="{{ $weekStart->toDateString() }}">
-                        <div class="mb-2">
-                            <label class="form-label small fw-semibold">Stall / market</label>
-                            <select name="farmer_market_id" class="form-select form-select-sm" required>
-                                <option value="">&mdash; choose &mdash;</option>
-                                @foreach ($farmerMarkets as $fm)
-                                    <option value="{{ $fm->id }}">{{ $fm->market->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <button class="btn btn-outline-ml w-100 btn-sm">Apply templates to this week</button>
-                    </form>
+                <div class="dashboard-card mb-4">
+                    <div class="dashboard-card-header"><h3 class="h6 mb-0"><i class="bi bi-file-earmark-arrow-down text-success me-2"></i>Apply Templates</h3></div>
+                    <div class="dashboard-card-body">
+                        <p class="small text-muted">Copies saved default quantities into the selected week for products that have no stock row yet.</p>
+                        <form method="POST" action="{{ route('farmer.stock.templates.apply') }}">
+                            @csrf
+                            <input type="hidden" name="week_start" value="{{ $weekStart->toDateString() }}">
+                            <div class="mb-2">
+                                <label class="form-label small fw-semibold">Stall / market</label>
+                                <select name="farmer_market_id" class="form-select form-select-sm" required>
+                                    <option value="">&mdash; choose &mdash;</option>
+                                    @foreach ($farmerMarkets as $fm)
+                                        <option value="{{ $fm->id }}">{{ $fm->market->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <button class="btn btn-outline-ml w-100 btn-sm">Apply templates to this week</button>
+                        </form>
+                    </div>
                 </div>
 
-                <div class="card-ml p-4">
-                    <h5 class="fw-bold mb-3"><i class="bi bi-file-earmark-plus me-2"></i>Save a template</h5>
-                    <p class="small text-muted">Stores a default quantity per product &amp; stall so future weeks can be filled in one click.</p>
-                    <form method="POST" action="{{ route('farmer.stock.templates.save') }}">
-                        @csrf
-                        <div class="mb-2">
-                            <label class="form-label small fw-semibold">Product</label>
-                            <select name="product_id" class="form-select form-select-sm" required>
-                                <option value="">&mdash; choose &mdash;</option>
-                                @foreach ($products as $p)
-                                    <option value="{{ $p->id }}">{{ $p->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label small fw-semibold">Stall / market</label>
-                            <select name="farmer_market_id" class="form-select form-select-sm" required>
-                                <option value="">&mdash; choose &mdash;</option>
-                                @foreach ($farmerMarkets as $fm)
-                                    <option value="{{ $fm->id }}">{{ $fm->market->name }} ({{ $fm->stall_name ?? 'stall' }})</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-semibold">Default quantity</label>
-                            <input type="number" step="0.5" min="0" name="default_quantity" class="form-control form-control-sm" required>
-                        </div>
-                        <button class="btn btn-outline-ml w-100 btn-sm">Save template</button>
-                    </form>
+                <div class="dashboard-card">
+                    <div class="dashboard-card-header"><h3 class="h6 mb-0"><i class="bi bi-file-earmark-plus text-success me-2"></i>Save a Template</h3></div>
+                    <div class="dashboard-card-body">
+                        <p class="small text-muted">Stores a default quantity per product &amp; stall so future weeks can be filled in one click.</p>
+                        <form method="POST" action="{{ route('farmer.stock.templates.save') }}">
+                            @csrf
+                            <div class="mb-2">
+                                <label class="form-label small fw-semibold">Product</label>
+                                <select name="product_id" class="form-select form-select-sm" required>
+                                    <option value="">&mdash; choose &mdash;</option>
+                                    @foreach ($products as $p)
+                                        <option value="{{ $p->id }}">{{ $p->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label small fw-semibold">Stall / market</label>
+                                <select name="farmer_market_id" class="form-select form-select-sm" required>
+                                    <option value="">&mdash; choose &mdash;</option>
+                                    @foreach ($farmerMarkets as $fm)
+                                        <option value="{{ $fm->id }}">{{ $fm->market->name }} ({{ $fm->stall_name ?? 'stall' }})</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">Default quantity</label>
+                                <input type="number" step="0.5" min="0" name="default_quantity" class="form-control form-control-sm" required>
+                            </div>
+                            <button class="btn btn-outline-ml w-100 btn-sm">Save template</button>
+                        </form>
+                    </div>
                 </div>
             </div>
 
             <div class="col-lg-8">
-                <div class="card-ml p-2">
+                <div class="dashboard-card flush">
                     <div class="table-responsive">
                         <table class="table table-ml align-middle mb-0">
                             <thead>

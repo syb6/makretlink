@@ -7,7 +7,7 @@
 @endpush
 
 @section('content')
-<section class="py-5">
+<section class="py-4 py-md-5">
     <div class="container">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb small">
@@ -18,6 +18,7 @@
 
         <div class="row g-4">
             <div class="col-lg-7">
+                <span class="badge-sub">LOCAL MARKET</span>
                 <h1 class="section-title mb-2">{{ $market->name }}</h1>
                 <p class="text-muted"><i class="bi bi-geo-alt me-1"></i>{{ $market->address }}</p>
                 @if ($market->description)
@@ -43,8 +44,8 @@
                     @forelse ($stalls as $stall)
                         <div class="col-md-6">
                             <div class="card-ml p-3 h-100">
-                                <div class="d-flex justify-content-between mb-1">
-                                    <a href="{{ route('farmers.show', $stall->farmer) }}" class="fw-semibold text-decoration-none text-dark">{{ $stall->stall_name ?? $stall->farmer->business_name }}</a>
+                                <div class="d-flex justify-content-between mb-1 gap-2">
+                                    <a href="{{ route('farmers.show', $stall->farmer) }}" class="fw-semibold text-decoration-none">{{ $stall->stall_name ?? $stall->farmer->business_name }}</a>
                                     <span class="status-pill status-{{ $stall->status }}">Active</span>
                                 </div>
                                 <div class="small text-muted mb-2">
@@ -55,7 +56,7 @@
                                 </div>
                                 <div class="small">
                                     @foreach ($stall->schedules->sortBy('day_of_week') as $fs)
-                                        <span class="badge badge-soft me-1">{{ \App\Models\MarketSchedule::DAYS[$fs->day_of_week] }} {{ $fs->start_time->format('gA') }}–{{ $fs->end_time->format('gA') }}</span>
+                                        <span class="badge badge-soft me-1 mb-1">{{ \App\Models\MarketSchedule::DAYS[$fs->day_of_week] }} {{ $fs->start_time->format('gA') }}–{{ $fs->end_time->format('gA') }}</span>
                                     @endforeach
                                 </div>
                             </div>
@@ -69,12 +70,12 @@
             <div class="col-lg-5">
                 <div id="map"></div>
                 <div class="card-ml p-4 mt-4">
-                    <h6 class="fw-bold mb-3"><i class="bi bi-star me-2"></i>Featured products here</h6>
+                    <h6 class="fw-bold mb-3"><i class="bi bi-star me-2" style="color: var(--primary-dark)"></i>Featured products here</h6>
                     <div class="d-grid gap-2">
                         @forelse ($featuredProducts as $p)
-                            <a href="{{ route('products.show', $p) }}" class="d-flex justify-content-between align-items-center text-decoration-none text-dark border-bottom pb-2">
+                            <a href="{{ route('products.show', $p) }}" class="d-flex justify-content-between align-items-center text-decoration-none border-bottom pb-2">
                                 <span>{{ $p->name }} <small class="text-muted">· {{ $p->farmer->business_name }}</small></span>
-                                <span class="product-price">${{ number_format($p->price, 2) }}</span>
+                                <span class="product-price">Rs {{ number_format($p->price, 2) }}</span>
                             </a>
                         @empty
                             <span class="text-muted small">Nothing in stock right now.</span>

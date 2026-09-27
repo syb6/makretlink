@@ -3,7 +3,7 @@
 @section('title', $product->name)
 
 @section('content')
-<section class="py-5">
+<section class="py-4 py-md-5">
     <div class="container">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb small">
@@ -14,7 +14,7 @@
 
         <div class="row g-5">
             <div class="col-lg-6">
-                @include('products._image', ['product' => $product, 'class' => 'w-100 rounded-4 shadow-sm', 'style' => 'max-height:420px', 'eager' => true])
+                @include('products._image', ['product' => $product, 'class' => 'w-100 rounded-4 shadow-sm', 'style' => 'max-height:420px;object-fit:cover', 'eager' => true])
             </div>
             <div class="col-lg-6">
                 <span class="badge badge-soft mb-2">{{ $product->category?->name ?? 'General' }}</span>
@@ -24,15 +24,17 @@
                 </p>
 
                 <div class="d-flex align-items-center gap-2 mb-3">
-                    <span class="product-price fs-3">${{ number_format($product->price, 2) }}</span>
+                    <span class="product-price fs-3">Rs {{ number_format($product->price, 2) }}</span>
                     <span class="text-muted">/ {{ $product->unit }}</span>
                 </div>
 
                 @if ($avgRating)
                     <div class="mb-3">
-                        @for ($i = 1; $i <= 5; $i++)
-                            <i class="bi {{ $i <= round($avgRating) ? 'bi-star-fill text-warning' : 'bi-star text-muted' }}"></i>
-                        @endfor
+                        <span class="stars">
+                            @for ($i = 1; $i <= 5; $i++)
+                                <i class="bi {{ $i <= round($avgRating) ? 'bi-star-fill' : 'bi-star' }}"></i>
+                            @endfor
+                        </span>
                         <span class="small text-muted ms-1">{{ number_format($avgRating, 1) }} ({{ $reviewCount }} review{{ $reviewCount === 1 ? '' : 's' }})</span>
                     </div>
                 @endif
@@ -58,7 +60,7 @@
                                 <button class="btn btn-ml flex-grow-1 add-to-cart-btn" data-stock-id="{{ $stocks->first()?->id }}" data-product-name="{{ $product->name }}">
                                     <i class="bi bi-cart-plus me-1"></i> Add to cart
                                 </button>
-                                <button class="btn btn-outline-danger favorite-product-btn" data-product-id="{{ $product->id }}" data-url="{{ route('favorites.toggle.product') }}" title="Save to favorites">
+                                <button class="btn btn-outline-danger favorite-product-btn" data-product-id="{{ $product->id }}" data-url="{{ route('favorites.toggle.product') }}" title="Save to favorites" aria-label="Save to favorites">
                                     <i class="bi bi-heart"></i>
                                 </button>
                             </div>
@@ -73,21 +75,25 @@
         {{-- Reviews --}}
         <div class="mt-5">
             <h4 class="fw-bold mb-3">Customer reviews</h4>
-            @forelse ($reviews as $review)
-                <div class="card-ml p-3 mb-2">
-                    <div class="d-flex justify-content-between">
-                        <strong>{{ $review->customer->user->name }}</strong>
-                        <span>
-                            @for ($i = 1; $i <= 5; $i++)
-                                <i class="bi {{ $i <= $review->rating ? 'bi-star-fill text-warning' : 'bi-star text-muted' }} small"></i>
-                            @endfor
-                        </span>
+            <div class="row g-3">
+                @forelse ($reviews as $review)
+                    <div class="col-md-6">
+                        <div class="card-ml p-3 h-100">
+                            <div class="d-flex justify-content-between gap-2">
+                                <strong>{{ $review->customer->user->name }}</strong>
+                                <span class="stars">
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        <i class="bi {{ $i <= $review->rating ? 'bi-star-fill' : 'bi-star' }} small"></i>
+                                    @endfor
+                                </span>
+                            </div>
+                            <p class="small mb-0 text-muted">{{ $review->comment }}</p>
+                        </div>
                     </div>
-                    <p class="small mb-0 text-muted">{{ $review->comment }}</p>
-                </div>
-            @empty
-                <p class="text-muted small">No reviews yet. Reviews can be left after completing an order.</p>
-            @endforelse
+                @empty
+                    <div class="col-12"><p class="text-muted small">No reviews yet. Reviews can be left after completing an order.</p></div>
+                @endforelse
+            </div>
         </div>
 
         @if ($related->isNotEmpty())
@@ -99,8 +105,8 @@
                             <div class="product-card h-100">
                                 @include('products._image', ['product' => $rp, 'class' => 'product-thumb'])
                                 <div class="p-2">
-                                    <div class="fw-semibold text-dark small">{{ $rp->name }}</div>
-                                    <span class="product-price small">${{ number_format($rp->price, 2) }}</span>
+                                    <div class="fw-semibold small">{{ $rp->name }}</div>
+                                    <span class="product-price small">Rs {{ number_format($rp->price, 2) }}</span>
                                 </div>
                             </div>
                         </a>
@@ -110,8 +116,6 @@
         @endif
     </div>
 </section>
-
-@include('chatbot.widget')
 
 @push('scripts')
 <script>

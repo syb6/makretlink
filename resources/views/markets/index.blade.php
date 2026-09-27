@@ -7,13 +7,16 @@
 @endpush
 
 @section('content')
-<section class="py-5">
+<section class="py-4 py-md-5">
     <div class="container">
+        <div class="text-center mb-5">
+            <span class="badge-sub">COMMUNITY HUBS</span>
+            <h1 class="section-title">Farmers Markets</h1>
+            <p class="section-subtitle mb-4">Find a market near you and see who is trading there.</p>
+        </div>
+
         <div class="row g-4">
             <div class="col-lg-4">
-                <h1 class="section-title mb-1">Farmers <span class="accent">Markets</span></h1>
-                <p class="text-muted">Find a market near you and see who is trading there.</p>
-
                 <form method="GET" class="card card-ml p-3 mb-4">
                     <label class="form-label fw-semibold small">Filter by operating day</label>
                     <select name="day" class="form-select mb-3">
@@ -24,37 +27,45 @@
                     </select>
                     <div class="d-flex gap-2">
                         <button class="btn btn-ml btn-sm flex-grow-1">Apply</button>
-                        <a href="{{ route('markets.index') }}" class="btn btn-outline-secondary btn-sm">Reset</a>
+                        <a href="{{ route('markets.index') }}" class="btn btn-outline-ml btn-sm">Reset</a>
                     </div>
                 </form>
 
                 <div id="map" class="mb-2"></div>
-                <p class="small text-muted"><i class="bi bi-info-circle me-1"></i>Click a marker for details & directions (OpenStreetMap).</p>
+                <p class="small text-muted"><i class="bi bi-info-circle me-1"></i>Click a marker for details &amp; directions (OpenStreetMap).</p>
             </div>
 
             <div class="col-lg-8">
                 <div class="row g-4">
                     @forelse ($markets as $market)
                         <div class="col-md-6">
-                            <div class="card-ml h-100 p-4 d-flex flex-column">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <h5 class="fw-bold mb-0">{{ $market->name }}</h5>
-                                    <span class="status-pill status-{{ $market->status }}">Open</span>
+                            <div class="market-card h-100">
+                                <div class="market-img-box">
+                                    <span class="market-status-tag {{ $market->status === 'active' ? '' : 'inactive' }}">Open</span>
+                                    <img src="{{ $market->image_url }}" alt="{{ $market->name }}"
+                                         width="600" height="400" loading="lazy"
+                                         onerror="this.onerror=null;this.src=this.dataset.fallback;"
+                                         data-fallback="{{ asset('images/placeholders/market.svg') }}">
                                 </div>
-                                <p class="small text-muted mb-2"><i class="bi bi-geo-alt me-1"></i>{{ $market->address }}</p>
-                                <div class="mb-3">
-                                    @foreach ($market->schedules->sortBy('day_of_week') as $s)
-                                        <span class="badge badge-soft me-1 mb-1 {{ $s->is_closed ? 'opacity-50 text-decoration-line-through' : '' }}">
-                                            {{ \App\Models\MarketSchedule::DAYS[$s->day_of_week] }}
-                                            @unless ($s->is_closed)
-                                                {{ $s->opening_time?->format('gA') }}–{{ $s->closing_time?->format('gA') }}
-                                            @endunless
-                                        </span>
-                                    @endforeach
-                                </div>
-                                <div class="mt-auto d-flex justify-content-between align-items-center">
-                                    <span class="small text-muted"><i class="bi bi-people me-1"></i>{{ $market->farmers_count }} farmer{{ $market->farmers_count === 1 ? '' : 's' }}</span>
-                                    <a href="{{ route('markets.show', $market) }}" class="btn btn-outline-ml btn-sm">View market <i class="bi bi-arrow-right ms-1"></i></a>
+                                <div class="market-details">
+                                    <h3 class="market-title">{{ $market->name }}</h3>
+                                    <div class="market-meta">
+                                        <span><i class="bi bi-geo-alt-fill"></i>{{ $market->address }}</span>
+                                    </div>
+                                    <div class="mb-3">
+                                        @foreach ($market->schedules->sortBy('day_of_week') as $s)
+                                            <span class="badge badge-soft me-1 mb-1 {{ $s->is_closed ? 'opacity-50 text-decoration-line-through' : '' }}">
+                                                {{ \App\Models\MarketSchedule::DAYS[$s->day_of_week] }}
+                                                @unless ($s->is_closed)
+                                                    {{ $s->opening_time?->format('gA') }}–{{ $s->closing_time?->format('gA') }}
+                                                @endunless
+                                            </span>
+                                        @endforeach
+                                    </div>
+                                    <div class="market-bottom">
+                                        <span class="vendor-count"><i class="bi bi-people me-1"></i>{{ $market->farmers_count }} farmer{{ $market->farmers_count === 1 ? '' : 's' }}</span>
+                                        <a href="{{ route('markets.show', $market) }}" class="btn-explore-market">View Market</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>

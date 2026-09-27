@@ -3,54 +3,58 @@
 @section('title', 'My Products')
 
 @section('content')
-<section class="py-5">
+<section class="py-4 py-md-5">
     <div class="container">
-        <h1 class="section-title mb-4">My <span class="accent">Products</span></h1>
+        <span class="badge-sub">FARMER MANAGEMENT PORTAL</span>
+        <h1 class="section-title mb-4">My Products</h1>
 
         <div class="row g-4">
             <div class="col-lg-4">
-                <div class="card-ml p-4">
-                    <h5 class="fw-bold mb-3"><i class="bi bi-plus-circle me-2"></i>Add product</h5>
-                    <form method="POST" action="{{ route('farmer.products.store') }}" enctype="multipart/form-data">
-                        @csrf
-                        <div class="mb-2">
-                            <label class="form-label small fw-semibold">Name</label>
-                            <input type="text" name="name" class="form-control form-control-sm" required value="{{ old('name') }}">
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label small fw-semibold">Category</label>
-                            <select name="category_id" class="form-select form-select-sm">
-                                <option value="">Uncategorized</option>
-                                @foreach ($categories as $c)
-                                    <option value="{{ $c->id }}">{{ $c->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="row g-2 mb-2">
-                            <div class="col-6">
-                                <label class="form-label small fw-semibold">Price ($)</label>
-                                <input type="number" step="0.01" min="0.01" name="price" class="form-control form-control-sm" required value="{{ old('price') }}">
+                <div class="dashboard-card">
+                    <div class="dashboard-card-header"><h3 class="h6 mb-0"><i class="bi bi-plus-circle text-success me-2"></i>Add Product</h3></div>
+                    <div class="dashboard-card-body">
+                        <x-form-errors />
+<form method="POST" action="{{ route('farmer.products.store') }}" enctype="multipart/form-data">
+                            @csrf
+                            <div class="mb-2">
+                                <label class="form-label small fw-semibold">Name</label>
+                                <input type="text" name="name" class="form-control form-control-sm" required value="{{ old('name') }}">
                             </div>
-                            <div class="col-6">
-                                <label class="form-label small fw-semibold">Unit</label>
-                                <input type="text" name="unit" class="form-control form-control-sm" placeholder="kg, bunch, pc" required value="{{ old('unit') }}">
+                            <div class="mb-2">
+                                <label class="form-label small fw-semibold">Category</label>
+                                <select name="category_id" class="form-select form-select-sm">
+                                    <option value="">Uncategorized</option>
+                                    @foreach ($categories as $c)
+                                        <option value="{{ $c->id }}">{{ $c->name }}</option>
+                                    @endforeach
+                                </select>
                             </div>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label small fw-semibold">Description</label>
-                            <textarea name="description" rows="2" class="form-control form-control-sm"></textarea>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label small fw-semibold">Image</label>
-                            <input type="file" name="image" class="form-control form-control-sm" accept="image/*">
-                        </div>
-                        <button class="btn btn-ml w-100 btn-sm">Add product</button>
-                    </form>
+                            <div class="row g-2 mb-2">
+                                <div class="col-6">
+                                    <label class="form-label small fw-semibold">Price ($)</label>
+                                    <input type="number" step="0.01" min="0.01" name="price" class="form-control form-control-sm" required value="{{ old('price') }}">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small fw-semibold">Unit</label>
+                                    <input type="text" name="unit" class="form-control form-control-sm" placeholder="kg, bunch, pc" required value="{{ old('unit') }}">
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label small fw-semibold">Description</label>
+                                <textarea name="description" rows="2" class="form-control form-control-sm"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">Product picture</label>
+                                @include('components.image-picker', ['name' => 'image', 'label' => 'product picture', 'placeholder' => 'bi-basket2'])
+                            </div>
+                            <button class="btn btn-ml w-100 btn-sm">Add product</button>
+                        </form>
+                    </div>
                 </div>
             </div>
 
             <div class="col-lg-8">
-                <div class="card-ml p-2">
+                <div class="dashboard-card flush">
                     <div class="table-responsive">
                         <table class="table table-ml align-middle mb-0">
                             <thead>
@@ -64,7 +68,7 @@
                             </thead>
                             <tbody>
                                 @forelse ($products as $product)
-                                    <tr {{ $product->trashed() ? 'class=opacity-50' : '' }}>
+                                    <tr {{ $product->trashed() ? 'class="opacity-50"' : '' }}>
                                         <td>
                                             <strong>{{ $product->name }}</strong>
                                             @if ($product->trashed())
@@ -72,9 +76,9 @@
                                             @endif
                                         </td>
                                         <td class="small">{{ $product->category?->name ?? '—' }}</td>
-                                        <td class="small">${{ number_format($product->price, 2) }} / {{ $product->unit }}</td>
+                                        <td class="small">Rs {{ number_format($product->price, 2) }} / {{ $product->unit }}</td>
                                         <td><span class="status-pill status-{{ $product->status }}">{{ $product->status }}</span></td>
-                                        <td class="text-end">
+                                        <td class="text-end text-nowrap">
                                             @unless ($product->trashed())
                                                 <button class="btn btn-sm btn-outline-ml" data-bs-toggle="modal" data-bs-target="#editProduct-{{ $product->id }}"><i class="bi bi-pencil"></i></button>
                                                 <form method="POST" action="{{ route('farmer.products.destroy', $product) }}" class="d-inline" data-confirm="Delete this product?">
@@ -96,7 +100,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="p-2">{{ $products->links() }}</div>
+                    <div class="p-3">{{ $products->links() }}</div>
                 </div>
             </div>
         </div>
@@ -144,8 +148,8 @@
                             <textarea name="description" rows="2" class="form-control form-control-sm">{{ $product->description }}</textarea>
                         </div>
                         <div class="mb-2">
-                            <label class="form-label small fw-semibold">Image</label>
-                            <input type="file" name="image" class="form-control form-control-sm" accept="image/*">
+                            <label class="form-label small fw-semibold">Product picture</label>
+                            @include('components.image-picker', ['name' => 'image', 'id' => 'image-'.$product->id, 'label' => 'product picture', 'existing' => $product->image, 'placeholder' => 'bi-basket2'])
                         </div>
                         <div>
                             <label class="form-label small fw-semibold">Status</label>

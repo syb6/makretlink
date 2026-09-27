@@ -3,91 +3,97 @@
 @section('title', 'Order '.$order->order_number)
 
 @section('content')
-<section class="py-5">
+<section class="py-4 py-md-5">
     <div class="container">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb small">
-                <li class="breadcrumb-item"><a href="{{ route('orders.index') }}">My Orders</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('orders.index') }}">My Pre-Orders</a></li>
                 <li class="breadcrumb-item active">{{ $order->order_number }}</li>
             </ol>
         </nav>
 
         <div class="row g-4">
             <div class="col-lg-8">
-                <div class="card-ml p-4 mb-4">
-                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
-                        <div>
-                            <h1 class="h4 fw-bold mb-1">{{ $order->order_number }}</h1>
-                            <span class="status-pill status-{{ $order->status }}">{{ str_replace('_', ' ', $order->status) }}</span>
-                        </div>
-                        <div class="text-end">
-                            <div class="fs-4 fw-bold text-ml-green">${{ number_format($order->total_amount, 2) }}</div>
-                            <small class="text-muted">Pay at pickup</small>
-                        </div>
-                    </div>
-
-                    <div class="row g-3 small">
-                        <div class="col-md-6">
-                            <div class="text-muted">Pickup at</div>
-                            <strong>{{ $order->market_name }}</strong> — {{ $order->farmer_name }}<br>
-                            {{ $order->pickup_date?->format('l, F j, Y') }}<br>
-                            {{ \Carbon\Carbon::parse($order->pickup_start_time)->format('g:i A') }} – {{ \Carbon\Carbon::parse($order->pickup_end_time)->format('g:i A') }}
-                        </div>
-                        <div class="col-md-6">
-                            <div class="text-muted">Cutoff for changes</div>
-                            @if ($order->pickupSlot?->cutoff_at)
-                                <strong>{{ $order->pickupSlot->cutoff_at->format('M j, g:i A') }}</strong>
-                            @else
-                                <span class="text-muted">See pickup window above.</span>
-                            @endif
-                        </div>
-                    </div>
-
-                    @if ($order->customer_note)
-                        <div class="alert bg-ml-green-light small mt-3 mb-0"><strong>Your note:</strong> {{ $order->customer_note }}</div>
-                    @endif
-                </div>
-
-                <div class="card-ml p-4 mb-4">
-                    <h5 class="fw-bold mb-3">Items</h5>
-                    @foreach ($order->items as $item)
-                        <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                <div class="dashboard-card mb-4">
+                    <div class="dashboard-card-body">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
                             <div>
-                                <span class="fw-semibold">{{ $item->product_name }}</span>
-                                <span class="text-muted small">× {{ $item->quantity }} {{ $item->unit }} @ ${{ number_format($item->unit_price, 2) }}</span>
+                                <h1 class="h4 fw-bold mb-1">{{ $order->order_number }}</h1>
+                                <span class="status-pill status-{{ $order->status }}">{{ str_replace('_', ' ', $order->status) }}</span>
                             </div>
-                            <div class="d-flex align-items-center gap-3">
-                                <span class="fw-semibold">${{ number_format($item->subtotal, 2) }}</span>
-                                @if ($order->status === 'completed' && $item->product_id && ! $existingProductReview->has($item->product_id))
-                                    <button class="btn btn-sm btn-outline-ml" data-bs-toggle="modal" data-bs-target="#reviewModal-{{ $item->id }}">Review</button>
-                                @elseif ($existingProductReview->has($item->product_id))
-                                    <span class="badge badge-soft">Reviewed ✓</span>
+                            <div class="text-end">
+                                <div class="fs-4 fw-bold text-ml-green">Rs {{ number_format($order->total_amount, 2) }}</div>
+                                <small class="text-muted">Pay at pickup</small>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 small">
+                            <div class="col-md-6">
+                                <div class="text-muted">Pickup at</div>
+                                <strong>{{ $order->market_name }}</strong> — {{ $order->farmer_name }}<br>
+                                {{ $order->pickup_date?->format('l, F j, Y') }}<br>
+                                {{ \Carbon\Carbon::parse($order->pickup_start_time)->format('g:i A') }} – {{ \Carbon\Carbon::parse($order->pickup_end_time)->format('g:i A') }}
+                            </div>
+                            <div class="col-md-6">
+                                <div class="text-muted">Cutoff for changes</div>
+                                @if ($order->pickupSlot?->cutoff_at)
+                                    <strong>{{ $order->pickupSlot->cutoff_at->format('M j, g:i A') }}</strong>
+                                @else
+                                    <span class="text-muted">See pickup window above.</span>
                                 @endif
                             </div>
                         </div>
-                    @endforeach
 
-                    @if ($order->status === 'completed' && $order->farmerMarket && ! $existingFarmerReview)
-                        <button class="btn btn-outline-ml mt-3" data-bs-toggle="modal" data-bs-target="#farmerReviewModal">Rate {{ $order->farmer_name }}</button>
-                    @elseif ($existingFarmerReview)
-                        <div class="alert bg-ml-green-light small mt-3 mb-0">You rated this farmer {{ $existingFarmerReview->rating }}/5. Thank you!</div>
-                    @endif
+                        @if ($order->customer_note)
+                            <div class="reply-box small mt-3"><strong>Your note:</strong> {{ $order->customer_note }}</div>
+                        @endif
+                    </div>
                 </div>
 
-                <div class="card-ml p-4">
-                    <h5 class="fw-bold mb-3">Status history</h5>
-                    <ul class="list-unstyled mb-0">
-                        @foreach ($order->statusHistories->sortBy('changed_at') as $h)
-                            <li class="d-flex gap-3 mb-3">
-                                <span class="status-pill status-{{ $h->status }}">{{ str_replace('_', ' ', $h->status) }}</span>
-                                <div class="small">
-                                    <strong>{{ $h->changed_at?->format('M j, g:i A') }}</strong>
-                                    @if ($h->changedBy) <span class="text-muted">by {{ $h->changedBy->name }}</span>@endif
-                                    @if ($h->note) <div class="text-muted">{{ $h->note }}</div>@endif
+                <div class="dashboard-card mb-4">
+                    <div class="dashboard-card-header"><h3 class="h5 mb-0">Items</h3></div>
+                    <div class="dashboard-card-body">
+                        @foreach ($order->items as $item)
+                            <div class="d-flex justify-content-between align-items-center border-bottom py-2 gap-2 flex-wrap">
+                                <div>
+                                    <span class="fw-semibold">{{ $item->product_name }}</span>
+                                    <span class="text-muted small">× {{ $item->quantity }} {{ $item->unit }} @ Rs {{ number_format($item->unit_price, 2) }}</span>
                                 </div>
-                            </li>
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="fw-semibold">Rs {{ number_format($item->subtotal, 2) }}</span>
+                                    @if ($order->status === 'completed' && $item->product_id && ! $existingProductReview->has($item->product_id))
+                                        <button class="btn btn-sm btn-outline-ml" data-bs-toggle="modal" data-bs-target="#reviewModal-{{ $item->id }}">Review</button>
+                                    @elseif ($existingProductReview->has($item->product_id))
+                                        <span class="badge badge-soft">Reviewed ✓</span>
+                                    @endif
+                                </div>
+                            </div>
                         @endforeach
-                    </ul>
+
+                        @if ($order->status === 'completed' && $order->farmerMarket && ! $existingFarmerReview)
+                            <button class="btn btn-outline-ml mt-3" data-bs-toggle="modal" data-bs-target="#farmerReviewModal">Rate {{ $order->farmer_name }}</button>
+                        @elseif ($existingFarmerReview)
+                            <div class="reply-box small mt-3">You rated this farmer {{ $existingFarmerReview->rating }}/5. Thank you!</div>
+                        @endif
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
+                    <div class="dashboard-card-header"><h3 class="h5 mb-0">Status history</h3></div>
+                    <div class="dashboard-card-body">
+                        <ul class="list-unstyled mb-0">
+                            @foreach ($order->statusHistories->sortBy('changed_at') as $h)
+                                <li class="d-flex gap-3 mb-3">
+                                    <span class="status-pill status-{{ $h->status }}">{{ str_replace('_', ' ', $h->status) }}</span>
+                                    <div class="small">
+                                        <strong>{{ $h->changed_at?->format('M j, g:i A') }}</strong>
+                                        @if ($h->changedBy) <span class="text-muted">by {{ $h->changedBy->name }}</span>@endif
+                                        @if ($h->note) <div class="text-muted">{{ $h->note }}</div>@endif
+                                    </div>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
                 </div>
             </div>
 
