@@ -21,6 +21,8 @@
     {{-- Fonts are self-hosted via @font-face in app.css (display: swap).
          No preload: on single-threaded dev servers preloads queue ahead of
          the hero image and delay LCP; the CSS is render-blocking anyway. --}}
+
+    <link rel="shortcut icon" href="{{asset('favicon.ico')}}" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/app.min.css') }}?v={{ filemtime(public_path('css/app.min.css')) }}">
