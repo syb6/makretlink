@@ -53,35 +53,61 @@
                                         <div class="small text-muted">{{ $user->email }} · {{ $user->phone }}</div>
                                     </td>
                                     <td><span class="badge badge-soft">{{ $user->role }}</span></td>
-                                    <td><span class="status-pill status-{{ $user->status }}">{{ $user->status }}</span></td>
+                                    <td><span class="status-pill status-{{ $user->status }}">{{ ucfirst($user->status) }}</span></td>
                                     <td class="small">
                                         @if ($user->farmerProfile)
                                             {{ $user->farmerProfile->business_name }}
-                                            <span class="status-pill status-{{ $user->farmerProfile->approval_status }}">{{ $user->farmerProfile->approval_status }}</span>
+                                            <span class="status-pill status-{{ $user->farmerProfile->approval_status }}">{{ ucfirst($user->farmerProfile->approval_status) }}</span>
                                         @elseif ($user->customerProfile)
                                             <span class="text-muted">customer</span>
                                         @endif
                                     </td>
                                     <td class="text-end">
                                         @if (! $user->isAdmin())
-                                            @foreach (['active', 'inactive', 'suspended'] as $s)
-                                                @if ($user->status !== $s)
-                                                    <form method="POST" action="{{ route('admin.users.status', $user) }}" class="d-inline">
-                                                        @csrf
-                                                        <input type="hidden" name="status" value="{{ $s }}">
-                                                        <button class="btn btn-sm btn-outline-secondary" title="Set {{ $s }}">{{ ucfirst(substr($s, 0, 1)) }}</button>
-                                                    </form>
-                                                @endif
-                                            @endforeach
+                                            {{-- Status Action Buttons --}}
+                                            @if ($user->status !== 'active')
+                                                <form method="POST" action="{{ route('admin.users.status', $user) }}" class="d-inline">
+                                                    @csrf
+                                                    <input type="hidden" name="status" value="active">
+                                                    <button class="btn btn-sm btn-outline-success" title="Set Active">
+                                                        <i class="bi bi-check-circle"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
 
+                                            @if ($user->status !== 'inactive')
+                                                <form method="POST" action="{{ route('admin.users.status', $user) }}" class="d-inline">
+                                                    @csrf
+                                                    <input type="hidden" name="status" value="inactive">
+                                                    <button class="btn btn-sm btn-outline-secondary" title="Set Inactive">
+                                                        <i class="bi bi-pause-circle"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
+
+                                            @if ($user->status !== 'suspended')
+                                                <form method="POST" action="{{ route('admin.users.status', $user) }}" class="d-inline">
+                                                    @csrf
+                                                    <input type="hidden" name="status" value="suspended">
+                                                    <button class="btn btn-sm btn-outline-warning" title="Set Suspended">
+                                                        <i class="bi bi-slash-circle"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
+
+                                            {{-- Farmer Profile Approval Buttons --}}
                                             @if ($user->farmerProfile && $user->farmerProfile->approval_status === 'pending')
                                                 <form method="POST" action="{{ route('admin.farmers.approve', $user) }}" class="d-inline">
                                                     @csrf
-                                                    <button class="btn btn-sm btn-success">Approve</button>
+                                                    <button class="btn btn-sm btn-success ms-1" title="Approve Farmer">
+                                                        <i class="bi bi-check-lg"></i> Approve
+                                                    </button>
                                                 </form>
                                                 <form method="POST" action="{{ route('admin.farmers.reject', $user) }}" class="d-inline" data-confirm="Reject this farmer?">
                                                     @csrf
-                                                    <button class="btn btn-sm btn-outline-danger">Reject</button>
+                                                    <button class="btn btn-sm btn-outline-danger" title="Reject Farmer">
+                                                        <i class="bi bi-x-lg"></i> Reject
+                                                    </button>
                                                 </form>
                                             @endif
                                         @else
