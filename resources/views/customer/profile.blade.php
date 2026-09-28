@@ -36,7 +36,7 @@
                         </div>
                         <div class="col-12">
                             <label class="form-label fw-semibold">Address</label>
-                            <textarea name="address" rows="2" class="form-control" required>{{ old('address', $user->customerProfile->address) }}</textarea>
+                            <textarea name="address" rows="2" class="form-control" required>{{ old('address', $customer->address) }}</textarea>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">New password <span class="optional-tag">(leave blank to keep)</span></label>

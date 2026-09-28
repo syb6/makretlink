@@ -3,18 +3,20 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Models\CustomerProfile;
 use App\Models\FavoriteProduct;
 use App\Models\Order;
 use App\Services\ProfileImageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
     public function dashboard()
     {
-        $customerId = Auth::user()->customerProfile->id;
+        $customerId = $this->profile()->id;
 
         return view('customer.dashboard', [
             'totalOrders' => Order::where('customer_id', $customerId)->count(),
@@ -28,12 +30,16 @@ class ProfileController extends Controller
 
     public function edit()
     {
-        return view('customer.profile', ['user' => Auth::user()->load('customerProfile')]);
+        return view('customer.profile', [
+            'user' => Auth::user()->load('customerProfile'),
+            'customer' => $this->profile(),
+        ]);
     }
 
     public function update(Request $request, ProfileImageService $images)
     {
         $user = Auth::user();
+        $customer = $this->profile();
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
@@ -53,17 +59,39 @@ class ProfileController extends Controller
         if ($request->hasFile('profile_image')) {
             $profileData['profile_image'] = $images->replace(
                 $request->file('profile_image'),
-                $user->customerProfile->profile_image,
-                'customer-'.$user->customerProfile->id
+                $customer->profile_image,
+                'customer-'.$customer->id
             );
         }
 
-        $user->customerProfile->update($profileData);
+        $customer->update($profileData);
 
         if (! empty($data['password'])) {
             $user->update(['password' => Hash::make($data['password'])]);
         }
 
         return back()->with('success', 'Profile updated.');
+    }
+
+    /**
+     * The signed-in customer's profile row, created (or restored) on first use.
+     *
+     * Every profile screen below assumed the row always exists — a user whose
+     * profile was never created (or was soft-deleted) crashed the dashboard and
+     * made the profile impossible to update. withTrashed + firstOrCreate
+     * repairs both cases without violating the unique user_id constraint.
+     */
+    private function profile(): CustomerProfile
+    {
+        $profile = CustomerProfile::withTrashed()->firstOrCreate(
+            ['user_id' => Auth::id()],
+            ['address' => '']
+        );
+
+        if ($profile->trashed()) {
+            $profile->restore();
+        }
+
+        return $profile;
     }
 }

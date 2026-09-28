@@ -6,6 +6,136 @@
     'use strict';
 
     /* =========================================================
+       0) Themed dialogs — mlConfirm() / mlAlert()
+       Promise-based replacements for window.confirm/alert so every
+       destructive action and error uses the MarketLink theme with
+       animations, instead of raw browser chrome.
+       ========================================================= */
+    var dialogCounter = 0;
+
+    function buildDialog(opts) {
+        var id = 'ml-dialog-' + (++dialogCounter);
+        var safeMsg = String(opts.message).replace(/[&<>"']/g, function (c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+
+        var backdrop = document.createElement('div');
+        backdrop.className = 'ml-dialog-backdrop';
+        backdrop.id = id;
+        backdrop.setAttribute('role', 'presentation');
+        backdrop.innerHTML =
+            '<div class="ml-dialog" role="' + (opts.mode === 'alert' ? 'alertdialog' : 'dialog') + '" aria-modal="true" aria-label="' + (opts.title ? safeMsg : 'Dialog') + '">' +
+                '<div class="ml-dialog-icon ml-dialog-icon-' + (opts.danger ? 'danger' : 'primary') + '">' +
+                    '<i class="bi ' + (opts.danger ? 'bi-exclamation-triangle-fill' : 'bi-check-circle-fill') + '"></i>' +
+                '</div>' +
+                (opts.title ? '<h5 class="ml-dialog-title"></h5>' : '') +
+                '<p class="ml-dialog-message">' + safeMsg + '</p>' +
+                '<div class="ml-dialog-actions">' +
+                    (opts.mode === 'confirm' ? '<button type="button" class="btn btn-outline-ml btn-sm" data-dialog-cancel>Cancel</button>' : '') +
+                    '<button type="button" class="btn ' + (opts.danger ? 'btn-danger' : 'btn-ml') + ' btn-sm" data-dialog-ok>' + (opts.okLabel || 'OK') + '</button>' +
+                '</div>' +
+            '</div>';
+
+        if (opts.title) {
+            backdrop.querySelector('.ml-dialog-title').textContent = opts.title;
+        }
+
+        document.body.appendChild(backdrop);
+        // Double rAF so the transition runs reliably after insertion.
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () { backdrop.classList.add('show'); });
+        });
+
+        return backdrop;
+ }
+
+    function closeDialog(backdrop, value, resolve) {
+        backdrop.classList.remove('show');
+        setTimeout(function () { backdrop.remove(); }, 220);
+        resolve(value);
+    }
+
+    /**
+     * Themed confirm. Usage: mlConfirm('Delete this product?').then(function (ok) { ... })
+     * Esc/backdrop click resolve false; Enter / OK button resolves true.
+     */
+    function mlConfirm(message, options) {
+        options = options || {};
+        return new Promise(function (resolve) {
+            if (reduced) { resolve(window.confirm(message)); return; }
+
+            var backdrop = buildDialog({
+                message: message,
+                title: options.title || 'Are you sure?',
+                danger: options.danger !== false,
+                okLabel: options.okLabel || 'Yes, continue',
+                mode: 'confirm',
+            });
+
+            var done = false;
+            var settle = function (value) {
+                if (done) return;
+                done = true;
+                document.removeEventListener('keydown', onKey);
+                closeDialog(backdrop, value, resolve);
+            };
+
+            var onKey = function (e) {
+                if (e.key === 'Escape') settle(false);
+                if (e.key === 'Enter') { e.preventDefault(); settle(true); }
+            };
+            document.addEventListener('keydown', onKey);
+
+            backdrop.querySelector('[data-dialog-ok]').addEventListener('click', function () { settle(true); });
+            var cancel = backdrop.querySelector('[data-dialog-cancel]');
+            if (cancel) cancel.addEventListener('click', function () { settle(false); });
+            backdrop.addEventListener('click', function (e) { if (e.target === backdrop) settle(false); });
+
+            var ok = backdrop.querySelector('[data-dialog-ok]');
+            if (ok) ok.focus();
+        });
+    }
+
+    /** Themed alert: mlAlert('Saved!') or mlAlert('…', { danger: true }). */
+    function mlAlert(message, options) {
+        options = options || {};
+        return new Promise(function (resolve) {
+            if (reduced) { window.alert(message); resolve(); return; }
+
+            var backdrop = buildDialog({
+                message: message,
+                title: options.title || (options.danger ? 'Something went wrong' : 'Notice'),
+                danger: !!options.danger,
+                okLabel: options.okLabel || 'Got it',
+                mode: 'alert',
+            });
+
+            var done = false;
+            var settle = function () {
+                if (done) return;
+                done = true;
+                document.removeEventListener('keydown', onKey);
+                closeDialog(backdrop, undefined, resolve);
+            };
+
+            var onKey = function (e) {
+                if (e.key === 'Escape' || e.key === 'Enter') { e.preventDefault(); settle(); }
+            };
+            document.addEventListener('keydown', onKey);
+
+            backdrop.querySelector('[data-dialog-ok]').addEventListener('click', settle);
+            backdrop.addEventListener('click', function (e) { if (e.target === backdrop) settle(); });
+
+            var ok = backdrop.querySelector('[data-dialog-ok]');
+            if (ok) ok.focus();
+        });
+    }
+
+    // Expose for the other scripts (marketlink.js) and inline handlers.
+    window.mlConfirm = mlConfirm;
+    window.mlAlert = mlAlert;
+
+    /* =========================================================
        1) Theme (dark mode) toggle
        ========================================================= */
     var THEME_KEY = 'ml-theme';
@@ -52,9 +182,13 @@
         /* ---------- Confirm dialogs for destructive forms ---------- */
         document.querySelectorAll('form[data-confirm]').forEach(function (form) {
             form.addEventListener('submit', function (e) {
-                if (!window.confirm(form.getAttribute('data-confirm'))) {
-                    e.preventDefault();
-                }
+                if (form.__mlConfirmed) { form.__mlConfirmed = false; return; }
+                e.preventDefault();
+                mlConfirm(form.getAttribute('data-confirm'), { danger: true }).then(function (ok) {
+                    if (!ok) return;
+                    form.__mlConfirmed = true;
+                    if (typeof form.requestSubmit === 'function') { form.requestSubmit(); } else { form.submit(); }
+                });
             });
         });
 
@@ -387,6 +521,15 @@
 
             tile.addEventListener('click', function () { input.click(); });
 
+            // Remember the original hint text so an error message can be undone.
+            (function () {
+                var meta = picker.querySelector('.image-picker-meta');
+                var hint = meta && meta.querySelector('.picker-hint');
+                if (hint && !hint.dataset.originalHint) {
+                    hint.dataset.originalHint = hint.textContent.trim();
+                }
+            })();
+
             input.addEventListener('change', function () {
                 var file = input.files && input.files[0];
                 if (!file) return;
@@ -401,6 +544,22 @@
                         ],
                         { duration: 260 }
                     );
+                    // Say WHY nothing happened — a silent shake reads as a
+                    // broken save button, which is how profile updates got
+                    // mistaken for "not working".
+                    var meta = picker.querySelector('.image-picker-meta');
+                    var hint = meta && meta.querySelector('.picker-hint');
+                    if (hint) {
+                        hint.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i>That file is not a supported picture. Use JPG, PNG or WebP.';
+                        hint.classList.add('picker-hint-error');
+                        clearTimeout(picker.__hintTimer);
+                        picker.__hintTimer = setTimeout(function () {
+                            hint.innerHTML = hint.dataset.originalHint || 'JPG, PNG or WebP · max 2 MB · square works best';
+                            hint.classList.remove('picker-hint-error');
+                        }, 6000);
+                    } else {
+                        mlAlert('That file is not a supported picture. Use JPG, PNG or WebP (max 2 MB).', { danger: true, title: 'Unsupported file' });
+                    }
                     return;
                 }
                 var url = URL.createObjectURL(file);
@@ -422,8 +581,10 @@
             if (removeBtn) {
                 removeBtn.addEventListener('click', function () {
                     var url = removeBtn.dataset.url;
-                    if (!url || !window.confirm('Remove this picture?')) return;
-                    fetch(url, {
+                    if (!url) return;
+                    mlConfirm('Remove this picture?', { danger: true, okLabel: 'Yes, remove it' }).then(function (ok) {
+                        if (!ok) return;
+                        fetch(url, {
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -439,9 +600,10 @@
                             if (text) text.textContent = 'Choose picture';
                         })
                         .catch(function () {
-                            window.alert('Could not remove the picture. Please try again.');
+                            mlAlert('Could not remove the picture. Please try again.', { danger: true });
                         });
-                });
+                    });
+            });
             }
         });
 

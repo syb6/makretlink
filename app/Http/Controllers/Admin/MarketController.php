@@ -64,6 +64,10 @@ class MarketController extends Controller
             return back()->with('error', 'Cannot delete: this market has orders attached. Set it inactive instead.');
         }
 
+        // Remove the market's uploaded picture (uploads only) after a
+        // successful delete so the file doesn't linger on disk.
+        ImageLibrary::delete('market', $market->image);
+
         return back()->with('success', 'Market removed.');
     }
 

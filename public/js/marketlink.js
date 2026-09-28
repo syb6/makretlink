@@ -43,9 +43,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 })
                 .catch(function () {
-                    toast(navigator.onLine
-                        ? 'Could not add to cart — the server did not respond. Check your connection and try again.'
-                        : 'You appear to be offline. Reconnect and try again.', false);
+                    (window.mlAlert || function (m) { window.alert(m); })(
+                        navigator.onLine
+                            ? 'Could not add to cart — the server did not respond. Check your connection and try again.'
+                            : 'You appear to be offline. Reconnect and try again.',
+                        { danger: true }
+                    );
                 })
                 .finally(function () { btn.disabled = false; });
         });
@@ -85,9 +88,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 })
                 .catch(function () {
-                    toast(navigator.onLine
-                        ? 'That action did not go through — the server did not respond. Please try again.'
-                        : 'You appear to be offline. Reconnect and try again.', false);
+                    (window.mlAlert || function (m) { window.alert(m); })(
+                        navigator.onLine
+                            ? 'That action did not go through — the server did not respond. Please try again.'
+                            : 'You appear to be offline. Reconnect and try again.',
+                        { danger: true }
+                    );
                 });
         });
     });

@@ -12,18 +12,34 @@ use App\Models\WeeklyStock;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $search = $request->query('q');
-        $category = $request->query('category');
-        $market = $request->query('market');
-        $day = $request->query('day');
-        $min = $request->query('min_price');
-        $max = $request->query('max_price');
-        $sort = $request->query('sort', 'name');
+        // Filter inputs are sanitized before touching the query builder so
+        // malformed query strings can't probe SQL or skew the listing. safe()
+        // silently drops anything invalid — a tampered URL simply shows the
+        // default listing instead of an error page.
+        $validated = Validator::make($request->query(), [
+            'q' => ['nullable', 'string', 'max:100'],
+            'category' => ['nullable', 'integer', 'exists:categories,id'],
+            'market' => ['nullable', 'integer', 'exists:markets,id'],
+            'day' => ['nullable', 'integer', 'between:0,6'],
+            'min_price' => ['nullable', 'numeric', 'min:0', 'max:999999'],
+            'max_price' => ['nullable', 'numeric', 'min:0', 'max:999999'],
+            'sort' => ['nullable', 'in:name,price_low,price_high,newest'],
+            'page' => ['nullable', 'integer', 'min:1', 'max:1000'],
+        ])->safe()->all();
+
+        $search = $validated['q'] ?? null;
+        $category = $validated['category'] ?? null;
+        $market = $validated['market'] ?? null;
+        $day = $validated['day'] ?? null;
+        $min = $validated['min_price'] ?? null;
+        $max = $validated['max_price'] ?? null;
+        $sort = $validated['sort'] ?? 'name';
 
         $stocks = WeeklyStock::query()
             ->where('status', 'available')
@@ -65,7 +81,7 @@ class ProductController extends Controller
 
         // Manual pagination over the deduped collection
         $perPage = 12;
-        $page = max(1, (int) $request->query('page', 1));
+        $page = (int) ($validated['page'] ?? 1);
         $chunk = $stocks->slice(($page - 1) * $perPage, $perPage)->values();
 
         // One query for the customer's favorite products instead of one per card
@@ -112,6 +128,10 @@ class ProductController extends Controller
             ->latest()
             ->take(6)
             ->get();
+
+        // SRS 1.6: reviews must come from completed orders; hide the review
+        // form on the product page itself (customers review from their order).
+
 
         $avgRating = (float) ProductReview::where('product_id', $product->id)->where('status', 'visible')->avg('rating');
 

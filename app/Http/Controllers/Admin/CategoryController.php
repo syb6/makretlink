@@ -67,6 +67,10 @@ class CategoryController extends Controller
             return back()->with('error', 'Cannot delete: category has products.');
         }
 
+        // Remove the category's uploaded picture (uploads only) after a
+        // successful delete so the file doesn't linger on disk.
+        ImageLibrary::delete('category', $category->image);
+
         return back()->with('success', 'Category removed.');
     }
 }

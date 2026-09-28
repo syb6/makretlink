@@ -13,8 +13,7 @@
                 <div class="dashboard-card">
                     <div class="dashboard-card-header"><h3 class="h6 mb-0"><i class="bi bi-plus-circle text-success me-2"></i>Add Product</h3></div>
                     <div class="dashboard-card-body">
-                        <x-form-errors />
-<form method="POST" action="{{ route('farmer.products.store') }}" enctype="multipart/form-data">
+                        <x-form-errors /><form method="POST" action="{{ route('farmer.products.store') }}" enctype="multipart/form-data">
                             @csrf
                             <div class="mb-2">
                                 <label class="form-label small fw-semibold">Name</label>
@@ -41,8 +40,24 @@
                             </div>
                             <div class="mb-2">
                                 <label class="form-label small fw-semibold">Description</label>
-                                <textarea name="description" rows="2" class="form-control form-control-sm"></textarea>
+                                <textarea name="description" rows="2" class="form-control form-control-sm" maxlength="2000"></textarea>
                             </div>
+                            <div class="row g-2 mb-2">
+                                <div class="col-7">
+                                    <label class="form-label small fw-semibold">This week's stock @</label>
+                                    <select name="initial_market_id" class="form-select form-select-sm">
+                                        <option value="">Stall…</option>
+                                        @foreach ($stalls as $stall)
+                                            <option value="{{ $stall->id }}" {{ old('initial_market_id') == $stall->id ? 'selected' : '' }}>{{ $stall->market->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-5">
+                                    <label class="form-label small fw-semibold">Qty</label>
+                                    <input type="number" name="initial_quantity" min="0" step="0.5" max="100000" class="form-control form-control-sm" placeholder="e.g. 20" value="{{ old('initial_quantity') }}">
+                                </div>
+                            </div>
+                            <p class="small text-muted mb-2"><i class="bi bi-info-circle me-1"></i>Stock is optional — set it to put the product on the Products page right away.</p>
                             <div class="mb-2">
                                 <label class="form-label small fw-semibold">Status</label>
                                 <select name="status" class="form-select form-select-sm">

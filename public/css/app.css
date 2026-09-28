@@ -3737,6 +3737,95 @@ body.page-leaving {
 .picker-remove:active {
   transform: scale(0.95);
 }
+.picker-hint-error {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+/* ============================================================
+   THEMED DIALOGS (mlConfirm / mlAlert)
+   ============================================================ */
+.ml-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 18, 12, 0);
+  backdrop-filter: blur(0px);
+  transition: background 0.22s ease, backdrop-filter 0.22s ease;
+}
+.ml-dialog-backdrop.show {
+  background: rgba(15, 18, 12, 0.55);
+  backdrop-filter: blur(3px);
+}
+.ml-dialog {
+  background: var(--surface);
+  color: var(--dark);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--card-shadow-lg);
+  max-width: 380px;
+  width: 100%;
+  padding: 26px 24px 20px;
+  text-align: center;
+  transform: translateY(14px) scale(0.94);
+  opacity: 0;
+  transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+}
+.ml-dialog-backdrop.show .ml-dialog {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+.ml-dialog-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  margin: 0 auto 14px;
+}
+.ml-dialog-icon-primary {
+  background: var(--primary-light);
+  color: var(--primary-contrast);
+  animation: dialog-pop 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.ml-dialog-icon-danger {
+  background: rgba(220, 53, 69, 0.12);
+  color: #dc3545;
+  animation: dialog-pop 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+[data-bs-theme='dark'] .ml-dialog-icon-danger {
+  color: #f2a0a8;
+}
+.ml-dialog-title {
+  font-family: 'Playfair Display', serif;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.ml-dialog-message {
+  color: var(--muted);
+  font-size: 0.92rem;
+  margin-bottom: 18px;
+  overflow-wrap: break-word;
+}
+.ml-dialog-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+.ml-dialog-actions .btn {
+  min-width: 110px;
+}
+@keyframes dialog-pop {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
 
 /* ============================================================
    FRIENDLY FORM ERRORS (why / what / how to fix)

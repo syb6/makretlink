@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Farmer;
 
 use App\Http\Controllers\Controller;
 use App\Models\FarmerMarket;
+use App\Models\FarmerProfile;
 use App\Models\FarmerReview;
 use App\Models\Market;
 use App\Models\MarketSchedule;
@@ -16,9 +17,36 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
+    /**
+     * The signed-in farmer's profile row, created (or restored) on first use.
+     *
+     * Profile screens assumed the row always exists — a farmer whose profile
+     * was never created (or was soft-deleted) crashed the dashboard and made
+     * the stall profile impossible to update. withTrashed + firstOrCreate
+     * repairs both cases without violating the unique user_id constraint.
+     */
+    private function currentFarmer(): FarmerProfile
+    {
+        $farmer = FarmerProfile::withTrashed()->firstOrCreate(
+            ['user_id' => Auth::id()],
+            [
+                'business_name' => Auth::user()->name."'s Stall",
+                'contact_person' => Auth::user()->name,
+                'address' => '',
+                'approval_status' => 'pending',
+            ]
+        );
+
+        if ($farmer->trashed()) {
+            $farmer->restore();
+        }
+
+        return $farmer;
+    }
+
     public function index()
     {
-        $farmer = Auth::user()->farmerProfile;
+        $farmer = $this->currentFarmer();
         $farmerMarketIds = FarmerMarket::where('farmer_id', $farmer->id)->pluck('id');
 
         $base = Order::whereIn('farmer_market_id', $farmerMarketIds);
@@ -41,12 +69,12 @@ class DashboardController extends Controller
 
     public function editProfile()
     {
-        return view('farmer.profile', ['farmer' => Auth::user()->farmerProfile->load('user')]);
+        return view('farmer.profile', ['farmer' => $this->currentFarmer()->load('user')]);
     }
 
     public function stalls()
     {
-        $farmer = Auth::user()->farmerProfile->load('user');
+        $farmer = $this->currentFarmer()->load('user');
 
         $stalls = FarmerMarket::with(['market', 'schedules'])
             ->where('farmer_id', $farmer->id)
@@ -75,7 +103,7 @@ class DashboardController extends Controller
 
     public function updateProfile(Request $request)
     {
-        $farmer = Auth::user()->farmerProfile;
+        $farmer = $this->currentFarmer();
 
         $data = $request->validate([
             'business_name' => ['required', 'string', 'max:150'],
@@ -100,7 +128,7 @@ class DashboardController extends Controller
 
     public function replyReview(Request $request, FarmerReview $review)
     {
-        abort_unless($review->farmer_id === Auth::user()->farmerProfile->id, 403);
+        abort_unless($review->farmer_id === $this->currentFarmer()->id, 403);
 
         $data = $request->validate(['farmer_reply' => ['required', 'string', 'max:1000']]);
 
@@ -128,7 +156,7 @@ class DashboardController extends Controller
             'end_time' => ['nullable', 'date_format:H:i', 'after:start_time'],
         ]);
 
-        $farmer = Auth::user()->farmerProfile;
+        $farmer = $this->currentFarmer();
 
         abort_unless($farmer->isApproved(), 403, 'Your stall must be approved by an administrator first.');
 
@@ -166,7 +194,7 @@ class DashboardController extends Controller
 
     public function toggleStall(FarmerMarket $stall)
     {
-        abort_unless($stall->farmer_id === Auth::user()->farmerProfile->id, 403);
+        abort_unless($stall->farmer_id === $this->currentFarmer()->id, 403);
 
         $stall->update(['status' => $stall->status === 'active' ? 'inactive' : 'active']);
 
@@ -175,7 +203,7 @@ class DashboardController extends Controller
 
     public function updateStallSchedule(Request $request, FarmerMarket $stall)
     {
-        abort_unless($stall->farmer_id === Auth::user()->farmerProfile->id, 403);
+        abort_unless($stall->farmer_id === $this->currentFarmer()->id, 403);
 
         $data = $request->validate([
             'day_of_week' => ['required', 'integer', 'between:0,6'],

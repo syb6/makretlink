@@ -25,9 +25,16 @@ class StockController extends Controller
 
     public function index()
     {
-        $weekStart = request()->query('week')
-            ? Carbon::parse(request()->query('week'))->startOfWeek(Carbon::SUNDAY)
-            : now()->startOfWeek(Carbon::SUNDAY);
+        // week param is parsed defensively: garbage input falls back to the
+        // current week instead of throwing a Carbon parse exception.
+        $week = request()->query('week');
+        try {
+            $weekStart = $week
+                ? Carbon::parse($week)->startOfWeek(Carbon::SUNDAY)
+                : now()->startOfWeek(Carbon::SUNDAY);
+        } catch (\Throwable) {
+            $weekStart = now()->startOfWeek(Carbon::SUNDAY);
+        }
 
         $stocks = WeeklyStock::with(['product', 'farmerMarket.market'])
             ->whereIn('farmer_market_id', $this->myFarmerMarketIds())
