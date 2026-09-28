@@ -52,10 +52,8 @@
             </div>
 
             <hr class="my-4">
-            <div class="small text-muted text-center lh-lg">
-                <strong>Demo accounts</strong> (password: <code>password</code>)<br>
-                admin@marketlink.test · farmer1@marketlink.test · customer1@marketlink.test
-            </div>
+            <div class="text-center small text-muted">
+                &copy; {{ date('Y') }} MarketLink. All rights reserved.
         </div>
     </div>
 </div>
