@@ -14,11 +14,15 @@ class UserController extends Controller
         $role = $request->query('role');
         $status = $request->query('status');
         $search = $request->query('q');
+        // "approval" filters the farmer-profile application status (pending /
+        // approved / rejected), distinct from the user account status.
+        $approval = $request->query('approval');
 
         $users = User::query()
             ->with(['farmerProfile', 'customerProfile'])
             ->when($role, fn ($q) => $q->where('role', $role))
             ->when($status, fn ($q) => $q->where('status', $status))
+            ->when($approval, fn ($q) => $q->whereHas('farmerProfile', fn ($fp) => $fp->where('approval_status', $approval)))
             ->when($search, fn ($q) => $q->where(fn ($w) => $w
                 ->where('name', 'like', "%{$search}%")
                 ->orWhere('email', 'like', "%{$search}%")))
@@ -30,6 +34,7 @@ class UserController extends Controller
             'users' => $users,
             'role' => $role,
             'status' => $status,
+            'approval' => $approval,
             'search' => $search,
         ]);
     }

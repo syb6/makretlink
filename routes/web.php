@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AnnouncementController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\FeedbackController;
 use App\Http\Controllers\Admin\MarketController as AdminMarketController;
 use App\Http\Controllers\Admin\ModerationController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
@@ -183,6 +184,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::post('/categories', [CategoryController::class, 'store'])->name('admin.categories.store');
     Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('admin.categories.update');
     Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('admin.categories.destroy');
+
+    Route::get('/feedback', [FeedbackController::class, 'index'])->name('admin.feedback');
+    Route::post('/feedback/{message}/toggle-read', [FeedbackController::class, 'toggleRead'])->name('admin.feedback.toggleRead');
+    Route::delete('/feedback/{message}', [FeedbackController::class, 'destroy'])->name('admin.feedback.destroy');
 
     Route::get('/moderation', [ModerationController::class, 'index'])->name('admin.moderation');
     Route::post('/moderation/product/{product}', [ModerationController::class, 'toggleProduct'])->name('admin.moderation.product');

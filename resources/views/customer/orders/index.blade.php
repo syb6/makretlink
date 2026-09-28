@@ -33,6 +33,13 @@
                                 <td class="fw-semibold">Rs {{ number_format($order->total_amount, 2) }}</td>
                                 <td><span class="status-pill status-{{ $order->status }}">{{ str_replace('_', ' ', $order->status) }}</span></td>
                                 <td class="text-end">
+                                    @if ($order->status === 'completed')
+                                        @if ($order->product_reviews_exists || $order->farmer_reviews_exists)
+                                            <span class="badge badge-soft me-1">Reviewed ✓</span>
+                                        @else
+                                            <a href="{{ route('orders.show', $order) }}" class="btn btn-sm btn-ml me-1"><i class="bi bi-star me-1"></i>Rate order</a>
+                                        @endif
+                                    @endif
                                     <a href="{{ route('orders.show', $order) }}" class="btn btn-sm btn-outline-ml">Details</a>
                                 </td>
                             </tr>

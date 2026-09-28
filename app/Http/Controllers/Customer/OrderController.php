@@ -19,6 +19,7 @@ class OrderController extends Controller
     public function index()
     {
         $orders = Order::with(['items.product', 'pickupSlot', 'farmerMarket.farmer.user'])
+            ->withExists(['productReviews', 'farmerReviews'])
             ->where('customer_id', Auth::user()->customerProfile->id)
             ->latest('placed_at')
             ->paginate(10);

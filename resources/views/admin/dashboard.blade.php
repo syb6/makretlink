@@ -77,7 +77,7 @@
                                 <strong class="d-block small">{{ $pendingFarmers }} farmer{{ $pendingFarmers === 1 ? '' : 's' }} waiting</strong>
                                 <span class="small text-muted">Review new stall applications before they can list products.</span>
                             </div>
-                            <a href="{{ route('admin.users', ['role' => 'farmer']) }}?status=pending" class="btn btn-ml w-100">Review applications</a>
+                            <a href="{{ route('admin.users', ['role' => 'farmer', 'approval' => 'pending']) }}" class="btn btn-ml w-100">Review applications</a>
                             <hr class="my-3">
                             <div class="d-grid gap-2">
                                 <a href="{{ route('admin.markets') }}" class="btn btn-sm btn-outline-ml"><i class="bi bi-shop me-1"></i> Manage markets</a>

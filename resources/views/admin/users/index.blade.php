@@ -16,19 +16,43 @@
                     <p class="text-muted mb-0">Approve farmer applications and manage account status.</p>
                 </div>
                 <form method="GET" class="d-flex gap-2 flex-wrap">
+                    <input type="hidden" name="role" value="{{ $role }}">
+                    <input type="hidden" name="status" value="{{ $status }}">
+                    <input type="hidden" name="approval" value="{{ $approval }}">
                     <input type="text" name="q" class="form-control form-control-sm" placeholder="Search name or email..." value="{{ $search }}">
-                    <select name="role" class="form-select form-select-sm w-auto">
-                        <option value="">All roles</option>
-                        <option value="admin" {{ $role === 'admin' ? 'selected' : '' }}>Admins</option>
-                        <option value="farmer" {{ $role === 'farmer' ? 'selected' : '' }}>Farmers</option>
-                        <option value="customer" {{ $role === 'customer' ? 'selected' : '' }}>Customers</option>
-                    </select>
-                    <select name="status" class="form-select form-select-sm w-auto">
-                        <option value="">All statuses</option>
-                        @foreach (['active', 'inactive', 'suspended'] as $s)
-                            <option value="{{ $s }}" {{ $status === $s ? 'selected' : '' }}>{{ ucfirst($s) }}</option>
-                        @endforeach
-                    </select>
+
+                    {{-- Bootstrap dropdowns instead of native <select> popups:
+                         the OS-rendered select list cannot be themed, these can. --}}
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-ml dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {{ ['admin' => 'Admins', 'farmer' => 'Farmers', 'customer' => 'Customers'][$role] ?? 'All roles' }}
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><button type="button" class="dropdown-item filter-option" data-name="role" data-value="">All roles</button></li>
+                            <li><button type="button" class="dropdown-item filter-option" data-name="role" data-value="admin">Admins</button></li>
+                            <li><button type="button" class="dropdown-item filter-option" data-name="role" data-value="farmer">Farmers</button></li>
+                            <li><button type="button" class="dropdown-item filter-option" data-name="role" data-value="customer">Customers</button></li>
+                        </ul>
+                    </div>
+
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-ml dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {{ ['pending' => 'Pending approval', 'approved' => 'Approved', 'rejected' => 'Rejected'][$approval] ?? ($status ? ucfirst($status) : 'All statuses') }}
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><h6 class="dropdown-header">Account status</h6></li>
+                            <li><button type="button" class="dropdown-item filter-option" data-name="status" data-value="">All statuses</button></li>
+                            @foreach (['active', 'inactive', 'suspended'] as $s)
+                                <li><button type="button" class="dropdown-item filter-option" data-name="status" data-value="{{ $s }}">{{ ucfirst($s) }}</button></li>
+                            @endforeach
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">Farmer application</h6></li>
+                            <li><button type="button" class="dropdown-item filter-option" data-name="approval" data-value="pending">Pending approval</button></li>
+                            <li><button type="button" class="dropdown-item filter-option" data-name="approval" data-value="approved">Approved</button></li>
+                            <li><button type="button" class="dropdown-item filter-option" data-name="approval" data-value="rejected">Rejected</button></li>
+                        </ul>
+                    </div>
+
                     <button class="btn btn-ml btn-sm">Filter</button>
                 </form>
             </div>
@@ -133,3 +157,15 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    // Filter dropdowns: copy the picked option into the matching hidden input.
+    document.querySelectorAll('.filter-option').forEach(function (option) {
+        option.addEventListener('click', function () {
+            var input = document.querySelector('form input[name="' + option.dataset.name + '"]');
+            if (input) input.value = option.dataset.value;
+        });
+    });
+</script>
+@endpush

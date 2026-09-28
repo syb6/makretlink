@@ -27,6 +27,13 @@
                             </div>
                         </div>
 
+                        @if ($order->status === 'completed' && (! $existingProductReview->count() || ! $existingFarmerReview))
+                            <div class="alert p-3 small mb-3" style="background: var(--primary-light); border-left: 3px solid var(--primary); color: var(--primary-contrast);">
+                                <i class="bi bi-star me-1"></i><strong>How was it?</strong>
+                                Glad your order made it — leave a rating for the items{{ $order->farmerMarket ? ' and the farmer' : '' }} below.
+                            </div>
+                        @endif
+
                         <div class="row g-3 small">
                             <div class="col-md-6">
                                 <div class="text-muted">Pickup at</div>

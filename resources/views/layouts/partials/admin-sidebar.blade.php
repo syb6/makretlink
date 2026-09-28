@@ -17,6 +17,10 @@
             <li><a href="{{ route('admin.markets') }}" class="{{ request()->routeIs('admin.markets') ? 'active' : '' }}"><i class="bi bi-shop"></i> <span>Markets</span></a></li>
             <li><a href="{{ route('admin.categories') }}" class="{{ request()->routeIs('admin.categories') ? 'active' : '' }}"><i class="bi bi-tags"></i> <span>Categories</span></a></li>
             <li class="sidebar-section-title">System</li>
+            @php
+                $unreadFeedback = \App\Models\FeedbackMessage::whereNull('read_at')->count();
+            @endphp
+            <li><a href="{{ route('admin.feedback') }}" class="{{ request()->routeIs('admin.feedback*') ? 'active' : '' }}"><i class="bi bi-inbox"></i> <span>Feedback</span>@if ($unreadFeedback)<span class="badge rounded-pill bg-danger ms-1">{{ $unreadFeedback }}</span>@endif</a></li>
             <li><a href="{{ route('admin.moderation') }}" class="{{ request()->routeIs('admin.moderation') ? 'active' : '' }}"><i class="bi bi-shield-exclamation"></i> <span>Moderation</span></a></li>
             <li><a href="{{ route('admin.reports') }}" class="{{ request()->routeIs('admin.reports') ? 'active' : '' }}"><i class="bi bi-bar-chart-line"></i> <span>Reports</span></a></li>
             <li><a href="{{ route('admin.announcements') }}" class="{{ request()->routeIs('admin.announcements') ? 'active' : '' }}"><i class="bi bi-megaphone"></i> <span>Announcements</span></a></li>
