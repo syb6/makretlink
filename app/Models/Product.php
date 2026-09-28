@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\ImageLibrary;
 use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -34,33 +35,15 @@ class Product extends Model
     }
 
     /**
-     * Placeholder image key derived from the product's category.
-     * Falls back to a stable per-product pick so results never look random.
-     */
-    public function getPlaceholderKeyAttribute(): string
-    {
-        $map = [
-            'vegetables' => 'vegetables',
-            'fruits' => 'fruits',
-            'dairy-eggs' => 'dairy-eggs',
-            'baked-goods' => 'baked-goods',
-            'herbs-greens' => 'herbs-greens',
-            'honey-preserves' => 'honey-preserves',
-        ];
-
-        return $map[$this->category?->slug] ?? 'general';
-    }
-
-    /**
-     * URL to the real uploaded image, or a deterministic local placeholder.
-     * Local SVGs avoid external requests (SRS: content licensing constraints)
-     * and keep the UI identical in light and dark mode.
+     * URL to the product's picture straight from its `image` column
+     * (a path inside public/images/placeholders/product-images/),
+     * falling back to the category's picture, then the generic one.
      */
     public function getImageUrlAttribute(): string
     {
-        return $this->image
-            ? asset('storage/'.$this->image)
-            : asset('images/placeholders/'.$this->placeholder_key.'.png');
+        return ImageLibrary::url('product', $this->image)
+            ?? $this->category?->image_url
+            ?? asset('images/placeholders/general.png');
     }
 
     public function farmer(): BelongsTo

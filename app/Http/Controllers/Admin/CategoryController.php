@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
-use App\Services\ProfileImageService;
+use App\Services\ImageLibrary;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -27,7 +27,7 @@ class CategoryController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $data['image'] = app(ProfileImageService::class)->replace($request->file('image'), null, 'category');
+            $data['image'] = ImageLibrary::replace($request->file('image'), 'category', null);
         }
 
         $data['slug'] = Str::slug($data['name']);
@@ -51,7 +51,7 @@ class CategoryController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $data['image'] = app(ProfileImageService::class)->replace($request->file('image'), $category->image, 'category');
+            $data['image'] = ImageLibrary::replace($request->file('image'), 'category', $category->image);
         }
 
         $category->update($data);

@@ -20,6 +20,7 @@ class MarketSeeder extends Seeder
         $markets = [
             [
                 'name' => 'Green Valley Community Market',
+                'image' => 'market-images/green-villey-community-market.jpeg',
                 'address' => 'University Road, Gulshan-e-Iqbal, Karachi',
                 'latitude' => 24.9197000,
                 'longitude' => 67.0990000,
@@ -28,6 +29,7 @@ class MarketSeeder extends Seeder
             ],
             [
                 'name' => 'Riverside Farmers Exchange',
+                'image' => 'market-images/riverside-farmers-exchange-market.jpeg',
                 'address' => 'Boat Basin, Clifton, Karachi',
                 'latitude' => 24.8100000,
                 'longitude' => 67.0300000,
@@ -36,6 +38,7 @@ class MarketSeeder extends Seeder
             ],
             [
                 'name' => 'Old Town Morning Market',
+                'image' => 'market-images/old-town-morning-market.jpeg',
                 'address' => 'Empress Market, Saddar, Karachi',
                 'latitude' => 24.8560000,
                 'longitude' => 67.0290000,
@@ -44,6 +47,7 @@ class MarketSeeder extends Seeder
             ],
             [
                 'name' => 'Port Gardens Weekend Market',
+                'image' => 'market-images/port-garden-weekend-market.jpeg',
                 'address' => 'KPT Gardens, Keamari, Karachi',
                 'latitude' => 24.8430000,
                 'longitude' => 66.9890000,

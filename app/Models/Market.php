@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+use App\Services\ImageLibrary;
+
 class Market extends Model
 {
     /** @use HasFactory<MarketFactory> */
@@ -24,12 +26,15 @@ class Market extends Model
         'status',
     ];
 
-    /** Market photo if uploaded, otherwise a fixed local fallback. */
+    /**
+     * URL to the market's picture straight from its `image` column
+     * (a path inside public/images/placeholders/market-images/),
+     * falling back to the generic market placeholder.
+     */
     public function getImageUrlAttribute(): string
     {
-        return $this->image
-            ? asset('storage/'.$this->image)
-            : asset('images/placeholders/market.png');
+        return ImageLibrary::url('market', $this->image)
+            ?? asset('images/placeholders/market.png');
     }
 
     /**

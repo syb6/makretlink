@@ -48,11 +48,11 @@
                     </select>
                 </div>
                 <div class="col-md-1 col-3">
-                    <label class="form-label small fw-semibold mb-1">Min $</label>
+                    <label class="form-label small fw-semibold mb-1">Min Rs</label>
                     <input type="number" step="0.01" name="min_price" class="form-control form-control-sm" value="{{ $filters['min'] }}">
                 </div>
                 <div class="col-md-1 col-3">
-                    <label class="form-label small fw-semibold mb-1">Max $</label>
+                    <label class="form-label small fw-semibold mb-1">Max Rs</label>
                     <input type="number" step="0.01" name="max_price" class="form-control form-control-sm" value="{{ $filters['max'] }}">
                 </div>
                 <div class="col-md-1 col-6 d-grid">

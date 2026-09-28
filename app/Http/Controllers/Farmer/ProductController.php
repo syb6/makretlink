@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Farmer;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
+use App\Services\ImageLibrary;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -46,9 +47,7 @@ class ProductController extends Controller
         $data['slug'] = $this->uniqueSlug($data['name'], $this->farmerId());
 
         if ($request->hasFile('image')) {
-            $data['image'] = app(ProfileImageService::class)->replace(
-                $request->file('image'), null, 'product'
-            );
+            $data['image'] = ImageLibrary::replace($request->file('image'), 'product', null);
         }
 
         Product::create($data);
@@ -71,9 +70,7 @@ class ProductController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $data['image'] = app(ProfileImageService::class)->replace(
-                $request->file('image'), $product->image, 'product'
-            );
+            $data['image'] = ImageLibrary::replace($request->file('image'), 'product', $product->image);
         }
 
         $product->update($data);

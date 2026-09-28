@@ -134,7 +134,7 @@
                                     </div>
                                     <div class="col-12">
                                         <label class="form-label small fw-semibold">Market picture</label>
-                                        @include('components.image-picker', ['name' => 'image', 'id' => 'image-'.$market->id, 'label' => 'market picture', 'hint' => 'JPG, PNG or WebP · max 2 MB · wide photos look best', 'existing' => $market->image, 'placeholder' => 'bi-shop'])
+                                        @include('components.image-picker', ['name' => 'image', 'id' => 'image-'.$market->id, 'label' => 'market picture', 'hint' => 'JPG, PNG or WebP · max 2 MB · wide photos look best', 'existing' => $market->image, 'type' => 'market', 'placeholder' => 'bi-shop'])
                                     </div>
                                     <div class="col-12">
                                         <label class="form-label small fw-semibold">Description</label>

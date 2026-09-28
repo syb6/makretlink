@@ -1319,6 +1319,27 @@ a.product-title:hover {
     object-fit: cover;
     background: var(--surface-2);
 }
+
+/* ---------- Dynamic card images: soft placeholder, fade-in on load ---------- */
+.card-img {
+    background:
+        linear-gradient(
+            135deg,
+            color-mix(in srgb, var(--primary-light) 60%, var(--surface)),
+            var(--surface-2)
+        );
+    opacity: 0;
+    transition: opacity 0.45s ease;
+}
+.card-img.is-loaded {
+    opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+    .card-img {
+        opacity: 1;
+        transition: none;
+    }
+}
 .promo-banner-section {
     background-color: var(--primary);
     color: #fff;
@@ -2705,7 +2726,7 @@ a.product-title:hover {
         gap: 30px;
     }
 }
-@media (max-width: 575.98px) {
+@media (max-width: 575.98px) {D
     .hero-title {
         font-size: 2rem;
     }

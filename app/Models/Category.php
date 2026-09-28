@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\ImageLibrary;
 use Database\Factories\CategoryFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -19,10 +20,14 @@ class Category extends Model
         'status',
     ];
 
-    /** Uploaded category photo, else null (UI falls back to themed SVG). */
-    public function getImageUrlAttribute(): ?string
+    /**
+     * URL to the category's picture straight from its `image` column
+     * (a path inside public/images/placeholders/category-images/).
+     */
+    public function getImageUrlAttribute(): string
     {
-        return $this->image ? asset('storage/'.$this->image) : null;
+        return ImageLibrary::url('category', $this->image)
+            ?? asset('images/placeholders/general.png');
     }
 
     public function products(): HasMany

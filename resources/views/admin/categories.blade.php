@@ -16,10 +16,12 @@
             </div>
 
             <div class="dashboard-card mb-4">
-                <div class="dashboard-card-header"><h3 class="h5 mb-0"><i class="bi bi-plus-circle text-success me-2"></i>Add Category</h3></div>
+                <div class="dashboard-card-header">
+                    <h3 class="h5 mb-0"><i class="bi bi-plus-circle text-success me-2"></i>Add Category</h3>
+                </div>
                 <div class="dashboard-card-body">
                     <x-form-errors />
-<form method="POST" action="{{ route('admin.categories.store') }}" enctype="multipart/form-data" class="row g-3 align-items-end">
+                    <form method="POST" action="{{ route('admin.categories.store') }}" enctype="multipart/form-data" class="row g-3 align-items-end">
                         @csrf
                         <div class="col-lg-4 col-md-5">
                             <label class="form-label small fw-semibold">Name</label>
@@ -46,7 +48,15 @@
             <div class="dashboard-card flush">
                 <div class="table-responsive">
                     <table class="table table-ml align-middle mb-0">
-                        <thead><tr><th>Name</th><th>Slug</th><th>Products</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Slug</th>
+                                <th>Products</th>
+                                <th>Status</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
                         <tbody>
                             @forelse ($categories as $category)
                                 <tr>
@@ -64,7 +74,9 @@
                                     </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="5" class="text-center text-muted py-4">No categories yet.</td></tr>
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-4">No categories yet.</td>
+                                </tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -81,15 +93,16 @@
     </div>
 </div>
 
+{{-- Modals moved outside of .app-container to fix z-index and flex layout breakages --}}
 @foreach ($categories as $category)
-    <div class="modal fade" id="editCategory-{{ $category->id }}" tabindex="-1">
+    <div class="modal fade" id="editCategory-{{ $category->id }}" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <form method="POST" action="{{ route('admin.categories.update', $category) }}" enctype="multipart/form-data" class="modal-content">
                 @csrf
                 @method('PUT')
                 <div class="modal-header">
                     <h5 class="modal-title">Edit {{ $category->name }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-2">
@@ -98,7 +111,7 @@
                     </div>
                     <div class="mb-2">
                         <label class="form-label small fw-semibold">Picture</label>
-                        @include('components.image-picker', ['name' => 'image', 'id' => 'category-'.$category->id, 'label' => 'category picture', 'hint' => 'Square, max 2 MB', 'existing' => $category->image, 'placeholder' => 'bi-tags'])
+                        @include('components.image-picker', ['name' => 'image', 'id' => 'category-'.$category->id, 'label' => 'category picture', 'hint' => 'Square, max 2 MB', 'existing' => $category->image, 'type' => 'category', 'placeholder' => 'bi-tags'])
                     </div>
                     <div>
                         <label class="form-label small fw-semibold">Status</label>

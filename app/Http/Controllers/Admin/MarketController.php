@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Market;
 use App\Models\MarketSchedule;
-use App\Services\ProfileImageService;
+use App\Services\ImageLibrary;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 
@@ -23,7 +23,7 @@ class MarketController extends Controller
         $data = $this->validated($request);
 
         if ($request->hasFile('image')) {
-            $data['image'] = app(ProfileImageService::class)->replace($request->file('image'), null, 'market');
+            $data['image'] = ImageLibrary::replace($request->file('image'), 'market', null);
         }
         $data['slug'] = null; // not used by schema; kept for clarity
 
@@ -39,7 +39,7 @@ class MarketController extends Controller
         $data = $this->validated($request);
 
         if ($request->hasFile('image')) {
-            $data['image'] = app(ProfileImageService::class)->replace($request->file('image'), $market->image, 'market');
+            $data['image'] = ImageLibrary::replace($request->file('image'), 'market', $market->image);
         }
 
         $market->update($data);

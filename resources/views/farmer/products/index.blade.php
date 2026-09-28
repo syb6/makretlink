@@ -156,7 +156,7 @@
                         </div>
                         <div class="mb-2">
                             <label class="form-label small fw-semibold">Product picture</label>
-                            @include('components.image-picker', ['name' => 'image', 'id' => 'image-'.$product->id, 'label' => 'product picture', 'existing' => $product->image, 'placeholder' => 'bi-basket2'])
+                            @include('components.image-picker', ['name' => 'image', 'id' => 'image-'.$product->id, 'label' => 'product picture', 'existing' => $product->image, 'type' => 'product', 'placeholder' => 'bi-basket2'])
                         </div>
                         <div>
                             <label class="form-label small fw-semibold">Status</label>

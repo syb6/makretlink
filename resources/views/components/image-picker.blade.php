@@ -4,8 +4,13 @@
     $hint = $hint ?? 'JPG, PNG or WebP · max 2 MB · square works best';
     $placeholder = $placeholder ?? 'bi-image';
     $existing = $existing ?? null;
+    // $type (product | category | market) resolves the stored image path
+    // through ImageLibrary — the same resolver the models use on the UI.
+    $type = $type ?? null;
     $src = $existing
-        ? (str_starts_with($existing, 'http') || str_starts_with($existing, asset('')) ? $existing : asset('storage/' . $existing))
+        ? ($type
+            ? \App\Services\ImageLibrary::url($type, $existing)
+            : (str_starts_with($existing, 'http') || str_starts_with($existing, asset('')) ? $existing : asset('storage/' . $existing)))
         : null;
 @endphp
 <div class="image-picker" data-image-picker>
