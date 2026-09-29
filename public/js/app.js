@@ -141,7 +141,8 @@
     var THEME_KEY = 'ml-theme';
 
     function applyTheme(theme) {
-        document.documentElement.setAttribute('data-bs-theme', theme);
+        var el = document.documentElement;
+        el.setAttribute('data-bs-theme', theme);
         var icon = document.getElementById('themeIcon');
         if (icon) {
             // Moon shown in light mode (click -> dark), sun in dark mode
@@ -149,7 +150,20 @@
         }
     }
 
-    applyTheme(document.documentElement.getAttribute('data-bs-theme') || 'light');
+    /**
+     * Theme switch with a brief cross-fade: .theme-anim on <html> enables
+     * color transitions for one moment, then is removed so regular page
+     * updates never transition (per UX best practice). Skipped when the
+     * user prefers reduced motion.
+     */
+    function applyThemeAnimated(next) {
+        var el = document.documentElement;
+        applyTheme(next);
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        el.classList.add('theme-anim');
+        clearTimeout(applyThemeAnimated._t);
+        applyThemeAnimated._t = setTimeout(function () { el.classList.remove('theme-anim'); }, 400);
+    }
 
     /* =========================================================
        2) + 3) DOM-ready behaviours
@@ -158,17 +172,61 @@
 
     document.addEventListener('DOMContentLoaded', function () {
 
-        /* ---------- Theme toggle ---------- */
+        /* ---------- Theme toggle (with smooth cross-fade) ---------- */
         var themeToggle = document.getElementById('themeToggle');
         if (themeToggle) {
             themeToggle.addEventListener('click', function () {
                 var next = document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
                 localStorage.setItem(THEME_KEY, next);
-                applyTheme(next);
+                applyThemeAnimated(next);
             });
         }
 
-        /* ---------- Auto-hide flash alerts ---------- */
+        /* ---------- Custom ml-alert toasts ----------
+           Auto-dismiss with a visible countdown; hovering an alert pauses
+           its timer so slow readers never lose a message. Alerts carrying
+           data-ttl="0" (validation summaries) stay until dismissed. */
+        document.querySelectorAll('[data-ml-alert]').forEach(function (alertEl) {
+            if (alertEl.__mlAlertBound) return;
+            alertEl.__mlAlertBound = true;
+
+            var ttl = parseInt(alertEl.dataset.ttl || '0', 10);
+            var timer = null;
+            var remaining = ttl;
+            var startedAt = 0;
+
+            var dismiss = function () {
+                alertEl.classList.add('leaving');
+                setTimeout(function () {
+                    var stack = alertEl.parentElement;
+                    alertEl.remove();
+                    // Tidy up empty stacks so no phantom gap remains.
+                    if (stack && stack.classList.contains('ml-alert-stack') && !stack.children.length) {
+                        stack.remove();
+                    }
+                }, 320);
+            };
+
+            alertEl.querySelector('.ml-alert-close')?.addEventListener('click', dismiss);
+
+            if (ttl > 0) {
+                var start = function () {
+                    startedAt = Date.now();
+                    timer = setTimeout(dismiss, remaining);
+                };
+                var pause = function () {
+                    if (!timer) return;
+                    clearTimeout(timer);
+                    timer = null;
+                    remaining -= Date.now() - startedAt;
+                };
+                alertEl.addEventListener('mouseenter', pause);
+                alertEl.addEventListener('mouseleave', start);
+                start();
+            }
+        });
+
+        /* ---------- Legacy auto-hide alerts (any remaining alert-auto-hide) ---------- */
         document.querySelectorAll('.alert-auto-hide').forEach(function (el) {
             setTimeout(function () {
                 try {
@@ -185,6 +243,27 @@
                 if (form.__mlConfirmed) { form.__mlConfirmed = false; return; }
                 e.preventDefault();
                 mlConfirm(form.getAttribute('data-confirm'), { danger: true }).then(function (ok) {
+                    if (!ok) return;
+                    form.__mlConfirmed = true;
+                    if (typeof form.requestSubmit === 'function') { form.requestSubmit(); } else { form.submit(); }
+                });
+            });
+        });
+
+        /* ---------- Themed logout confirmation ---------- */
+        // Same promise-based dialog as destructive actions; not dangerous, so
+        // no red chrome — just a friendly "see you soon" before signing out.
+        document.querySelectorAll('form[action*="logout"]').forEach(function (form) {
+            if (form.dataset.logoutBound) return; // idempotent
+            form.dataset.logoutBound = '1';
+            form.addEventListener('submit', function (e) {
+                if (form.__mlConfirmed) { form.__mlConfirmed = false; return; }
+                e.preventDefault();
+                mlConfirm('Sign out of MarketLink?', {
+                    title: 'See you soon!',
+                    danger: false,
+                    okLabel: 'Sign out',
+                }).then(function (ok) {
                     if (!ok) return;
                     form.__mlConfirmed = true;
                     if (typeof form.requestSubmit === 'function') { form.requestSubmit(); } else { form.submit(); }
@@ -293,13 +372,27 @@
 
         if (reduced) return; // everything below is decorative motion
 
+        /* ---------- Page-enter fade ---------- */
+        // Soft fade-up on every fresh paint. Skipped on bfcache restores
+        // (back/forward must feel instant) — pageshow clears it there.
+        document.body.classList.add('page-enter');
+        window.addEventListener('pageshow', function () {
+            document.body.classList.remove('page-enter');
+        });
+
         document.documentElement.classList.add('js-anim');
 
         /* ---------- Scroll-reveal via IntersectionObserver ---------- */
         var revealSelector = [
             '.stat-card', '.product-card', '.market-card', '.card-ml',
             '.dashboard-card', '.feature-card', '.step-card', '.category-card',
-            '.order-item', '.metric-box', '.auth-card'
+            '.order-item', '.metric-box', '.auth-card',
+            /* broader coverage: content sections across public + dashboard pages */
+            '.notif-item', '.breadcrumb', '.page-banner .container',
+            '.market-availability', '.empty',
+            /* home refresh: section intros + banners opt in explicitly */
+            '.section-head', '.promo-content', '.promo-img-box', '.cta-box > h2',
+            '.cta-box > p', '.cta-btns'
         ].join(', ');
 
         var revealEls = Array.prototype.slice.call(document.querySelectorAll(revealSelector))
@@ -368,6 +461,23 @@
             setTimeout(function () { ink.remove(); }, 600);
         });
 
+        /* ---------- Subtle 3D tilt on the hero basket ---------- */
+        // Desktop, fine pointers only. Runs on the <img> while the float
+        // animation runs on the wrapper's <picture> — the two compose.
+        var tiltWrap = document.querySelector('.hero-image-wrapper');
+        var tiltImg = tiltWrap ? tiltWrap.querySelector('.hero-img') : null;
+        if (tiltWrap && tiltImg && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+            tiltWrap.addEventListener('mousemove', function (e) {
+                var r = tiltWrap.getBoundingClientRect();
+                var x = (e.clientX - r.left) / r.width - 0.5;
+                var y = (e.clientY - r.top) / r.height - 0.5;
+                tiltImg.style.transform = 'perspective(700px) rotateY(' + (x * 7).toFixed(2) + 'deg) rotateX(' + (-y * 7).toFixed(2) + 'deg)';
+            });
+            tiltWrap.addEventListener('mouseleave', function () {
+                tiltImg.style.transform = '';
+            });
+        }
+
         /* ---------- Stat number count-up ---------- */
         var countUp = function (el) {
             var target = parseFloat(el.dataset.target || '0');
@@ -432,37 +542,97 @@
         // Blade templates already set loading="lazy"; this catches any
         // below-fold image that slipped through (dynamic includes etc.).
         Array.prototype.forEach.call(document.images, function (img) {
-            if (img.loading || img.fetchPriority === 'high') return;
+            if (img.loading || img.getAttribute('fetchpriority') === 'high') return;
             var r = img.getBoundingClientRect();
             if (r.top > window.innerHeight && r.height >= 40) {
                 img.loading = 'lazy';
             }
         });
 
-        /* ---------- Page-leave skeleton (products & markets grids) ---------- */
-        // Those grids paint slowly on first load, so show a skeleton page
-        // as soon as the user follows a link to them.
-        var GRIDS = ['/products', '/markets'];
+        /* ---------- Page-leave skeletons, shaped per destination ---------- */
+        // Products/markets/farmers grids paint slowly on first load, so show
+        // a skeleton page the moment the user follows a link to them. Each
+        // destination gets its own layout mirror of the real page.
+        var GRIDS = ['/products', '/markets', '/farmers'];
         var overlay = null;
+
+        // Reusable fragment builders
+        var skelHead = function (label) {
+            return '<div class="skeleton-head"><span class="skeleton-dot"></span><span class="skeleton-dot" style="animation-delay:.15s"></span><span class="skeleton-dot" style="animation-delay:.3s"></span>' +
+                '<span style="margin-left:6px">' + label + '\u2026</span></div>';
+        };
+        var skelBanner = function () {
+            return '<div class="sk-banner"><div class="sk-banner-eyebrow"></div><div class="sk-banner-title"></div><div class="sk-banner-sub"></div></div>';
+        };
+        var skelProductCard = function (i) {
+            return '<div class="skeleton-card" style="--i:' + i + '">' +
+                '<div class="skeleton-block skeleton-img"></div>' +
+                '<div class="sk-chip"></div>' +
+                '<div class="skeleton-line w60"></div>' +
+                '<div class="skeleton-line w80"></div>' +
+                '<div class="sk-price-row"><div class="sk-price"></div><div class="sk-add"></div></div>' +
+                '</div>';
+        };
+        var skelMarketCard = function (i) {
+            return '<div class="skeleton-card" style="--i:' + i + '">' +
+                '<div class="skeleton-block skeleton-img"></div>' +
+                '<div class="skeleton-line w60"></div>' +
+                '<div class="skeleton-line w80"></div>' +
+                '<div class="sk-chip-row"><span class="sk-chip"></span><span class="sk-chip"></span><span class="sk-chip"></span></div>' +
+                '<div class="sk-foot"><div class="sk-price"></div><div class="sk-link"></div></div>' +
+                '</div>';
+        };
+        var skelFarmerCard = function (i) {
+            return '<div class="skeleton-card sk-farmer" style="--i:' + i + '">' +
+                '<div class="sk-farmer-head"><div class="sk-avatar"></div><div class="sk-farmer-id"><div class="skeleton-line w80" style="margin:0 0 8px"></div><div class="skeleton-line w60" style="margin:0"></div></div></div>' +
+                '<div class="skeleton-line"></div>' +
+                '<div class="skeleton-line w80"></div>' +
+                '<div class="sk-chip-row"><span class="sk-chip"></span><span class="sk-chip"></span></div>' +
+                '<div class="sk-btn"></div>' +
+                '</div>';
+        };
 
         var buildSkeleton = function (kind) {
             var el = document.createElement('div');
             el.className = 'skeleton-overlay';
             el.setAttribute('aria-hidden', 'true');
-            var label = kind === '/markets' ? 'Finding local markets' : 'Gathering fresh products';
-            var html = '<div class="skeleton-inner">' +
-                '<div class="skeleton-head"><span class="skeleton-dot"></span><span class="skeleton-dot" style="animation-delay:.15s"></span><span class="skeleton-dot" style="animation-delay:.3s"></span>' +
-                '<span style="margin-left:6px">' + label + '\u2026</span></div>' +
-                '<div class="skeleton-grid">';
-            for (var i = 0; i < 8; i++) {
-                html += '<div class="skeleton-card" style="--i:' + i + '">' +
-                    '<div class="skeleton-block skeleton-img"></div>' +
-                    '<div class="skeleton-line w60"></div>' +
-                    '<div class="skeleton-line"></div>' +
-                    '<div class="skeleton-line w40"></div>' +
-                    '</div>';
+            var html = '<div class="skeleton-inner">';
+
+            if (kind === '/products') {
+                // Products page: banner, filter card row, count row, 4-col grid.
+                html += skelHead('Gathering fresh products');
+                html += skelBanner();
+                html += '<div class="sk-filter">';
+                for (var f = 0; f < 6; f++) html += '<div class="sk-field"></div>';
+                html += '<div class="sk-btn sk-btn-go"></div></div>';
+                html += '<div class="sk-count-row"><div class="skeleton-line w40" style="margin:0"></div></div>';
+                html += '<div class="skeleton-grid sk-grid-4">';
+                for (var i = 0; i < 8; i++) html += skelProductCard(i);
+            } else if (kind === '/markets') {
+                // Markets page: banner, then sidebar cards + map, 2-col grid.
+                html += skelHead('Finding local markets');
+                html += skelBanner();
+                html += '<div class="sk-markets-layout">';
+                html += '<div class="sk-side">';
+                for (var s = 0; s < 2; s++) {
+                    html += '<div class="sk-side-card"><div class="skeleton-line w60" style="margin:0 0 10px"></div>';
+                    for (var b = 0; b < 2; b++) html += '<div class="sk-field" style="margin:8px 0"></div>';
+                    html += '<div class="sk-btn" style="margin-top:10px"></div></div>';
+                }
+                html += '<div class="sk-map"></div></div>';
+                html += '<div class="sk-side-main"><div class="skeleton-grid sk-grid-2">';
+                for (var m2 = 0; m2 < 4; m2++) html += skelMarketCard(m2);
+                html += '</div></div></div>';
+            } else {
+                // Farmers page: banner, centered search row, 3-col avatar cards.
+                html += skelHead('Meeting the growers');
+                html += skelBanner();
+                html += '<div class="sk-search"><div class="sk-field"></div><div class="sk-field"></div><div class="sk-btn"></div></div>';
+                html += '<div class="skeleton-grid sk-grid-3">';
+                for (var fa = 0; fa < 6; fa++) html += skelFarmerCard(fa);
             }
-            html += '</div></div>';
+
+            html += '</div>';
             el.innerHTML = html;
             return el;
         };

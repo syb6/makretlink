@@ -39,7 +39,7 @@
                     </div>
                 </div>
             @empty
-                <div class="col-12"><div class="alert alert-light border">No reviews yet.</div></div>
+                <div class="col-12"><div class="ml-note"><i class="bi bi-info-circle"></i>No reviews yet.</div></div>
             @endforelse
         </div>
 

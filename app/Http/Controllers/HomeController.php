@@ -63,6 +63,9 @@ class HomeController extends Controller
         }
 
         return view('home', [
+            // product_id => how many markets stock it — cards note "also at N more markets"
+            // so the same product listed per market doesn't read as a duplicate.
+            'marketCounts' => WeeklyStock::marketCountsFor($featuredStocks),
             'announcements' => $announcements,
             'featuredStocks' => $featuredStocks,
             'marketCount' => $stats['marketCount'],

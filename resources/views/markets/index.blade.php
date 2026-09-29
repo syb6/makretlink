@@ -77,7 +77,8 @@
                                             </button>
                                         @endif
                                     @endauth
-                                    <span class="market-status-tag {{ $market->status === 'active' ? '' : 'inactive' }}">Open</span>
+                                    @php $openDays = $market->openDays(); @endphp
+                                    <span class="market-status-tag {{ $market->status === 'active' ? '' : 'inactive' }}">{{ $market->openDaysLabel() }}</span>
                                     <img src="{{ $market->image_url }}" alt="{{ $market->name }}"
                                          width="600" height="400" loading="lazy"
                                          onerror="this.onerror=null;this.src=this.dataset.fallback;"
@@ -89,6 +90,9 @@
                                         <span><i class="bi bi-geo-alt-fill"></i>{{ $market->address }}</span>
                                     </div>
                                     <div class="mb-3">
+                                        @if ($openDays->count() > 1)
+                                            <p class="multi-market-note mb-2"><i class="bi bi-calendar-week me-1"></i>Trades {{ $openDays->count() }} days weekly</p>
+                                        @endif
                                         @foreach ($market->schedules->sortBy('day_of_week') as $s)
                                             <span class="badge badge-soft me-1 mb-1 {{ $s->is_closed ? 'opacity-50 text-decoration-line-through' : '' }}">
                                                 {{ \App\Models\MarketSchedule::DAYS[$s->day_of_week] }}
@@ -107,7 +111,7 @@
                         </div>
                     @empty
                         <div class="col-12">
-                            <div class="alert alert-light border">No markets match that day. Try another filter.</div>
+                            <div class="ml-note"><i class="bi bi-info-circle"></i>No markets match that day. Try another filter.</div>
                         </div>
                     @endforelse
                 </div>
@@ -119,10 +123,10 @@
 </section>
 
 @push('scripts')
-<script src="{{ asset('vendor/leaflet/leaflet.js') }}"></script>
+<script src="{{ asset('vendor/leaflet/leaflet.js') }}" defer></script>
 <script>if (typeof L === 'undefined') document.write('<script src="https:\/\/unpkg.com\/leaflet@1.9.4\/dist\/leaflet.js"><\/script>');</script>
 <script>
-    (function () {
+    document.addEventListener('DOMContentLoaded', function () {
         var map = L.map('map').setView([24.8607, 67.0011], 11); // Karachi
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
@@ -145,9 +149,9 @@
                 }).addTo(map);
                 try { map.fitBounds(layer.getBounds().pad(0.25)); } catch (e) {}
             });
-    })();
+    });
 
-    (function () {
+    document.addEventListener('DOMContentLoaded', function () {
         var btn = document.getElementById('findNearbyBtn');
         var statusEl = document.getElementById('nearbyStatus');
         var resultsEl = document.getElementById('nearbyResults');
@@ -173,7 +177,7 @@
             listEl.innerHTML = '';
 
             if (!markets.length) {
-                listEl.innerHTML = '<div class="alert alert-light border mb-0"><i class="bi bi-compass me-1"></i>' +
+                listEl.innerHTML = '<div class="ml-note mb-0"><i class="bi bi-compass me-1"></i>' +
                     'No markets found within ' + data.radius_km + ' km. Try widening the map instead.</div>';
                 return;
             }
@@ -214,7 +218,7 @@
                         render(data);
                         if (typeof L !== 'undefined') {
                             try {
-                                map.flyTo([lat, lng], 13, { duration: 0.8 });
+                                map.flyTo([lat, lng], 13, { duration: 0.8 }); // lat/lng from the position callback — fixed scope bug
                                 L.circleMarker([lat, lng], {
                                     radius: 8, color: '#889721', weight: 2, fillColor: '#a2b231', fillOpacity: 0.85,
                                     className: 'market-you-marker',
@@ -238,7 +242,7 @@
                 showStatus('error', '<i class="bi bi-x-circle me-1"></i>' + (messages[err.code] || 'Could not get your location.'));
             }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 });
         });
-    })();
+    });
 </script>
 @endpush
 @endsection

@@ -24,7 +24,8 @@ class MarketSeeder extends Seeder
                 'address' => 'University Road, Gulshan-e-Iqbal, Karachi',
                 'latitude' => 24.9197000,
                 'longitude' => 67.0990000,
-                'description' => 'Our flagship Saturday market in the heart of Gulshan-e-Iqbal, with live music and 20+ stalls.',
+                // Weekends: the schedule below (Sat + Sun) is the source of truth.
+                'description' => 'Our flagship weekend market in the heart of Gulshan-e-Iqbal, with live music and 20+ stalls every Saturday & Sunday.',
                 'days' => [6 => ['08:00', '14:00'], 0 => ['09:00', '13:00']], // Sat + Sun
             ],
             [

@@ -14,6 +14,9 @@
         <h1 class="h4 serif-font">@yield('admin_title', 'Admin Console')</h1>
     </div>
     <div class="d-flex align-items-center gap-3">
+        <button class="theme-toggle" id="themeToggle" type="button" title="Toggle dark mode" aria-label="Toggle dark mode">
+            <i class="bi bi-moon-stars" id="themeIcon"></i>
+        </button>
         <a class="header-icon-btn position-relative" href="{{ route('notifications.index') }}" title="Notifications" aria-label="Notifications">
             <i class="bi bi-bell"></i>
             @php $unreadNotifications = auth()->user()->unreadNotifications()->count(); @endphp

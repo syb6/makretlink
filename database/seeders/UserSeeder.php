@@ -63,7 +63,7 @@ class UserSeeder extends Seeder
                 [
                     'business_name' => $business,
                     'contact_person' => $contact,
-                    'address' => rand(10, 99).' Rural Route '.chr(64 + rand(1, 20)).', Green Valley',
+                    'address' => rand(10, 99).' Farm Belt Road, Malir, Karachi',
                     'description' => $desc,
                     'approval_status' => $status,
                     'approved_at' => $status === 'approved' ? now()->subDays(rand(5, 60)) : null,
@@ -74,11 +74,10 @@ class UserSeeder extends Seeder
 
         // Customers
         $customerData = [
-            ['Oliver Shopper', 'customer1@marketlink.test', '12 Maple Street, Green Valley'],
-            ['Priya Fresh', 'mysidtuaham@gmail.com', '48 Birch Avenue, Green Valley'],
-            ['Diego Mercado', 'customer3@marketlink.test', '7 Cedar Lane, Riverside'],
-            ['Emma Weekend', 'customer4@marketlink.test', '230 Oak Drive, Green Valley'],
-            // Karachi customers for local flavour
+            ['Oliver Shopper', 'customer1@marketlink.test', '12 Maple Street, Clifton, Karachi'],
+            ['Priya Fresh', 'mysidtuaham@gmail.com', '48 Birch Avenue, PECHS, Karachi'],
+            ['Diego Mercado', 'customer3@marketlink.test', '7 Cedar Lane, Nazimabad, Karachi'],
+            ['Emma Weekend', 'customer4@marketlink.test', '230 Oak Drive, Bath Island, Karachi'],
             ['Hamza Saddar', 'customer5@marketlink.test', '14 Preedy Street, Saddar, Karachi'],
             ['Sana Gulshan', 'customer6@marketlink.test', 'Block 13-C, Gulshan-e-Iqbal, Karachi'],
             ['Bilal Clifton', 'customer7@marketlink.test', 'Khayaban-e-Seher, DHA Phase 6, Karachi'],

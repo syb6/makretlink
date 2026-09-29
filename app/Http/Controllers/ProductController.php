@@ -93,6 +93,9 @@ class ProductController extends Controller
         }
 
         return view('products.index', [
+            // product_id => how many markets stock it — cards show "also at N more markets"
+            // so the same product listed per market doesn't read as a duplicate.
+            'marketCounts' => WeeklyStock::marketCountsFor($chunk),
             'stocks' => new LengthAwarePaginator(
                 $chunk,
                 $stocks->count(),

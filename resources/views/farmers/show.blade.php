@@ -74,7 +74,7 @@
             @forelse ($stocks as $stock)
                 @include('products._card', ['stock' => $stock])
             @empty
-                <div class="col-12"><div class="alert alert-light border">This farmer has not published weekly stock yet.</div></div>
+                <div class="col-12"><div class="ml-note">This farmer has not published weekly stock yet.</div></div>
             @endforelse
         </div>
     </div>

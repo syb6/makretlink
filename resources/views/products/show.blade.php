@@ -41,6 +41,25 @@
 
                 <p>{{ $product->description }}</p>
 
+                @if ($stocks->count() > 1)
+                    <div class="market-availability">
+                        <div class="market-availability-title">
+                            <i class="bi bi-geo-alt-fill me-1"></i>Same product, available at {{ $stocks->count() }} markets
+                        </div>
+                        <ul class="market-availability-list">
+                            @foreach ($stocks as $s)
+                                <li>
+                                    <span>{{ $s->farmerMarket->market->name }}</span>
+                                    <span class="text-muted small">{{ $s->available_quantity }} {{ $product->unit }} in stock</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                        <p class="small text-muted mb-0 mt-2">
+                            <i class="bi bi-info-circle me-1"></i>Pick whichever stall suits your week — stock is tracked per stall.
+                        </p>
+                    </div>
+                @endif
+
                 @auth
                     @if (auth()->user()->isCustomer())
                         <div class="card card-ml p-3 mb-3">

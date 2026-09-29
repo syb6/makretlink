@@ -15,9 +15,16 @@
             <x-form-errors />
 
             @if (session('reset-status'))
-                <div class="alert alert-success alert-auto-hide">
-                    <i class="bi bi-envelope-check me-1"></i> {{ session('reset-status') }}
-                    <div class="small mt-1 opacity-75">The link <strong>expires after 30 minutes</strong> and can be used only once.</div>
+                <div class="ml-alert success" role="status" data-ml-alert data-ttl="8000">
+                    <div class="ml-alert-icon"><i class="bi bi-check-circle-fill"></i></div>
+                    <div class="ml-alert-body">
+                        <div class="ml-alert-msg">
+                            <i class="bi bi-envelope-check me-1"></i> {{ session('reset-status') }}
+                            <div class="small mt-1 opacity-75">The link <strong>expires after 30 minutes</strong> and can be used only once.</div>
+                        </div>
+                    </div>
+                    <button type="button" class="ml-alert-close" aria-label="Dismiss"><i class="bi bi-x-lg"></i></button>
+                    <span class="ml-alert-progress" aria-hidden="true" style="--ttl: 8s"></span>
                 </div>
             @endif
 

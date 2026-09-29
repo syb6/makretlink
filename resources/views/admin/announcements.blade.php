@@ -59,7 +59,7 @@
                     </div>
                 </div>
             @empty
-                <div class="alert alert-light border">No announcements yet.</div>
+                <div class="ml-note"><i class="bi bi-info-circle"></i>No announcements yet.</div>
             @endforelse
 
             <div class="mt-3">{{ $announcements->links() }}</div>

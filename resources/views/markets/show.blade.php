@@ -80,7 +80,7 @@
                             </div>
                         </div>
                     @empty
-                        <div class="col-12"><div class="alert alert-light border">No farmers registered at this market yet.</div></div>
+                        <div class="col-12"><div class="ml-note"><i class="bi bi-info-circle"></i>No farmers registered at this market yet.</div></div>
                     @endforelse
                 </div>
             </div>
@@ -106,14 +106,14 @@
 </section>
 
 @push('scripts')
-<script src="{{ asset('vendor/leaflet/leaflet.js') }}"></script>
+<script src="{{ asset('vendor/leaflet/leaflet.js') }}" defer></script>
 <script>if (typeof L === 'undefined') document.write('<script src="https:\/\/unpkg.com\/leaflet@1.9.4\/dist\/leaflet.js"><\/script>');</script>
 <script>
-    (function () {
+    document.addEventListener('DOMContentLoaded', function () {
         @if ($market->latitude && $market->longitude)
             var lat = {{ $market->latitude }}, lng = {{ $market->longitude }};
         @else
-            var lat = 40.7128, lng = -74.006;
+            var lat = 24.8607, lng = 67.0011; // Karachi city centre fallback
         @endif
         var map = L.map('map').setView([lat, lng], 15);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -122,7 +122,7 @@
         L.marker([lat, lng]).addTo(map)
             .bindPopup('<strong>{{ $market->name }}</strong><br>{{ $market->address }}')
             .openPopup();
-    })();
+    });
 </script>
 @endpush
 @endsection

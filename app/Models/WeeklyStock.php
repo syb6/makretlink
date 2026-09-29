@@ -51,4 +51,38 @@ class WeeklyStock extends Model
             && $this->available_quantity > 0
             && $this->week_start->isSameWeek(now(), Carbon::SUNDAY);
     }
+
+    /**
+     * Distinct active markets with live stock per product, for a set of stock
+     * rows. Cards use this to say "also at 2 more markets" so a product sold
+     * at multiple markets doesn't read as a duplicate listing.
+     *
+     * @param  iterable<int, self>  $stocks
+     * @return array<int, int>  product_id => market count
+     */
+    public static function marketCountsFor(iterable $stocks): array
+    {
+        $productIds = collect($stocks)
+            ->pluck('product_id')
+            ->unique()
+            ->values();
+
+        if ($productIds->isEmpty()) {
+            return [];
+        }
+
+        return self::query()
+            ->whereIn('product_id', $productIds)
+            ->where('status', 'available')
+            ->where('available_quantity', '>', 0)
+            ->where('week_start', '>=', now()->startOfWeek(Carbon::SUNDAY)->toDateString())
+            ->whereHas('farmerMarket', fn ($fm) => $fm
+                ->where('status', 'active')
+                ->whereHas('market', fn ($m) => $m->where('status', 'active')))
+            ->selectRaw('product_id, COUNT(DISTINCT farmer_market_id) as markets_count')
+            ->groupBy('product_id')
+            ->pluck('markets_count', 'product_id')
+            ->map(fn ($count) => (int) $count)
+            ->all();
+    }
 }

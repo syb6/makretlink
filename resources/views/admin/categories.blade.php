@@ -19,25 +19,30 @@
                 <div class="dashboard-card-header"><h3 class="h5 mb-0"><i class="bi bi-plus-circle text-success me-2"></i>Add Category</h3></div>
                 <div class="dashboard-card-body">
                     <x-form-errors />
-<form method="POST" action="{{ route('admin.categories.store') }}" enctype="multipart/form-data" class="row g-3 align-items-end">
+                    {{-- Two-row grid: text fields row + picker row. The picker tile
+                         is ~150px tall, so squeezing it inline with small inputs
+                         made every control misalign — this keeps rows level. --}}
+                    <form method="POST" action="{{ route('admin.categories.store') }}" enctype="multipart/form-data">
                         @csrf
-                        <div class="col-lg-4 col-md-5">
-                            <label class="form-label small fw-semibold">Name</label>
-                            <input type="text" name="name" class="form-control form-control-sm" required>
+                        <div class="row g-3 align-items-end">
+                            <div class="col-lg-6 col-md-6">
+                                <label class="form-label small fw-semibold">Name</label>
+                                <input type="text" name="name" class="form-control" required>
+                            </div>
+                            <div class="col-lg-3 col-md-3">
+                                <label class="form-label small fw-semibold">Status</label>
+                                <select name="status" class="form-select">
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-3 col-md-3">
+                                <button class="btn btn-ml w-100"><i class="bi bi-plus-lg me-1"></i> Add Category</button>
+                            </div>
                         </div>
-                        <div class="col-lg-2 col-md-3">
-                            <label class="form-label small fw-semibold">Status</label>
-                            <select name="status" class="form-select form-select-sm">
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
-                            </select>
-                        </div>
-                        <div class="col-lg-4">
-                            <label class="form-label small fw-semibold">Picture</label>
-                            @include('components.image-picker', ['name' => 'image', 'id' => 'category-new', 'label' => 'category picture', 'hint' => 'Square, max 2 MB', 'placeholder' => 'bi-tags'])
-                        </div>
-                        <div class="col-lg-2">
-                            <button class="btn btn-ml btn-sm w-100">Add</button>
+                        <div class="mt-3">
+                            <label class="form-label small fw-semibold">Category picture</label>
+                            @include('components.image-picker', ['name' => 'image', 'id' => 'category-new', 'label' => 'category picture', 'hint' => 'Square works best · max 2 MB', 'placeholder' => 'bi-tags'])
                         </div>
                     </form>
                 </div>

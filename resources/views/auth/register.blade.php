@@ -45,7 +45,7 @@
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="phoneNumber" class="form-label">Phone</label>
-                        <input type="tel" class="form-control @error('phone') is-invalid @enderror" id="phoneNumber" name="phone" value="{{ old('phone') }}" required placeholder="+1 (555) 000-0000">
+                        <input type="tel" class="form-control @error('phone') is-invalid @enderror" id="phoneNumber" name="phone" value="{{ old('phone') }}" required placeholder="+92 3XX XXXXXXX">
                         
                     </div>
                 </div>

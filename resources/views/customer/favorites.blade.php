@@ -33,7 +33,7 @@
                             </div>
                         </div>
                     @empty
-                        <div class="col-12"><div class="alert alert-light border">No favorite products yet. Tap the ♥ on any product.</div></div>
+                        <div class="col-12"><div class="ml-note"><i class="bi bi-info-circle"></i>No favorite products yet. Tap the ♥ on any product.</div></div>
                     @endforelse
                 </div>
             </div>
@@ -52,7 +52,7 @@
                             </div>
                         </div>
                     @empty
-                        <div class="col-12"><div class="alert alert-light border">No favorite farmers yet.</div></div>
+                        <div class="col-12"><div class="ml-note"><i class="bi bi-info-circle"></i>No favorite farmers yet.</div></div>
                     @endforelse
                 </div>
             </div>
@@ -71,7 +71,7 @@
                             </div>
                         </div>
                     @empty
-                        <div class="col-12"><div class="alert alert-light border">No favorite markets yet.</div></div>
+                        <div class="col-12"><div class="ml-note"><i class="bi bi-info-circle"></i>No favorite markets yet.</div></div>
                     @endforelse
                 </div>
             </div>

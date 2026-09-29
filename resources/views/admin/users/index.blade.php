@@ -94,6 +94,7 @@
                                                     @csrf
                                                     <input type="hidden" name="status" value="active">
                                                     <button class="btn btn-sm btn-outline-success" title="Set Active">
+                                                        <!-- themed via --bs-btn-* overrides (olive, not bootstrap green) -->
                                                         <i class="bi bi-check-circle"></i>
                                                     </button>
                                                 </form>
@@ -126,6 +127,7 @@
                                                     <button class="btn btn-sm btn-success ms-1" title="Approve Farmer">
                                                         <i class="bi bi-check-lg"></i> Approve
                                                     </button>
+                                                    <!-- keep .btn-success: CSS override layer re-skins it to olive -->
                                                 </form>
                                                 <form method="POST" action="{{ route('admin.farmers.reject', $user) }}" class="d-inline" data-confirm="Reject this farmer?">
                                                     @csrf

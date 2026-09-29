@@ -900,6 +900,431 @@ a.logo-brand:hover {
     line-height: 1.15;
     margin-bottom: 20px;
 }
+
+/* ---------- Hero motion layer ----------
+   Word-by-word title entrance, gradient shine sweeping the accent
+   words, floating trust chips, scroll cue, and a slow glow pulse.
+   Everything is disabled under prefers-reduced-motion. */
+.hero-title .w {
+    display: inline-block;
+    opacity: 0;
+    animation: ml-in-up 0.65s cubic-bezier(0.22, 0.8, 0.32, 1) both;
+    animation-delay: calc(var(--i, 0) * 70ms + 180ms);
+    will-change: opacity, transform;
+}
+
+.hero-title .accent {
+    background: linear-gradient(
+        100deg,
+        var(--primary-dark) 0%,
+        var(--primary) 30%,
+        var(--primary-dark) 60%
+    );
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    animation:
+        ml-in-up 0.65s cubic-bezier(0.22, 0.8, 0.32, 1) both,
+        accent-shine 5.5s ease-in-out 1.4s infinite;
+    animation-delay: calc(var(--i, 0) * 70ms + 180ms), 1.4s;
+}
+
+[data-bs-theme='dark'] .hero-title .accent {
+    background: linear-gradient(
+        100deg,
+        var(--primary) 0%,
+        var(--primary-contrast) 30%,
+        var(--primary) 60%
+    );
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+@keyframes accent-shine {
+    0%,
+    100% {
+        background-position: 0% 0;
+    }
+    50% {
+        background-position: 100% 0;
+    }
+}
+
+.hero-float-chips {
+    position: absolute;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-pill);
+    padding: 8px 14px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--dark);
+    box-shadow: var(--card-shadow-lg);
+    pointer-events: none;
+    opacity: 0;
+    animation:
+        chip-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both,
+        chip-float 5s ease-in-out infinite;
+}
+
+.hero-float-chips i {
+    color: var(--primary-dark);
+    font-size: 1rem;
+}
+
+[data-bs-theme='dark'] .hero-float-chips i {
+    color: var(--primary);
+}
+
+.hero-float-chips.chip-1 {
+    top: 16%;
+    right: 4%;
+    animation-delay: 1.1s, 1.7s;
+}
+
+.hero-float-chips.chip-2 {
+    bottom: 14%;
+    left: 46%;
+    animation-delay: 1.35s, 2.2s;
+}
+
+@keyframes chip-pop {
+    from {
+        opacity: 0;
+        transform: translateY(14px) scale(0.85);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes chip-float {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-9px);
+    }
+}
+
+.hero-scroll-cue {
+    position: absolute;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%);
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    opacity: 0;
+    animation: fade-in 0.8s ease 2s both;
+    transition: color 0.25s ease;
+}
+
+.hero-scroll-cue:hover {
+    color: var(--primary-dark);
+}
+
+.hero-scroll-cue i {
+    animation: cue-bob 1.6s ease-in-out infinite;
+}
+
+@keyframes cue-bob {
+    0%,
+    100% {
+        transform: translateY(0);
+        opacity: 0.55;
+    }
+    50% {
+        transform: translateY(6px);
+        opacity: 1;
+    }
+}
+
+@keyframes glow-drift {
+    from {
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+    to {
+        transform: translate3d(30px, 18px, 0) scale(1.12);
+    }
+}
+
+/* =========================================================
+   ml-alert — custom MarketLink toast alerts (replace the stock
+   Bootstrap alert chrome for flash messages).
+   Stacked card with a colored status rail, progress countdown,
+   pause-on-hover, and the site's type/radius/shadow tokens.
+   ========================================================= */
+.ml-alert-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ml-alert {
+    --ml-accent: var(--primary);
+    --ml-accent-ink: var(--primary-contrast);
+    --ml-accent-soft: var(--primary-light);
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    overflow: hidden;
+    padding: 14px 16px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--card-shadow-lg);
+    color: var(--dark);
+    animation: ml-alert-in 0.4s cubic-bezier(0.22, 1.2, 0.32, 1) both;
+    transition:
+        opacity 0.3s ease,
+        transform 0.3s ease;
+}
+
+.ml-alert.leaving {
+    opacity: 0;
+    transform: translateX(24px);
+    pointer-events: none;
+}
+
+@keyframes ml-alert-in {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* Colored status rail on the left edge */
+.ml-alert::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--ml-accent);
+}
+
+.ml-alert-icon {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    background: var(--ml-accent-soft);
+    color: var(--ml-accent-ink);
+    animation: icon-wiggle 0.6s ease 0.15s both;
+}
+
+.ml-alert-body {
+    flex: 1;
+    min-width: 0;
+    padding-top: 3px;
+}
+
+.ml-alert-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 2px;
+}
+
+.ml-alert-msg {
+    font-size: 0.86rem;
+    color: var(--muted);
+    line-height: 1.45;
+}
+
+.ml-alert-close {
+    flex-shrink: 0;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.ml-alert-close:hover {
+    background: var(--ml-accent-soft);
+    color: var(--ml-accent-ink);
+    transform: rotate(90deg);
+}
+
+/* Countdown progress bar — animates to zero over the auto-hide time.
+    Pauses when hovering the alert (paired with the JS timer pause). */
+.ml-alert-progress {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 3px;
+    width: 100%;
+    background: var(--ml-accent);
+    transform-origin: left;
+    animation: ml-alert-countdown linear both;
+    animation-duration: var(--ttl, 4.5s);
+}
+
+.ml-alert:hover .ml-alert-progress {
+    animation-play-state: paused;
+}
+
+@keyframes ml-alert-countdown {
+    from {
+        transform: scaleX(1);
+    }
+    to {
+        transform: scaleX(0);
+    }
+}
+
+/* Status flavors — olive brand colors, not bootstrap green/red */
+.ml-alert.success {
+    --ml-accent: #3e8e5a;
+    --ml-accent-ink: #eaf6ee;
+    --ml-accent-soft: #e2f2e7;
+}
+
+.ml-alert.error,
+.ml-alert.danger {
+    --ml-accent: #d9383a;
+    --ml-accent-ink: #fdeeef;
+    --ml-accent-soft: #fbe4e4;
+}
+
+.ml-alert.warning {
+    --ml-accent: #d98e1f;
+    --ml-accent-ink: #6a4a08;
+    --ml-accent-soft: #fdf0da;
+}
+
+.ml-alert.info {
+    --ml-accent: #3e7ca8;
+    --ml-accent-ink: #eaf3f9;
+    --ml-accent-soft: #e1eef6;
+}
+
+/* Dark theme: deep tinted surfaces with light ink */
+[data-bs-theme='dark'] .ml-alert.success {
+    --ml-accent: var(--primary);
+    --ml-accent-ink: var(--primary-contrast);
+    --ml-accent-soft: color-mix(in srgb, var(--primary) 16%, var(--surface));
+}
+
+[data-bs-theme='dark'] .ml-alert.error,
+[data-bs-theme='dark'] .ml-alert.danger {
+    --ml-accent: #ef8791;
+    --ml-accent-ink: #ffd7da;
+    --ml-accent-soft: color-mix(in srgb, #d9383a 22%, var(--surface));
+}
+
+[data-bs-theme='dark'] .ml-alert.warning {
+    --ml-accent: #ffd970;
+    --ml-accent-ink: #ffe9b3;
+    --ml-accent-soft: color-mix(in srgb, #e2a100 20%, var(--surface));
+}
+
+[data-bs-theme='dark'] .ml-alert.info {
+    --ml-accent: #9fd0f5;
+    --ml-accent-ink: #dcf0fc;
+    --ml-accent-soft: color-mix(in srgb, #3e7ca8 22%, var(--surface));
+}
+
+[data-bs-theme='dark'] .ml-alert {
+    background: var(--surface);
+    border-color: var(--border-color);
+}
+
+[data-bs-theme='dark'] .ml-alert .ml-alert-msg {
+    color: var(--muted);
+}
+
+/* Inline info note — replaces the old "alert alert-light" empty-state boxes */
+.ml-note {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    background: var(--surface-2);
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.ml-note i {
+    color: var(--primary-dark);
+    font-size: 1.05rem;
+    flex-shrink: 0;
+}
+
+[data-bs-theme='dark'] .ml-note i {
+    color: var(--primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-title .w {
+        opacity: 1;
+        animation: none;
+    }
+
+    .hero-title .accent {
+        animation: none;
+        -webkit-text-fill-color: initial;
+        color: var(--primary-dark);
+        background: none;
+    }
+
+    .hero-float-chips {
+        opacity: 1;
+        animation: none;
+    }
+
+    .hero-scroll-cue {
+        opacity: 1;
+        animation: none;
+    }
+
+    .hero-scroll-cue i,
+    .hero-bg-glow::before {
+        animation: none;
+    }
+}
+
 .hero-description {
     font-size: 1.02rem;
     color: var(--muted);
@@ -2726,7 +3151,7 @@ a.product-title:hover {
         gap: 30px;
     }
 }
-@media (max-width: 575.98px) {D
+@media (max-width: 575.98px) {
     .hero-title {
         font-size: 2rem;
     }
@@ -2930,7 +3355,7 @@ body {
     animation: slide-down 0.35s ease both;
 }
 .dropdown-menu.show {
-    animation: fade-up 0.18s ease both;
+    animation: drop-in 0.18s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 .modal.fade .modal-dialog {
     transform: scale(0.94) translateY(16px);
@@ -3224,11 +3649,21 @@ a.logo-brand:hover i {
     height: 420px;
     top: -120px;
     left: -140px;
+}
+
+/* Gradient lives on ::before so its slow drift animation never fights
+   the parallax transform on the element itself (they compose). */
+.hero-bg-glow::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
     background: radial-gradient(
         circle,
         color-mix(in srgb, var(--primary) 22%, transparent),
         transparent 70%
     );
+    animation: glow-drift 11s ease-in-out infinite alternate;
 }
 .hero-bg-glow-2 {
     width: 360px;
@@ -4108,5 +4543,1505 @@ body.page-leaving {
 
     .ml-in {
         animation: none;
+    }
+}
+
+/* =========================================================
+   UX polish layer — smooth theme switching, full dark-mode
+   coverage and the open-days / multi-market components.
+   ========================================================= */
+
+/* ---------- Smooth theme switch ----------
+   JS adds .theme-anim to <html> only for the moment a theme
+   switch happens, so colors cross-fade instead of snapping —
+   while ordinary scrolling/animation frames stay transition-free. */
+html.theme-anim,
+html.theme-anim body,
+html.theme-anim .card,
+html.theme-anim .card-ml,
+html.theme-anim .dashboard-card,
+html.theme-anim .market-card,
+html.theme-anim .product-card,
+html.theme-anim .feature-card,
+html.theme-anim .stat-card,
+html.theme-anim .step-card,
+html.theme-anim .auth-card,
+html.theme-anim .main-header,
+html.theme-anim .top-bar,
+html.theme-anim .site-footer,
+html.theme-anim .nav-bar-wrapper,
+html.theme-anim .page-banner,
+html.theme-anim .hero-section,
+html.theme-anim .cta-section,
+html.theme-anim .promo-banner-section,
+html.theme-anim .alert,
+html.theme-anim .modal-content,
+html.theme-anim .dropdown-menu,
+html.theme-anim .form-control,
+html.theme-anim .form-select,
+html.theme-anim .input-group-text,
+html.theme-anim .page-link,
+html.theme-anim .chatbot-window,
+html.theme-anim .chatbot-body,
+html.theme-anim .chatbot-foot,
+html.theme-anim .ml-dialog,
+html.theme-anim .ml-dialog-backdrop,
+html.theme-anim .btn-ml,
+html.theme-anim .btn-outline-ml,
+html.theme-anim .btn-white,
+html.theme-anim .fav-btn,
+html.theme-anim .product-badge,
+html.theme-anim .badge-soft,
+html.theme-anim .pill,
+html.theme-anim .status-pill,
+html.theme-anim .multi-market-note,
+html.theme-anim .market-availability,
+html.theme-anim .stat-icon,
+html.theme-anim .feature-icon-circle,
+html.theme-anim .product-add,
+html.theme-anim .header-icon-btn,
+html.theme-anim .theme-toggle,
+html.theme-anim .profile-badge,
+html.theme-anim .cart-badge-btn,
+html.theme-anim .offline-banner,
+html.theme-anim .skeleton-overlay,
+html.theme-anim .skeleton-card,
+html.theme-anim .table-ml thead th,
+html.theme-anim .metric-box,
+html.theme-anim .empty {
+    transition:
+        background-color 0.35s ease,
+        border-color 0.35s ease,
+        color 0.35s ease,
+        box-shadow 0.35s ease !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html.theme-anim *,
+    html.theme-anim *::before,
+    html.theme-anim *::after {
+        transition: none !important;
+    }
+}
+
+/* ---------- Bootstrap alert variants: dark coverage ----------
+   BS's built-in dark variants go nearly black; these keep the
+   MarketLink palette (olive-tinted surfaces, legible text). */
+[data-bs-theme="dark"] .alert-success {
+    --bs-alert-color: #bce9c8;
+    --bs-alert-bg: #182d1f;
+    --bs-alert-border-color: #2c4a35;
+}
+
+[data-bs-theme="dark"] .alert-danger {
+    --bs-alert-color: #f4c3be;
+    --bs-alert-bg: #341b19;
+    --bs-alert-border-color: #63302c;
+}
+
+[data-bs-theme="dark"] .alert-warning {
+    --bs-alert-color: #ffe3a6;
+    --bs-alert-bg: #33290f;
+    --bs-alert-border-color: #6b531c;
+}
+
+[data-bs-theme="dark"] .alert-info {
+    --bs-alert-color: #c3e2f8;
+    --bs-alert-bg: #14283a;
+    --bs-alert-border-color: #2b4a66;
+}
+
+[data-bs-theme="dark"] .alert-light {
+    --bs-alert-color: var(--dark);
+    --bs-alert-bg: var(--surface-2);
+    --bs-alert-border-color: var(--border-color);
+}
+
+/* ---------- Modals, close buttons, tooltips, popovers (dark) ---------- */
+[data-bs-theme="dark"] .modal-content {
+    --bs-modal-bg: var(--surface);
+    --bs-modal-color: var(--dark);
+    --bs-modal-border-color: var(--border-color);
+}
+
+[data-bs-theme="dark"] .modal-header,
+[data-bs-theme="dark"] .modal-footer {
+    border-color: var(--border-color);
+}
+
+[data-bs-theme="dark"] .btn-close {
+    filter: invert(1) grayscale(100%) brightness(1.6);
+}
+
+[data-bs-theme="dark"] .tooltip {
+    --bs-tooltip-bg: var(--surface-2);
+    --bs-tooltip-color: var(--dark);
+    --bs-tooltip-opacity: 1;
+    border: 1px solid var(--border-color);
+}
+
+[data-bs-theme="dark"] .popover {
+    --bs-popover-bg: var(--surface);
+    --bs-popover-border-color: var(--border-color);
+    --bs-popover-header-color: var(--dark);
+    --bs-popover-header-bg: var(--surface-2);
+    --bs-popover-body-color: var(--dark);
+}
+
+[data-bs-theme="dark"] .badge.bg-danger {
+    background-color: #d64a42 !important;
+}
+
+[data-bs-theme="dark"] .badge.bg-secondary {
+    background-color: var(--surface-2) !important;
+    color: var(--dark) !important;
+    border: 1px solid var(--border-color);
+}
+
+[data-bs-theme="dark"] .btn-outline-danger {
+    --bs-btn-color: #ef8791;
+    --bs-btn-border-color: #7a3a37;
+    --bs-btn-hover-bg: #7a3a37;
+    --bs-btn-hover-border-color: #7a3a37;
+    --bs-btn-hover-color: #fff;
+}
+
+[data-bs-theme="dark"] .btn-outline-secondary {
+    --bs-btn-color: var(--dark);
+    --bs-btn-border-color: var(--border-color);
+    --bs-btn-hover-bg: var(--surface-2);
+    --bs-btn-hover-border-color: var(--muted);
+    --bs-btn-hover-color: var(--dark);
+}
+
+/* ---------- Small hard-coded bits that ignored dark mode ---------- */
+[data-bs-theme="dark"] .fav-btn {
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    color: #ef8791;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+[data-bs-theme="dark"] .pill.soft {
+    background: color-mix(in srgb, #e2a100 16%, var(--surface));
+    color: #ffd970;
+}
+
+[data-bs-theme="dark"] mark {
+    background: color-mix(in srgb, var(--primary) 30%, var(--surface));
+    color: var(--dark);
+}
+
+/* ---------- Open-days pill (market cards) ---------- */
+.multi-market-note {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--primary-dark);
+    background: var(--primary-light);
+    border-radius: var(--radius-pill);
+    padding: 3px 10px;
+    margin-bottom: 8px;
+}
+
+[data-bs-theme="dark"] .multi-market-note {
+    color: var(--primary-contrast);
+}
+
+/* ---------- Multi-market badge on product cards ---------- */
+.product-badge-alt {
+    top: auto;
+    bottom: 12px;
+    display: inline-flex;
+    align-items: center;
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+}
+
+/* ---------- "Same product, multiple markets" box (product page) ---------- */
+.market-availability {
+    background: var(--surface-2);
+    border: 1px solid var(--border-color);
+    border-left: 3px solid var(--primary);
+    border-radius: var(--radius-md);
+    padding: 14px 18px;
+    margin-bottom: 20px;
+}
+
+.market-availability-title {
+    font-weight: 600;
+    color: var(--primary-dark);
+    font-size: 0.92rem;
+    margin-bottom: 10px;
+}
+
+[data-bs-theme="dark"] .market-availability-title {
+    color: var(--primary);
+}
+
+.market-availability-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+}
+
+.market-availability-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    font-size: 0.88rem;
+    border-bottom: 1px dashed var(--border-color);
+    padding-bottom: 6px;
+}
+
+.market-availability-list li:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+}
+
+/* =========================================================
+   FULL-THEME OVERRIDE LAYER
+   Every remaining Bootstrap-default component (button variants,
+   focus rings, dropdowns, close buttons, semantic utilities) is
+   re-skinned with the MarketLink palette so nothing renders in
+   stock bootstrap blue/green/red chrome in either theme.
+   ========================================================= */
+
+/* ---------- 1) Buttons: default variants -> MarketLink variants ----------
+   BS green (.btn-success) clashes with the olive brand; danger keeps its
+   semantic red but gets soft themed borders. Overrides come after the base
+   layer so they win the cascade without !important. */
+.btn-success,
+.btn-success:focus {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: var(--primary);
+    --bs-btn-border-color: var(--primary);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--primary-dark);
+    --bs-btn-hover-border-color: var(--primary-dark);
+    --bs-btn-focus-shadow-rgb: 162, 178, 49;
+    --bs-btn-active-bg: var(--primary-dark);
+    --bs-btn-active-border-color: var(--primary-dark);
+    --bs-btn-disabled-color: #fff;
+    --bs-btn-disabled-bg: var(--primary);
+    --bs-btn-disabled-border-color: var(--primary);
+}
+
+.btn-success {
+    transition: var(--transition);
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(162, 178, 49, 0.35);
+}
+
+.btn-outline-success,
+.btn-outline-success:focus {
+    --bs-btn-color: var(--primary-dark);
+    --bs-btn-border-color: var(--primary);
+    --bs-btn-hover-bg: var(--primary);
+    --bs-btn-hover-border-color: var(--primary);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-focus-shadow-rgb: 162, 178, 49;
+    --bs-btn-active-bg: var(--primary);
+    --bs-btn-active-border-color: var(--primary);
+}
+
+[data-bs-theme='dark'] .btn-outline-success {
+    --bs-btn-color: var(--primary-contrast);
+    --bs-btn-border-color: var(--primary);
+    --bs-btn-hover-bg: var(--primary);
+    --bs-btn-hover-color: var(--sidebar-bg);
+}
+
+.btn-outline-warning,
+.btn-outline-warning:focus {
+    --bs-btn-color: #b28704;
+    --bs-btn-border-color: #e2a100;
+    --bs-btn-hover-bg: #e2a100;
+    --bs-btn-hover-border-color: #e2a100;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-focus-shadow-rgb: 226, 161, 0;
+}
+
+[data-bs-theme='dark'] .btn-outline-warning {
+    --bs-btn-color: #ffd970;
+    --bs-btn-border-color: #8a6a14;
+    --bs-btn-hover-bg: #8a6a14;
+    --bs-btn-hover-border-color: #8a6a14;
+    --bs-btn-hover-color: #fff;
+}
+
+.btn-outline-danger,
+.btn-outline-danger:focus {
+    --bs-btn-color: #d9383a;
+    --bs-btn-border-color: #d9383a;
+    --bs-btn-hover-bg: #d9383a;
+    --bs-btn-hover-border-color: #d9383a;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-focus-shadow-rgb: 217, 56, 58;
+    transition: var(--transition);
+}
+
+[data-bs-theme='dark'] .btn-outline-danger {
+    --bs-btn-color: #ef8791;
+    --bs-btn-border-color: #7a3a37;
+    --bs-btn-hover-bg: #7a3a37;
+    --bs-btn-hover-border-color: #7a3a37;
+    --bs-btn-hover-color: #fff;
+}
+
+.btn-outline-secondary,
+.btn-outline-secondary:focus {
+    --bs-btn-color: var(--dark);
+    --bs-btn-border-color: var(--border-color);
+    --bs-btn-hover-bg: var(--surface-2);
+    --bs-btn-hover-border-color: var(--muted);
+    --bs-btn-hover-color: var(--dark);
+    --bs-btn-focus-shadow-rgb: 162, 178, 49;
+    transition: var(--transition);
+}
+
+.btn-primary,
+.btn-info,
+.btn-light,
+.btn-dark,
+.btn-secondary {
+    --bs-btn-color: var(--dark);
+    --bs-btn-bg: var(--surface-2);
+    --bs-btn-border-color: var(--border-color);
+    --bs-btn-hover-color: var(--dark);
+    --bs-btn-hover-bg: var(--surface);
+    --bs-btn-hover-border-color: var(--muted);
+}
+
+/* ---------- 2) Olive focus rings everywhere (was BS blue) ---------- */
+.btn {
+    --bs-btn-focus-shadow-rgb: 162, 178, 49;
+}
+
+.btn:focus-visible,
+.form-control:focus-visible,
+.form-select:focus-visible,
+.form-check-input:focus-visible {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.25rem rgba(162, 178, 49, 0.22);
+    outline: 0;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.25rem rgba(162, 178, 49, 0.22);
+    outline: 0;
+}
+
+.dropdown-item:focus-visible,
+.dropdown-toggle:focus-visible {
+    outline: 3px solid var(--primary-dark);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+[data-bs-theme='dark'] .dropdown-item:focus-visible,
+[data-bs-theme='dark'] .dropdown-toggle:focus-visible {
+    outline-color: var(--primary);
+}
+
+.page-link:focus-visible {
+    box-shadow: 0 0 0 0.25rem rgba(162, 178, 49, 0.22);
+}
+
+/* Invalid fields: themed red ring instead of BS default blue flash */
+.form-control.is-invalid:focus,
+.form-select.is-invalid:focus {
+    border-color: #d9383a;
+    box-shadow: 0 0 0 0.25rem rgba(217, 56, 58, 0.18);
+}
+
+.form-control.is-invalid,
+.form-select.is-invalid {
+    border-color: #d9383a;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23d9383a'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='M6 3.5v3'/%3e%3cpath d='M6 8.2h.01'/%3e%3c/svg%3e");
+}
+
+/* ---------- 3) Dropdowns: layered motion + icon behaviour ---------- */
+.dropdown-menu {
+    animation: drop-in 0.16s cubic-bezier(0.16, 1, 0.3, 1) both;
+    transform-origin: top center;
+}
+
+@keyframes drop-in {
+    from {
+        opacity: 0;
+        transform: translateY(-6px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.dropdown-item {
+    position: relative;
+    overflow: hidden;
+    transition:
+        background-color 0.18s ease,
+        color 0.18s ease,
+        padding-left 0.18s ease;
+}
+
+.dropdown-item i {
+    transition: transform 0.18s ease;
+}
+
+.dropdown-item:hover i,
+.dropdown-item:focus-visible i {
+    transform: translateX(2px);
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus-visible {
+    padding-left: 1.25rem;
+    background: var(--primary-light);
+    color: var(--primary-contrast);
+}
+
+[data-bs-theme='dark'] .dropdown-item:hover,
+[data-bs-theme='dark'] .dropdown-item:focus-visible {
+    background: color-mix(in srgb, var(--primary) 14%, var(--surface));
+    color: var(--dark);
+}
+
+/* ---------- 4) Semantic utilities: legible on dark surfaces ---------- */
+[data-bs-theme='dark'] .text-success {
+    color: var(--primary) !important;
+}
+
+[data-bs-theme='dark'] .text-danger {
+    color: #ef8791 !important;
+}
+
+[data-bs-theme='dark'] .text-warning {
+    color: #ffd970 !important;
+}
+
+[data-bs-theme='dark'] .text-info {
+    color: #9fd0f5 !important;
+}
+
+[data-bs-theme='dark'] .text-primary {
+    color: var(--primary) !important;
+}
+
+[data-bs-theme='dark'] .border-success {
+    border-color: var(--primary) !important;
+}
+
+[data-bs-theme='dark'] .border-danger {
+    border-color: #7a3a37 !important;
+}
+
+/* ---------- 5) card-header / card: themed chrome ---------- */
+.card-header {
+    background: var(--surface-2);
+    color: var(--dark);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.card > .list-group,
+.card > .list-group-flush {
+    border-top-color: var(--border-color);
+    border-bottom-color: var(--border-color);
+}
+
+.list-group-item {
+    background: var(--surface);
+    color: var(--dark);
+    border-color: var(--border-color);
+}
+
+.list-group-item:hover {
+    background: var(--surface-2);
+}
+
+.list-group-item.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+}
+
+.nav-tabs {
+    --bs-nav-tabs-border-color: var(--border-color);
+    --bs-nav-link-color: var(--muted);
+    --bs-nav-link-hover-color: var(--primary-dark);
+}
+
+.nav-tabs .nav-link {
+    color: var(--muted);
+    transition:
+        color 0.2s ease,
+        background-color 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--primary-dark);
+    background: var(--primary-light);
+    border-color: var(--border-color);
+    isolation: isolate;
+}
+
+.nav-tabs .nav-link.active {
+    background: var(--surface);
+    color: var(--primary-dark);
+    border-bottom-color: var(--surface);
+    font-weight: 600;
+}
+
+.nav-pills .nav-link {
+    color: var(--muted);
+    transition: var(--transition);
+}
+
+.nav-pills .nav-link:hover {
+    color: var(--primary-contrast);
+    background: var(--primary-light);
+}
+
+.nav-pills .nav-link.active {
+    background: var(--primary);
+    color: #fff;
+}
+
+[data-bs-theme='dark'] .nav-tabs .nav-link.active {
+    color: var(--primary);
+    background: var(--surface);
+    border-bottom-color: var(--surface);
+}
+
+[data-bs-theme='dark'] .nav-pills .nav-link.active {
+    color: var(--sidebar-bg);
+}
+
+/* ---------- 6) Toasts (BS component — themed even if unused yet) ---------- */
+.toast {
+    --bs-toast-bg: var(--surface);
+    --bs-toast-color: var(--dark);
+    --bs-toast-border-color: var(--border-color);
+    --bs-toast-header-bg: var(--surface-2);
+    --bs-toast-header-color: var(--dark);
+    border-radius: var(--radius-md);
+    box-shadow: var(--card-shadow-lg);
+}
+
+/* ---------- 7) btn-close: themed hover ring, dark handled above ---------- */
+.btn-close {
+    border-radius: 50%;
+    transition:
+        background-color 0.2s ease,
+        transform 0.2s ease,
+        filter 0.2s ease;
+}
+
+.btn-close:hover {
+    background: rgba(162, 178, 49, 0.18);
+    transform: rotate(90deg);
+}
+
+[data-bs-theme='dark'] .btn-close:hover {
+    background: rgba(179, 195, 63, 0.22);
+}
+
+[data-bs-theme='dark'] .btn-close-white {
+    filter: none;
+}
+
+/* ---------- 8) Placeholders (BS skeleton component) ---------- */
+.placeholder {
+    background: color-mix(in srgb, var(--primary) 14%, var(--surface-2)) !important;
+}
+
+/* ---------- 9) Progress bars (used by any upload/progress UI) ---------- */
+.progress {
+    background: var(--surface-2);
+    border: 1px solid var(--border-color);
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+}
+/* =========================================================
+   Home 2026 refresh — hero stats, section heads,
+   steps connector, hover polish. Layered on top of the
+   existing motion system; all responsive + dark themed.
+   ========================================================= */
+
+/* ---------- Big hero buttons ---------- */
+.btn-lg-ml {
+    padding: 12px 26px;
+    font-size: 1rem;
+    border-radius: var(--radius-pill);
+}
+.btn-lg-ml i {
+    transition: transform 0.25s ease;
+}
+.btn-lg-ml:hover i {
+    transform: translateX(4px);
+}
+
+/* ---------- Hero stats ---------- */
+.hero-stats {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    margin-top: 34px;
+    max-width: 480px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--surface) 72%, transparent);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+}
+.hero-stat {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 14px 8px;
+    position: relative;
+    transition: background-color 0.3s ease;
+}
+.hero-stat + .hero-stat::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 22%;
+    bottom: 22%;
+    width: 1px;
+    background: linear-gradient(180deg, transparent, var(--border-color), transparent);
+}
+.hero-stat:hover {
+    background: color-mix(in srgb, var(--primary-light) 45%, transparent);
+}
+.hero-stat-number {
+    font-family: "Poppins", sans-serif;
+    font-size: 1.55rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--primary-dark);
+    font-variant-numeric: tabular-nums;
+}
+/* Suffix (+) sits in ::after so the count-up JS can animate the raw digits */
+.hero-stat-number[data-suffix]::after {
+    content: attr(data-suffix);
+    color: var(--primary);
+    margin-left: 1px;
+}
+.hero-stat-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+[data-bs-theme='dark'] .hero-stat-number {
+    color: var(--primary);
+}
+
+/* ---------- Hero announcements rail ---------- */
+.hero-announcements {
+    margin-top: 18px;
+    max-width: 480px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--surface) 82%, transparent);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    overflow: hidden;
+}
+.hero-announcements-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--primary-contrast);
+    background: linear-gradient(90deg, var(--primary-dark), var(--primary));
+}
+.hero-announcements-head i {
+    font-size: 0.95rem;
+}
+.hero-announcements-body {
+    padding: 10px 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    max-height: 96px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+.hero-announcement {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 0.84rem;
+    animation: hero-ann-in 0.5s cubic-bezier(0.22, 0.8, 0.32, 1) both;
+}
+.hero-announcement:nth-child(2) {
+    animation-delay: 0.12s;
+}
+.hero-announcement:nth-child(3) {
+    animation-delay: 0.24s;
+}
+.hero-announcement-date {
+    flex-shrink: 0;
+    font-weight: 700;
+    font-size: 0.72rem;
+    color: var(--primary-dark);
+    font-variant-numeric: tabular-nums;
+}
+[data-bs-theme='dark'] .hero-announcement-date {
+    color: var(--primary);
+}
+.hero-announcement-text {
+    color: var(--dark);
+    opacity: 0.85;
+}
+@keyframes hero-ann-in {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* Third floating chip (chip-1/chip-2 styles already exist) */
+.hero-float-chips.chip-3 {
+    top: 55%;
+    right: 30%;
+    animation-delay: 1.6s, 2.7s;
+}
+
+
+/* ---------- Section heads with accent words ---------- */
+.section-head {
+    text-align: center;
+    position: relative;
+    margin-bottom: 8px;
+}
+.section-head .section-subtitle {
+    margin-bottom: 40px;
+}
+.section-head .accent {
+    color: var(--primary-dark);
+}
+[data-bs-theme='dark'] .section-head .accent {
+    color: var(--primary);
+}
+.section-head .badge-sub {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+.section-head .badge-sub::before,
+.section-head .badge-sub::after {
+    content: "";
+    height: 1px;
+    width: 34px;
+    background: linear-gradient(90deg, transparent, var(--primary));
+}
+.section-head .badge-sub::after {
+    background: linear-gradient(90deg, var(--primary), transparent);
+}
+
+/* ---------- How-it-works connector line ---------- */
+.hiw-section {
+    position: relative;
+    overflow: hidden;
+}
+.steps-grid {
+    position: relative;
+}
+.steps-grid::before {
+    content: "";
+    position: absolute;
+    top: 65px;
+    left: 16%;
+    right: 16%;
+    height: 2px;
+    background: repeating-linear-gradient(
+        90deg,
+        var(--primary) 0 10px,
+        transparent 10px 20px
+    );
+    opacity: 0.35;
+    z-index: 0;
+}
+.steps-grid .step-card {
+    position: relative;
+    z-index: 1;
+}
+.steps-grid .step-card .step-number {
+    box-shadow: 0 0 0 8px var(--light-bg);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.steps-grid .step-card:hover .step-number {
+    transform: scale(1.1) rotate(-4deg);
+}
+.step-card {
+    border-radius: var(--radius-md);
+    transition: transform 0.3s ease;
+}
+.step-card:hover {
+    transform: translateY(-6px);
+}
+
+/* ---------- Category & market card polish ---------- */
+.category-card {
+    position: relative;
+}
+.category-card::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 6px;
+    width: 0;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--primary);
+    transform: translateX(-50%);
+    transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.category-card:hover::after {
+    width: 44px;
+}
+.category-card:hover .category-img-circle {
+    transform: translateY(-4px);
+}
+.category-card:hover .category-title {
+    color: var(--primary-dark);
+}
+[data-bs-theme='dark'] .category-card:hover .category-title {
+    color: var(--primary);
+}
+.category-img-circle {
+    transition: var(--transition), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.market-card .market-img-box img {
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.market-card:hover .market-img-box img {
+    transform: scale(1.07);
+}
+
+/* ---------- Feature card top-rail + icon wobble ---------- */
+.feature-card {
+    position: relative;
+    overflow: hidden;
+}
+.feature-card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.feature-card:hover::before {
+    transform: scaleX(1);
+}
+.feature-card:hover .feature-icon-circle {
+    animation: icon-wobble 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes icon-wobble {
+    0% { transform: scale(1) rotate(0); }
+    35% { transform: scale(1.12) rotate(-6deg); }
+    70% { transform: scale(1.06) rotate(4deg); }
+    100% { transform: scale(1) rotate(0); }
+}
+
+/* ---------- Hero image decorative ring ---------- */
+.hero-image-wrapper {
+    position: relative;
+}
+.hero-image-wrapper::before {
+    content: "";
+    position: absolute;
+    top: 7%;
+    right: 7%;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 2px dashed color-mix(in srgb, var(--primary) 55%, transparent);
+    animation: spin-slow 16s linear infinite;
+    pointer-events: none;
+    z-index: 2;
+}
+.hero-image-wrapper::after {
+    content: "";
+    position: absolute;
+    bottom: 6%;
+    left: 4%;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--primary) 30%, transparent), transparent 70%);
+    pointer-events: none;
+    z-index: 2;
+}
+@keyframes spin-slow {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 991.98px) {
+    .hero-stats {
+        max-width: 440px;
+    }
+    .hero-stat-number {
+        font-size: 1.35rem;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .hero-float-chips.chip-3 {
+        display: none;
+    }
+    .hero-stats,
+    .hero-announcements {
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .hero-stats {
+        margin-top: 26px;
+    }
+    .hero-stat {
+        padding: 12px 6px;
+    }
+    .hero-stat-number {
+        font-size: 1.25rem;
+    }
+    .hero-stat-label {
+        font-size: 0.64rem;
+        letter-spacing: 0.4px;
+    }
+    .hero-announcements {
+        max-width: 440px;
+    }
+    .steps-grid::before {
+        display: none;
+    }
+    .hero-image-wrapper::before,
+    .hero-image-wrapper::after {
+        display: none;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .hero-btns .btn {
+        flex: 1 1 100%;
+        justify-content: center;
+    }
+    .hero-stat-number {
+        font-size: 1.15rem;
+    }
+    .hero-stat-label {
+        font-size: 0.58rem;
+    }
+    .hero-announcements-head {
+        padding: 8px 13px;
+        font-size: 0.68rem;
+    }
+    .hero-announcements-body {
+        padding: 8px 13px 10px;
+    }
+}
+
+/* =========================================================
+   Home v2 — cross-fades, hero blend, global smoothness,
+   per-layout page-leave skeletons.
+   ========================================================= */
+
+/* ---------- Hero image cross-fades ----------
+   Both hero images start invisible; JS adds .is-loaded via the
+   onload attribute (works even if this script is blocked), and
+   the image fades in. The bg photo also settles from a slight
+   scale — a soft "reveal" instead of a hard pop. */
+.hero-bg-photo img,
+.hero-img {
+    opacity: 0;
+    transition:
+        opacity 0.9s ease,
+        transform 1.4s cubic-bezier(0.22, 0.8, 0.32, 1);
+}
+.hero-bg-photo img.is-loaded {
+    opacity: 1;
+    transform: scale(1);
+}
+.hero-bg-photo img {
+    transform: scale(1.06);
+    animation: hero-kenburns 36s ease-in-out infinite alternate;
+    animation-delay: 0.9s; /* start after the fade-in lands */
+}
+.hero-img.is-loaded {
+    opacity: 1;
+}
+
+/* ---------- Hero → page background blend ----------
+   Sits at the hero's bottom edge: fades from transparent to the
+   page bg so the photo dissolves into the page (no divider line,
+   no band — just a smooth transition). Themed via color-mix. */
+.hero-section {
+    padding-bottom: 140px; /* room for the blend ramp */
+}
+.hero-blend {
+    height: 120px;
+    margin-top: -120px; /* overlay the hero's bottom edge */
+    position: relative;
+    z-index: 4;
+    pointer-events: none;
+    background: linear-gradient(
+        180deg,
+        transparent 0%,
+        color-mix(in srgb, var(--cream) 45%, transparent) 45%,
+        var(--cream) 100%
+    );
+}
+[data-bs-theme='dark'] .hero-blend {
+    background: linear-gradient(
+        180deg,
+        transparent 0%,
+        color-mix(in srgb, var(--light-bg) 45%, transparent) 45%,
+        var(--light-bg) 100%
+    );
+}
+/* The feature strip must sit above the blend ramp */
+.features-section {
+    z-index: 6;
+}
+
+/* =========================================================
+   Global smoothness layer — one motion vocabulary everywhere
+   ========================================================= */
+:root {
+    --ease-out: cubic-bezier(0.22, 0.8, 0.32, 1);
+    --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+    --t-fast: 0.2s;
+    --t-med: 0.3s;
+    --t-slow: 0.5s;
+}
+
+/* Page-enter fade: every paint starts soft (skipped for bfcache
+   restores and back/forward, which must feel instant). */
+body.page-enter:not(.page-leaving) {
+    animation: page-fade-in 0.5s var(--ease-out) both;
+}
+@keyframes page-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* One synchronized card language: product/market/farmer/feature
+   cards all lift the same distance on the same curve. */
+.product-card,
+.market-card,
+.card-ml {
+    transition:
+        transform var(--t-med) var(--ease-out),
+        box-shadow var(--t-med) var(--ease-out),
+        border-color var(--t-med) var(--ease-out);
+    will-change: transform;
+}
+.product-card:hover,
+.card-ml:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--card-shadow-lg);
+}
+.product-card:hover .product-img-wrap img,
+.card-img {
+    transition: opacity 0.5s var(--ease-out);
+}
+
+/* Product images cross-fade in via .is-loaded (onload attr in
+   products._image partial) */
+.card-img {
+    opacity: 0;
+}
+.card-img.is-loaded {
+    opacity: 1;
+}
+/* If onload never fires (cached edge case), force-show after a beat */
+@keyframes img-failsafe {
+    to {
+        opacity: 1;
+    }
+}
+.card-img {
+    animation: img-failsafe 0s 1.2s forwards;
+}
+
+/* Buttons: one consistent press feel */
+.btn-ml,
+.btn-outline-ml,
+.btn-white,
+.btn-explore-market {
+    transition:
+        transform var(--t-fast) var(--ease-out),
+        box-shadow var(--t-fast) var(--ease-out),
+        background-color var(--t-fast) var(--ease-out),
+        color var(--t-fast) var(--ease-out),
+        border-color var(--t-fast) var(--ease-out);
+}
+.btn-ml:active,
+.btn-outline-ml:active,
+.btn-white:active {
+    transform: scale(0.97);
+}
+
+/* Form focus: themed glow */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+/* Badges and pills */
+.badge-soft,
+.status-pill {
+    transition:
+        background-color var(--t-fast) ease,
+        color var(--t-fast) ease,
+        transform var(--t-fast) var(--ease-out);
+}
+
+/* =========================================================
+   Per-layout page-leave skeletons
+   Shared bits
+   ========================================================= */
+.sk-banner {
+    text-align: center;
+    padding: 26px 0 8px;
+}
+.sk-banner-eyebrow {
+    width: 130px;
+    height: 12px;
+    margin: 0 auto 14px;
+    border-radius: 99px;
+    background: var(--surface-2);
+    animation: skeleton-sweep 1.4s ease-in-out infinite;
+}
+.sk-banner-title {
+    width: 280px;
+    height: 30px;
+    margin: 0 auto 12px;
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    animation: skeleton-sweep 1.4s ease-in-out infinite;
+}
+.sk-banner-sub {
+    width: 380px;
+    max-width: 80%;
+    height: 12px;
+    margin: 0 auto 26px;
+    border-radius: 99px;
+    background: var(--surface-2);
+    animation: skeleton-sweep 1.4s ease-in-out infinite;
+}
+.sk-field {
+    height: 32px;
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    animation: skeleton-sweep 1.4s ease-in-out infinite;
+}
+.sk-btn {
+    height: 32px;
+    border-radius: var(--radius-sm);
+    background: color-mix(in srgb, var(--primary) 30%, var(--surface-2));
+    animation: skeleton-sweep 1.4s ease-in-out infinite;
+}
+.sk-btn-go {
+    width: 100%;
+}
+.sk-chip {
+    width: 64px;
+    height: 16px;
+    border-radius: 99px;
+    background: var(--surface-2);
+    animation: skeleton-sweep 1.4s ease-in-out infinite;
+}
+.sk-chip-row {
+    display: flex;
+    gap: 6px;
+    margin: 13px 14px 0;
+    flex-wrap: wrap;
+}
+.sk-price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 14px 14px 16px;
+}
+.sk-price {
+    width: 76px;
+    height: 18px;
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    animation: skeleton-sweep 1.4s ease-in-out infinite;
+}
+.sk-add {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--primary) 30%, var(--surface-2));
+    animation: skeleton-sweep 1.4s ease-in-out infinite;
+}
+.sk-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 14px 14px 16px;
+}
+.sk-link {
+    width: 88px;
+    height: 14px;
+    border-radius: 99px;
+    background: color-mix(in srgb, var(--primary) 26%, var(--surface-2));
+    animation: skeleton-sweep 1.4s ease-in-out infinite;
+}
+
+/* Layout variants */
+.sk-grid-4 {
+    grid-template-columns: repeat(4, 1fr);
+}
+.sk-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+.sk-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+.sk-count-row {
+    padding: 0 2px 14px;
+}
+.sk-filter {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    margin-bottom: 18px;
+    box-shadow: var(--card-shadow);
+}
+
+/* Markets: sidebar + main grid */
+.sk-markets-layout {
+    display: grid;
+    grid-template-columns: 1fr 2.2fr;
+    gap: 22px;
+    align-items: start;
+}
+.sk-side {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.sk-side-card {
+    background: var(--surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    box-shadow: var(--card-shadow);
+}
+.sk-map {
+    height: 300px;
+    border-radius: var(--radius-md);
+    background: var(--surface-2);
+    animation: skeleton-sweep 1.4s ease-in-out infinite;
+}
+.sk-side-main .skeleton-grid {
+    gap: 22px;
+}
+
+/* Farmers: search row + avatar cards */
+.sk-search {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 26px;
+}
+.sk-search .sk-field {
+    width: 200px;
+}
+.sk-search .sk-btn {
+    width: 90px;
+}
+.sk-farmer .skeleton-line {
+    margin-left: 0;
+    margin-right: 0;
+}
+.sk-farmer-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 16px 16px 14px;
+}
+.sk-farmer .sk-chip-row {
+    margin-left: 16px;
+    margin-right: 16px;
+}
+.sk-farmer .sk-btn {
+    margin: 16px 16px 16px;
+    height: 34px;
+}
+.sk-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    flex-shrink: 0;
+    background: var(--surface-2);
+    animation: skeleton-sweep 1.4s ease-in-out infinite;
+}
+.sk-farmer-id {
+    flex: 1;
+}
+.sk-farmer-id .skeleton-line {
+    margin: 0;
+}
+
+/* =========================================================
+   Skeleton responsive mirrors (match the real page breakpoints)
+   ========================================================= */
+@media (max-width: 991.98px) {
+    /* Markets page collapses the sidebar above the grid at <992 */
+    .sk-markets-layout {
+        grid-template-columns: 1fr;
+    }
+    .sk-map {
+        height: 220px;
+    }
+    .sk-grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 767.98px) {
+    .sk-grid-3 {
+        grid-template-columns: 1fr;
+    }
+    .sk-search .sk-field {
+        width: 150px;
+    }
+    .sk-filter {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 575.98px) {
+    .sk-grid-4,
+    .sk-grid-2 {
+        grid-template-columns: 1fr;
+    }
+    .sk-banner-title {
+        width: 200px;
+        height: 24px;
+    }
+    .sk-banner-sub {
+        width: 240px;
+    }
+    .sk-filter {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .sk-search {
+        flex-wrap: wrap;
+    }
+    .sk-search .sk-field {
+        flex: 1 1 130px;
+        width: auto;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.page-enter:not(.page-leaving) {
+        animation: none;
+    }
+    .hero-blend,
+    .hero-bg-photo img,
+    .hero-img {
+        transition: none;
+    }
+}
+
+/* =========================================================
+   Products page — filter bar & sort dropdown polish
+   ========================================================= */
+.product-filter-card {
+    position: relative;
+    overflow: visible;
+}
+.product-filter-card .form-label {
+    margin-bottom: 2px;
+}
+/* Native dropdown popups follow the theme on modern browsers */
+.form-select,
+.form-control {
+    color-scheme: light dark;
+}
+
+/* Small tablets: 2 per row, price inputs side by side */
+@media (max-width: 767.98px) {
+    .product-filter-card .row {
+        row-gap: 10px;
+    }
+}
+
+/* Phones: everything stacks full-width, Go button last */
+@media (max-width: 575.98px) {
+    .product-filter-card .col-6,
+    .product-filter-card .col-3 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+    .product-filter-card .d-grid {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+    .product-filter-card .btn {
+        width: 100%;
+    }
+    /* Sort row wraps cleanly next to the result count */
+    #sortForm {
+        width: 100%;
+        justify-content: flex-start;
     }
 }

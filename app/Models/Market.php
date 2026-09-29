@@ -77,6 +77,39 @@ class Market extends Model
         return $this->hasMany(MarketSchedule::class);
     }
 
+    /**
+     * Days this market actually trades, derived from its schedules so every
+     * label on the site stays consistent with the data (no hardcoded
+     * "Open Saturday" strings that drift out of sync).
+     *
+     * @return \Illuminate\Support\Collection<int, MarketSchedule>
+     */
+    public function openDays(): \Illuminate\Support\Collection
+    {
+        return $this->schedules
+            ->filter(fn (MarketSchedule $s) => ! $s->is_closed)
+            ->sortBy('day_of_week')
+            ->values();
+    }
+
+    /**
+     * Human label for cards: "Saturdays" when one trading day,
+     * "Sat & Sun" when two, "Multiple days" beyond that.
+     */
+    public function openDaysLabel(): string
+    {
+        $days = $this->openDays();
+
+        return match (true) {
+            $days->isEmpty() => 'See schedule',
+            $days->count() === 1 => 'Open '.\App\Models\MarketSchedule::DAYS[$days->first()->day_of_week],
+            $days->count() === 2 => 'Open '.collect($days)
+                ->map(fn ($s) => substr(\App\Models\MarketSchedule::DAYS[$s->day_of_week], 0, 3))
+                ->implode(' & '),
+            default => 'Open multiple days',
+        };
+    }
+
     public function farmerMarkets(): HasMany
     {
         return $this->hasMany(FarmerMarket::class);

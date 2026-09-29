@@ -32,9 +32,9 @@
             <div class="footer-col">
                 <h4>Stay in Touch</h4>
                 <ul class="footer-contact">
-                    <li><i class="bi bi-geo-alt"></i><a class="text-decoration-none" href="{{ route('home') }}">Green Valley Community Market, Main St</a></li>
+                    <li><i class="bi bi-geo-alt"></i><a class="text-decoration-none" href="{{ route('markets.index') }}">Green Valley Community Market, University Road, Karachi</a></li>
                     <li><i class="bi bi-envelope"></i><a  class="text-decoration-none" href="mailto:hello@marketlink.test">hello@marketlink.test</a></li>
-                    <li><i class="bi bi-telephone"></i><a href="tel:+15550102233" class="text-decoration-none">(555) 010-2233</a></li>
+                    <li><i class="bi bi-telephone"></i><a href="tel:+922111111111" class="text-decoration-none">+92 21 111 111 111</a></li>
                 </ul>
                 <a href="{{ route('markets.index') }}" class="btn btn-ml btn-sm mt-2">Find a Market</a>
             </div>

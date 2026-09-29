@@ -23,9 +23,9 @@ Demo accounts (seeded): `admin@marketlink.test`, `farmer1@marketlink.test`,
 
 ## Deploying to Railway
 
-The repo ships with `railway.json` (build + start commands) and a pre-deploy script at
-`railway/init-app.sh` that migrates, seeds idempotently, links storage and warms caches —
-so every deploy is hands-off.
+The repo ships with `railway.json` (build + start commands). Its `preDeployCommand`
+migrates, seeds idempotently, links storage and warms caches — so every deploy is
+hands-off with no extra scripts to maintain.
 
 ### One-time setup
 
@@ -59,10 +59,10 @@ so every deploy is hands-off.
 
 ### Optional services
 
-- **Worker** (only if you later queue notifications): create a service from the same repo
-  with start command `chmod +x railway/run-worker.sh && sh railway/run-worker.sh`.
+- **Worker** (only if you later queue notifications): add a service from the same repo
+  with start command `php artisan queue:work --tries=3 --timeout=60`.
 - **Cron** (for scheduled tasks): same repo, start command
-  `chmod +x railway/run-cron.sh && sh railway/run-cron.sh`.
+  `php artisan schedule:run` on a minute schedule. (No tasks are scheduled today.)
 
 ### Notes
 
