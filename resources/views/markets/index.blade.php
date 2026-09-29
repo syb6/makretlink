@@ -80,6 +80,7 @@
                                     @php $openDays = $market->openDays(); @endphp
                                     <span class="market-status-tag {{ $market->status === 'active' ? '' : 'inactive' }}">{{ $market->openDaysLabel() }}</span>
                                     <img src="{{ $market->image_url }}" alt="{{ $market->name }}"
+                                     loading="lazy"
                                          width="600" height="400" loading="lazy"
                                          onerror="this.onerror=null;this.src=this.dataset.fallback;"
                                          data-fallback="{{ asset('images/placeholders/market.png') }}">

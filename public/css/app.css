@@ -954,8 +954,6 @@ a.logo-brand:hover {
 }
 
 .hero-float-chips {
-    position: absolute;
-    z-index: 3;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -983,18 +981,6 @@ a.logo-brand:hover {
 
 [data-bs-theme='dark'] .hero-float-chips i {
     color: var(--primary);
-}
-
-.hero-float-chips.chip-1 {
-    top: 16%;
-    right: 4%;
-    animation-delay: 1.1s, 1.7s;
-}
-
-.hero-float-chips.chip-2 {
-    bottom: 14%;
-    left: 46%;
-    animation-delay: 1.35s, 2.2s;
 }
 
 @keyframes chip-pop {
@@ -2872,6 +2858,11 @@ a.product-title:hover {
     padding: 0.55rem;
     border-top: 1px solid var(--border-color);
     background: var(--surface);
+}
+/* The spinner must stay hidden until a message is actually sending
+   (bootstrap's .spinner-border is inline-block by default). */
+.chatbot-send-busy {
+    display: none;
 }
 .chatbot-foot form.sending .chatbot-send-busy {
     display: inline-block;
@@ -5332,14 +5323,6 @@ html.theme-anim .empty {
     }
 }
 
-/* Third floating chip (chip-1/chip-2 styles already exist) */
-.hero-float-chips.chip-3 {
-    top: 55%;
-    right: 30%;
-    animation-delay: 1.6s, 2.7s;
-}
-
-
 /* ---------- Section heads with accent words ---------- */
 .section-head {
     text-align: center;
@@ -5528,9 +5511,6 @@ html.theme-anim .empty {
 }
 
 @media (max-width: 767.98px) {
-    .hero-float-chips.chip-3 {
-        display: none;
-    }
     .hero-stats,
     .hero-announcements {
         margin-left: auto;
@@ -5570,7 +5550,7 @@ html.theme-anim .empty {
         font-size: 1.15rem;
     }
     .hero-stat-label {
-        font-size: 0.58rem;
+        font-size: 0.72rem;
     }
     .hero-announcements-head {
         padding: 8px 13px;
@@ -6043,5 +6023,180 @@ body.page-enter:not(.page-leaving) {
     #sortForm {
         width: 100%;
         justify-content: flex-start;
+    }
+}
+/* =========================================================
+   Hero trust chips — responsive placement (v3)
+   Desktop (>992px): the strip overlays the hero section and
+   each chip floats at its photo-anchored spot (original look).
+   Stacked layouts (<=991px): the strip becomes a normal in-flow
+   row of pills under the hero photo — no absolute positioning,
+   so chips can never overlap the title, description or CTAs.
+   ========================================================= */
+.hero-chips-strip {
+    pointer-events: none;
+}
+
+@media (min-width: 992px) {
+    .hero-chips-strip {
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+    }
+
+    .hero-chips-strip .hero-float-chips {
+        position: absolute;
+        margin: 0;
+    }
+
+    .hero-chips-strip .hero-float-chips.chip-1 {
+        top: 16%;
+        right: 4%;
+        animation-delay: 1.1s, 1.7s;
+    }
+
+    .hero-chips-strip .hero-float-chips.chip-2 {
+        bottom: 14%;
+        left: 46%;
+        animation-delay: 1.35s, 2.2s;
+    }
+
+    .hero-chips-strip .hero-float-chips.chip-3 {
+        top: 55%;
+        right: 30%;
+        animation-delay: 1.6s, 2.7s;
+    }
+}
+
+/* Tablet range: the two-column hero is narrower here, so chip-2's
+   desktop spot collides with the announcements rail — drop it a
+   little lower and keep it clear of the left column. */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    .hero-chips-strip .hero-float-chips.chip-2 {
+        bottom: 8%;
+        left: 50%;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .hero-chips-strip {
+        position: relative;
+        z-index: 3;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px 10px;
+        max-width: 560px;
+        margin: 2px auto 0;
+        padding: 0 16px;
+    }
+
+    .hero-chips-strip .hero-float-chips {
+        position: static;
+        animation-delay: 0.9s, 1.6s;
+    }
+
+    .hero-chips-strip .hero-float-chips.chip-2 {
+        animation-delay: 1.05s, 2.1s;
+    }
+
+    .hero-chips-strip .hero-float-chips.chip-3 {
+        animation-delay: 1.2s, 2.6s;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .hero-chips-strip {
+        gap: 7px 8px;
+        padding: 0 12px;
+    }
+
+    .hero-chips-strip .hero-float-chips {
+        padding: 6px 11px;
+        font-size: 0.72rem;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    .hero-chips-strip .hero-float-chips i {
+        font-size: 0.88rem;
+    }
+}
+/* =========================================================
+   Mobile ergonomics + tap-target polish (audit pass)
+   Brings interactive elements to a ~40px+ touch footprint on
+   phones and keeps micro-text legible. Appended last so these
+   values intentionally win the cascade.
+   ========================================================= */
+
+/* Announcements label was rendered at ~9px on phones */
+@media (max-width: 575.98px) {
+    .hero-announcements-head {
+        font-size: 0.72rem;
+    }
+    .hero-announcements-head i {
+        font-size: 0.82rem;
+    }
+}
+
+/* Map zoom controls: bigger tap targets (desktop 26px → 34px, touch
+   30px → 36px). Chained classes beat Leaflet's own rules regardless
+   of stylesheet order (leaflet.css loads after app.css). */
+.leaflet-bar a.leaflet-control-zoom-in,
+.leaflet-bar a.leaflet-control-zoom-out {
+    width: 34px;
+    height: 34px;
+    line-height: 34px;
+    font-size: 18px;
+}
+.leaflet-touch .leaflet-bar a.leaflet-control-zoom-in,
+.leaflet-touch .leaflet-bar a.leaflet-control-zoom-out {
+    width: 36px;
+    height: 36px;
+    line-height: 36px;
+    font-size: 20px;
+}
+
+/* Contact info links: comfortable tap + clear hover state */
+.contact-link {
+    display: inline-block;
+    padding: 3px 0;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+.contact-link:hover {
+    color: var(--primary-dark);
+}
+
+/* Auth card mini-links ("Forgot password?", "Create an account") */
+.auth-minilink {
+    display: inline-block;
+    padding: 4px 0;
+}
+
+/* ---- Header tap targets on phones ----
+   These appended rules intentionally override the compact sizes
+   set earlier in the file (34/32/28px blocks). 40px matches the
+   padded brand height on mobile so the bar stays balanced. */
+@media (max-width: 575.98px) {
+    .header-icon-btn,
+    .theme-toggle {
+        width: 40px;
+        height: 40px;
+        font-size: 1.05rem;
+    }
+    .logo-brand {
+        padding: 8px 0;
+    }
+}
+@media (max-width: 359.98px) {
+    .header-icon-btn,
+    .theme-toggle {
+        width: 36px;
+        height: 36px;
+        font-size: 0.95rem;
+    }
+    .logo-brand {
+        padding: 6px 0;
     }
 }

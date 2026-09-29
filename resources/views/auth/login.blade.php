@@ -34,7 +34,7 @@
                     </div>
                     
                     <div class="text-end mt-1">
-                        <a href="{{ route('password.request') }}" class="small text-decoration-none fw-semibold">Forgot password?</a>
+                        <a href="{{ route('password.request') }}" class="small text-decoration-none fw-semibold auth-minilink">Forgot password?</a>
                     </div>
                 </div>
 
@@ -48,7 +48,7 @@
 
             <div class="text-center mt-4 small">
                 <span class="text-muted">New to MarketLink?</span>
-                <a href="{{ route('register') }}" class="fw-semibold text-decoration-none">Create an account</a>
+                <a href="{{ route('register') }}" class="fw-semibold text-decoration-none auth-minilink">Create an account</a>
             </div>
 
             <hr class="my-4">

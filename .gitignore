@@ -24,3 +24,7 @@ Thumbs.db
 /node_modules
 
 /package-lock.json
+
+# Local QA screenshots do not belong in the repo
+/storage/*.png
+/storage/ss-*.png

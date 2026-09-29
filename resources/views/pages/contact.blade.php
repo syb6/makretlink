@@ -22,8 +22,8 @@
                 <div class="card-ml p-4 mb-4 reveal">
                     <h5 class="fw-bold mb-3">Get in touch</h5>
                     <p class="mb-2"><i class="bi bi-geo-alt me-2" style="color: var(--primary-dark)"></i>MarketLink — Gulshan-e-Iqbal, Karachi, Pakistan</p>
-                    <p class="mb-2"><i class="bi bi-envelope me-2" style="color: var(--primary-dark)"></i><a href="mailto:hello@marketlink.test" class="text-decoration-none">hello@marketlink.test</a></p>
-                    <p class="mb-2"><i class="bi bi-telephone me-2" style="color: var(--primary-dark)"></i><a href="tel:+92211111MarketLink" class="text-decoration-none">+92 21 111 111&nbsp;xxx</a></p>
+                    <p class="mb-2"><i class="bi bi-envelope me-2" style="color: var(--primary-dark)"></i><a href="mailto:hello@marketlink.test" class="text-decoration-none contact-link">hello@marketlink.test</a></p>
+                    <p class="mb-2"><i class="bi bi-telephone me-2" style="color: var(--primary-dark)"></i><a href="tel:+92211111MarketLink" class="text-decoration-none contact-link">+92 21 111 111&nbsp;xxx</a></p>
                     <p class="mb-0"><i class="bi bi-clock me-2" style="color: var(--primary-dark)"></i>Mon–Sat, 8:00 – 18:00</p>
                 </div>
 

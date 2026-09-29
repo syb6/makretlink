@@ -16,10 +16,6 @@
     <div class="hero-bg-scrim" aria-hidden="true"></div>
     <div class="hero-bg-glow" aria-hidden="true"></div>
     <div class="hero-bg-glow-2" aria-hidden="true"></div>
-    {{-- Floating trust chips over the hero photo (pure decoration) --}}
-    <span class="hero-float-chips chip-1" aria-hidden="true"><i class="bi bi-basket2-fill"></i> 1,200+ baskets reserved</span>
-    <span class="hero-float-chips chip-2" aria-hidden="true"><i class="bi bi-star-fill"></i> 9 farms near you</span>
-    <span class="hero-float-chips chip-3" aria-hidden="true"><i class="bi bi-patch-check-fill"></i> 100% verified farmers</span>
     <div class="container hero-grid">
         {{-- Staggered entrance: pure CSS, no JS dependency (ml-in + --d delay) --}}
         <div class="hero-content">
@@ -82,6 +78,14 @@
                      onerror="this.style.display='none'">
             </picture>
         </div>
+    </div>
+    {{-- Floating trust chips (pure decoration). Desktop: absolutely
+         positioned over the hero photo. Stacked layouts: an in-flow
+         pill strip under the photo so they never overlap the text. --}}
+    <div class="hero-chips-strip" role="presentation">
+        <span class="hero-float-chips chip-1" aria-hidden="true"><i class="bi bi-basket2-fill"></i> 1,200+ baskets reserved</span>
+        <span class="hero-float-chips chip-2" aria-hidden="true"><i class="bi bi-star-fill"></i> 9 farms near you</span>
+        <span class="hero-float-chips chip-3" aria-hidden="true"><i class="bi bi-patch-check-fill"></i> 100% verified farmers</span>
     </div>
     <a class="hero-scroll-cue" href="#features" aria-label="Scroll to features"><span>Scroll</span><i class="bi bi-chevron-double-down"></i></a>
 </section>
@@ -149,7 +153,7 @@
                 <div class="market-card reveal">
                     <div class="market-img-box">
                         <span class="market-status-tag">{{ $market->openDaysLabel() }}</span>
-                        <img src="{{ $market->image_url }}" alt="{{ $market->name }}"
+                        <img src="{{ $market->image_url }}" alt="{{ $market->name }}" loading="lazy"
                              width="600" height="400" loading="lazy"
                              onerror="this.onerror=null;this.src=this.dataset.fallback;"
                              data-fallback="{{ asset('images/placeholders/market.png') }}">
