@@ -30,6 +30,22 @@ class EnsureUserHasRole
             return redirect()->route('login')->with('error', 'Your account has been deactivated. Contact the administrator.');
         }
 
+        // Pending and rejected farmers must not reach the farmer area — only
+        // approved farmers can manage stalls, stock, slots and orders.
+        if ($user->isFarmer() && in_array('farmer', $roles, true)) {
+            $approval = $user->farmerProfile?->approval_status;
+
+            if ($approval !== 'approved') {
+                auth()->logout();
+
+                $message = $approval === 'rejected'
+                    ? 'Your farmer application was rejected. Contact the administrator for details.'
+                    : 'Your farmer account is still awaiting admin approval.';
+
+                return redirect()->route('login')->with('error', $message);
+            }
+        }
+
         return $next($request);
     }
 }

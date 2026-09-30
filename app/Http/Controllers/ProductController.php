@@ -41,16 +41,9 @@ class ProductController extends Controller
         $max = $validated['max_price'] ?? null;
         $sort = $validated['sort'] ?? 'name';
 
-        $stocks = WeeklyStock::query()
-            ->where('status', 'available')
-            ->where('available_quantity', '>', 0)
-            // Only current or upcoming weeks — stale stock from past weeks must not be sellable.
-            ->where('week_start', '>=', now()->startOfWeek(Carbon::SUNDAY)->toDateString())
+        $stocks = WeeklyStock::sellable()
             ->with(['product.category', 'product.farmer.user', 'farmerMarket.market'])
             ->whereHas('product', fn ($p) => $p
-                ->where('status', 'active')
-                // Pending/rejected farmers must never appear in public listings.
-                ->whereHas('farmer', fn ($f) => $f->where('approval_status', 'approved'))
                 ->when($search, fn ($q) => $q->where(fn ($w) => $w
                     ->where('name', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%")))
@@ -61,9 +54,6 @@ class ProductController extends Controller
             ->when($day !== null && $day !== '', fn ($q) => $q->whereHas('farmerMarket.schedules', fn ($s) => $s
                 ->where('day_of_week', (int) $day)
                 ->where('is_active', true)))
-            ->whereHas('farmerMarket', fn ($fm) => $fm
-                ->where('status', 'active')
-                ->whereHas('market', fn ($m) => $m->where('status', 'active')))
             ->get()
             // One row per product+stall so a product stocked at two markets shows twice, not N times.
             ->unique(fn ($s) => $s->product_id.'-'.$s->farmer_market_id)
@@ -113,14 +103,17 @@ class ProductController extends Controller
 
     public function show(Product $product)
     {
+        // Hidden items must not be reachable by URL: product must be active
+        // AND its farmer approved (pending/rejected farmers' products 404).
         abort_unless($product->status === 'active', 404);
+        abort_unless($product->farmer->approval_status === 'approved', 404);
 
         $product->load(['category', 'farmer.user', 'farmer.farmerMarkets.market']);
 
-        $stocks = WeeklyStock::query()
+        // Only sellable stock: current/upcoming week, active stall + market.
+        // Listing raw stock rows leaked old weeks and inactive stalls.
+        $stocks = WeeklyStock::sellable()
             ->where('product_id', $product->id)
-            ->where('status', 'available')
-            ->where('available_quantity', '>', 0)
             ->with('farmerMarket.market')
             ->get();
 
@@ -154,9 +147,10 @@ class ProductController extends Controller
      */
     public function stockOptions(Product $product)
     {
-        $options = WeeklyStock::where('product_id', $product->id)
-            ->where('status', 'available')
-            ->where('available_quantity', '>', 0)
+        // Same sellable rules as the detail page — the add-to-cart modal
+        // must not offer old-week or inactive-stall stock either.
+        $options = WeeklyStock::sellable()
+            ->where('product_id', $product->id)
             ->with('farmerMarket.market')
             ->get()
             ->map(fn ($s) => [

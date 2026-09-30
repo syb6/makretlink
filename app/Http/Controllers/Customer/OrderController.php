@@ -47,24 +47,36 @@ class OrderController extends Controller
     {
         $this->authorizeOrder($order);
 
-        if (! in_array($order->status, ['placed', 'accepted'], true)) {
-            return back()->with('error', 'This order can no longer be cancelled.');
-        }
+        $error = null;
 
-        $cutoff = $order->pickupSlot?->cutoff_at;
-        if ($cutoff && now()->greaterThan($cutoff)) {
-            return back()->with('error', 'The cutoff time for this order has passed.');
-        }
+        DB::transaction(function () use ($order, &$error) {
+            // Re-read the order INSIDE the transaction, row-locked, so two
+            // concurrent cancel requests (double-click) cannot both pass the
+            // status check and restore stock twice. The second request sees
+            // status = cancelled and bails.
+            $locked = Order::whereKey($order->id)->lockForUpdate()->first();
 
-        DB::transaction(function () use ($order) {
-            foreach ($order->items as $item) {
+            if (! in_array($locked->status, ['placed', 'accepted'], true)) {
+                $error = 'This order can no longer be cancelled.';
+
+                return;
+            }
+
+            $cutoff = $locked->pickupSlot?->cutoff_at;
+            if ($cutoff && now()->greaterThan($cutoff)) {
+                $error = 'The cutoff time for this order has passed.';
+
+                return;
+            }
+
+            foreach ($locked->items as $item) {
                 if ($item->product_id) {
                     $stock = WeeklyStock::where('product_id', $item->product_id)
-                        ->where('farmer_market_id', $order->farmer_market_id)
+                        ->where('farmer_market_id', $locked->farmer_market_id)
                         ->lockForUpdate()
                         ->first();
                     if ($stock) {
-                        $stock->available_quantity += (float) $item->quantity;
+                        $stock->available_quantity = (float) $stock->available_quantity + (float) $item->quantity;
                         if ($stock->status === 'sold_out' && $stock->available_quantity > 0) {
                             $stock->status = 'available';
                         }
@@ -73,8 +85,12 @@ class OrderController extends Controller
                 }
             }
 
-            $order->markStatus('cancelled', 'Cancelled by customer before cutoff.', Auth::user());
+            $locked->markStatus('cancelled', 'Cancelled by customer before cutoff.', Auth::user());
         });
+
+        if ($error) {
+            return back()->with('error', $error);
+        }
 
         return back()->with('success', 'Order cancelled.');
     }

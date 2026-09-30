@@ -12,7 +12,6 @@ use App\Models\WeeklyStock;
 use App\Services\AiAssistant;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Session;
 
@@ -24,22 +23,11 @@ class HomeController extends Controller
     {
         $announcements = Announcement::published()->latest('published_at')->take(3)->get();
 
-        $featuredStocks = WeeklyStock::with([
+        $featuredStocks = WeeklyStock::sellable()->with([
             'product.category',
             'product.farmer.user',
             'farmerMarket.market',
         ])
-            ->where('status', 'available')
-            ->where('available_quantity', '>', 0)
-            // Only current or upcoming weeks; past stock must not resurface after the week passes.
-            ->where('week_start', '>=', now()->startOfWeek(Carbon::SUNDAY)->toDateString())
-            // Only products of approved farmers sold at active stalls in active markets.
-            ->whereHas('product', fn ($p) => $p
-                ->where('status', 'active')
-                ->whereHas('farmer', fn ($f) => $f->where('approval_status', 'approved')))
-            ->whereHas('farmerMarket', fn ($fm) => $fm
-                ->where('status', 'active')
-                ->whereHas('market', fn ($m) => $m->where('status', 'active')))
             ->inRandomOrder()
             ->take(8)
             ->get();

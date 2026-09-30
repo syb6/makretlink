@@ -58,10 +58,11 @@ class FarmerController extends Controller
 
         $farmer->load(['user', 'farmerMarkets.market', 'farmerMarkets.schedules']);
 
-        $stocks = WeeklyStock::query()
+        // Sellable scope already requires the product to be active (and the
+        // farmer approved, stall + market active, week current) — inactive
+        // products must not leak onto a farmer's public page.
+        $stocks = WeeklyStock::sellable()
             ->whereHas('product', fn ($q) => $q->where('farmer_id', $farmer->id))
-            ->where('status', 'available')
-            ->where('available_quantity', '>', 0)
             ->with(['product.category', 'farmerMarket.market'])
             ->orderByDesc('week_start')
             ->get();

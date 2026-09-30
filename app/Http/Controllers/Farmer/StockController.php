@@ -74,12 +74,37 @@ class StockController extends Controller
             ],
             [
                 'quantity' => $data['quantity'],
-                'available_quantity' => $data['quantity'],
+                // Re-saving an existing row must PRESERVE reservations:
+                // units already sold/reserved stay sold, only the remainder
+                // becomes available. Wiping available_quantity back to the
+                // full amount would oversell the week.
+                'available_quantity' => $this->availabilityFor((float) $data['quantity'], $data['product_id'], $data['farmer_market_id'], $weekStart),
                 'status' => $data['quantity'] > 0 ? 'available' : 'unavailable',
             ]
         );
 
         return back()->with('success', 'Weekly stock saved.');
+    }
+
+    /**
+     * Availability after re-saving total quantity for a week: keep units
+     * already sold/reserved deducted. For brand-new rows everything is
+     * available.
+     */
+    private function availabilityFor(float $newTotal, $productId, $farmerMarketId, string $weekStart): float
+    {
+        $existing = WeeklyStock::where('product_id', $productId)
+            ->where('farmer_market_id', $farmerMarketId)
+            ->where('week_start', $weekStart)
+            ->first();
+
+        if (! $existing) {
+            return max(0, $newTotal);
+        }
+
+        $reserved = max(0, (float) $existing->quantity - (float) $existing->available_quantity);
+
+        return max(0, $newTotal - $reserved);
     }
 
     public function update(Request $request, WeeklyStock $stock)

@@ -28,8 +28,23 @@ class CheckoutController extends Controller
                 ->with('error', 'Your cart is empty.');
         }
 
-        // Group items by farmer_market to create one order per stall
-        $groups = $cart->items->groupBy('farmer_market_id');
+        // Hide anything that is no longer sellable (product deactivated,
+        // farmer unapproved, stall/market inactive, week passed, stock gone).
+        // Customers fix their cart here instead of hitting errors at place().
+        $cart->items->each(function ($item) {
+            $item->is_unsellable = ! $this->sellableStockFor($item)->exists();
+        });
+
+        $orderable = $cart->items->reject(fn ($i) => $i->is_unsellable);
+
+        if ($orderable->isEmpty()) {
+            return redirect()
+                ->route('cart.index')
+                ->with('error', 'The items in your cart are no longer available.');
+        }
+
+        // Group orderable items by farmer_market to create one order per stall
+        $groups = $orderable->groupBy('farmer_market_id');
         $slots = collect();
 
         foreach ($groups as $farmerMarketId => $items) {
@@ -47,6 +62,7 @@ class CheckoutController extends Controller
             'cart' => $cart,
             'groups' => $groups,
             'slots' => $slots,
+            'unsellable' => $cart->items->filter(fn ($i) => $i->is_unsellable),
         ]);
     }
 
@@ -91,8 +107,8 @@ class CheckoutController extends Controller
                     continue;
                 }
 
-                // Cancelled orders must not consume slot capacity.
-                if ($slot->max_orders !== null && $slot->orders()->whereNotIn('status', ['cancelled'])->count() >= $slot->max_orders) {
+                // Declined orders must not consume slot capacity.
+                if ($slot->max_orders !== null && $slot->orders()->whereNotIn('status', ['cancelled', 'declined'])->count() >= $slot->max_orders) {
                     $failures[] = 'That pickup slot is full — please pick another one.';
 
                     continue;
@@ -100,6 +116,39 @@ class CheckoutController extends Controller
 
                 $fm = $items->first()->farmerMarket;
 
+                // ---- Phase 1: lock & verify stock for the WHOLE group ----
+                // Nothing is written until every item in the group passes, so
+                // a failed group never leaves half-reserved rows behind.
+                $stockRows = [];
+                $groupOk = true;
+
+                foreach ($items as $item) {
+                    // Sellable scope enforces: available status, quantity left,
+                    // current/upcoming week, active product, approved farmer,
+                    // active stall AND market. Row is locked until commit so
+                    // no concurrent checkout can oversell it.
+                    $stock = WeeklyStock::sellable()
+                        ->where('product_id', $item->product_id)
+                        ->where('farmer_market_id', $item->farmer_market_id)
+                        ->lockForUpdate()
+                        ->first();
+
+                    if (! $stock || (float) $stock->available_quantity < (float) $item->quantity) {
+                        $left = $stock ? (float) $stock->available_quantity : 0;
+                        $failures[] = $item->product->name.' only has '.$left.' '.$item->product->unit.' left — adjust the quantity in your cart.';
+                        $groupOk = false;
+
+                        break;
+                    }
+
+                    $stockRows[$item->id] = $stock;
+                }
+
+                if (! $groupOk) {
+                    continue;
+                }
+
+                // ---- Phase 2: write the order, items, reservations ----
                 $order = Order::create([
                     'order_number' => Order::generateOrderNumber(),
                     'customer_id' => $customer->id,
@@ -114,36 +163,39 @@ class CheckoutController extends Controller
                     'pickup_start_time' => $slot->start_time,
                     'pickup_end_time' => $slot->end_time,
                     'status' => 'placed',
-                    'total_amount' => $items->sum(fn ($i) => $i->quantity * $i->price),
+                    'total_amount' => 0,
                     'customer_note' => $data['note'] ?? null,
                     'placed_at' => now(),
                 ]);
 
                 foreach ($items as $item) {
+                    $stock = $stockRows[$item->id];
+
+                    // Charge the LIVE price at order time, never the price
+                    // stored when the item was added to the cart — a farmer's
+                    // price change must reach old carts immediately.
+                    $unitPrice = (float) $stock->product->price;
+
                     OrderItem::create([
                         'order_id' => $order->id,
                         'product_id' => $item->product_id,
                         'product_name' => $item->product->name,
                         'unit' => $item->product->unit,
                         'quantity' => $item->quantity,
-                        'unit_price' => $item->price,
-                        'subtotal' => $item->quantity * $item->price,
+                        'unit_price' => $unitPrice,
+                        'subtotal' => (float) $item->quantity * $unitPrice,
                     ]);
 
-                    // Reduce weekly stock
-                    $stock = WeeklyStock::where('product_id', $item->product_id)
-                        ->where('farmer_market_id', $item->farmer_market_id)
-                        ->lockForUpdate()
-                        ->first();
-
-                    if ($stock) {
-                        $stock->available_quantity = max(0, (float) $stock->available_quantity - (float) $item->quantity);
-                        if ($stock->available_quantity <= 0) {
-                            $stock->status = 'sold_out';
-                        }
-                        $stock->save();
+                    $stock->available_quantity = (float) $stock->available_quantity - (float) $item->quantity;
+                    if ($stock->available_quantity <= 0) {
+                        $stock->available_quantity = 0;
+                        $stock->status = 'sold_out';
                     }
+                    $stock->save();
                 }
+
+                // The stored total always matches the charged prices.
+                $order->update(['total_amount' => (float) $order->items()->sum('subtotal')]);
 
                 $order->statusHistories()->create([
                     'status' => 'placed',
@@ -181,5 +233,13 @@ class CheckoutController extends Controller
         }
 
         return redirect()->route('orders.index')->with('success', $orders->count().' order(s) placed! Pay at pickup.');
+    }
+
+    /** Live sellable stock row for a cart item (null-safe query builder). */
+    private function sellableStockFor(CartItem $item)
+    {
+        return WeeklyStock::sellable()
+            ->where('product_id', $item->product_id)
+            ->where('farmer_market_id', $item->farmer_market_id);
     }
 }

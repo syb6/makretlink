@@ -3307,7 +3307,11 @@ body {
     pointer-events: none;
     transition: width 0.08s linear;
 }
-.js-anim .reveal {
+/* :where() keeps the reveal system at zero specificity so component
+   rules (e.g. hover lifts) can still override transform after the
+   reveal lands — previously .js-anim .reveal.in-view (0,3,0) beat
+   .product-card:hover (0,2,0) and silently killed all card lifts. */
+.js-anim :where(.reveal) {
     opacity: 0;
     transform: translateY(18px);
     will-change: transform, opacity;
@@ -3316,19 +3320,19 @@ body {
         transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     transition-delay: var(--d, 0ms);
 }
-.js-anim .reveal.reveal-left {
+.js-anim :where(.reveal.reveal-left) {
     transform: translateX(-24px);
 }
-.js-anim .reveal.reveal-right {
+.js-anim :where(.reveal.reveal-right) {
     transform: translateX(24px);
 }
-.js-anim .reveal.reveal-scale {
+.js-anim :where(.reveal.reveal-scale) {
     transform: scale(0.96);
 }
-.js-anim .reveal.reveal-pop {
+.js-anim :where(.reveal.reveal-pop) {
     transform: scale(0.92) translateY(10px);
 }
-.js-anim .reveal.in-view {
+.js-anim :where(.reveal.in-view) {
     opacity: 1;
     transform: none;
     will-change: auto;
@@ -5652,7 +5656,11 @@ body.page-enter:not(.page-leaving) {
 }
 
 /* One synchronized card language: product/market/farmer/feature
-   cards all lift the same distance on the same curve. */
+   cards all lift the same distance on the same curve. NOTE: no
+   will-change here — permanently promoting every card turns each
+   one into a transform containing block, which makes Chrome render
+   native <select> popups detached from their anchor (ghost dropdown
+   bug). The transition alone gives the same hover lift. */
 .product-card,
 .market-card,
 .card-ml {
@@ -5660,10 +5668,21 @@ body.page-enter:not(.page-leaving) {
         transform var(--t-med) var(--ease-out),
         box-shadow var(--t-med) var(--ease-out),
         border-color var(--t-med) var(--ease-out);
-    will-change: transform;
 }
-.product-card:hover,
-.card-ml:hover {
+/* Cards that contain form controls must never lift: a transform on an
+   ancestor of a <select> detaches the native dropdown popup from the
+   field (the ghost/offset dropdown bug). */
+.card-ml:has(form),
+.card-ml:has(.form-select),
+.card-ml:has(select),
+.card-ml:has(input) {
+    transform: none !important;
+}
+.product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--card-shadow-lg);
+}
+.card-ml:not(:has(form)):not(:has(select)):not(:has(input)):hover {
     transform: translateY(-4px);
     box-shadow: var(--card-shadow-lg);
 }
@@ -6198,5 +6217,140 @@ body.page-enter:not(.page-leaving) {
     }
     .logo-brand {
         padding: 6px 0;
+    }
+}
+/* =========================================================
+   Themed select dropdowns (.select-dd)
+   Native select popups are OS-drawn and unthemeable, so on
+   fine-pointer devices app.js mirrors every select.form-select
+   into a Bootstrap dropdown (touch keeps native pickers).
+   The closed control reuses .form-select styling exactly;
+   only the popup and wrapper need new rules.
+   ========================================================= */
+.select-dd {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+}
+/* Default block-level behavior inside filter/dashboard rows */
+.col .select-dd,
+.col-lg-3 .select-dd,
+.col-lg-2 .select-dd,
+.col-lg-1 .select-dd,
+.col-md-2 .select-dd,
+.col-md-4 .select-dd,
+.col-6 .select-dd,
+.col-3 .select-dd {
+    display: block;
+    width: 100%;
+}
+.select-dd.w-auto {
+    display: inline-block;
+    width: auto;
+}
+
+/* The fake trigger: identical .form-select face, plus a caret hint */
+button.select-dd-btn {
+    --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23889721' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    appearance: none;
+    background-image: var(--bs-form-select-bg-img);
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
+    padding-right: 2.25rem;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    /* Kill the button chrome so only .form-select shows */
+    border: 1px solid var(--border-color);
+    line-height: 1.5;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+.select-dd.w-auto button.select-dd-btn {
+    width: auto;
+}
+button.select-dd-btn:hover {
+    border-color: var(--primary);
+}
+button.select-dd-btn[aria-expanded='true'] {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--primary) 18%, transparent);
+}
+button.select-dd-btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+button.select-dd-btn.form-select-sm {
+    padding-right: 1.9rem;
+    background-position: right 0.6rem center;
+}
+
+/* Placeholder-style text (the "All"/"Any" empty-value options) */
+.select-dd-label.placeholder {
+    color: color-mix(in srgb, var(--muted) 90%, transparent);
+}
+
+/* The themed popup: a .dropdown-menu, already themed project-wide.
+   Only sizing/scroll niceties are needed here. Popper positions the
+   menu; CSS never overrides transform/position (that misplaces it). */
+.select-dd-menu {
+    max-height: 300px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    z-index: 1060; /* above sticky header (1030) and modals' backdrop */
+    box-shadow: var(--card-shadow-lg);
+    /* Popup reads as part of the field: at least as wide as the trigger,
+       anchored to its left edge (JS keeps flip/shift disabled). */
+    min-width: 100%;
+    /* Own entrance: OPACITY ONLY. The shared .dropdown-menu drop-in
+       animates transform with fill:both — a finished animation's final
+       keyframe (transform:none) permanently overrides Popper's inline
+       transform, which pinned popper-positioned menus at the viewport
+       origin. Opacity can't clash with positioning. */
+    animation: ml-dd-fade 0.16s ease both;
+}
+/* The open state needs its own override: the shared
+   .dropdown-menu.show rule (0,2,0) applies the transform-animating
+   drop-in, whose final keyframe would pin the menu at the origin. */
+.select-dd-menu.show {
+    animation: ml-dd-fade 0.16s ease both;
+}
+@keyframes ml-dd-fade {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+.select-dd-menu .dropdown-item {
+    display: block;
+    width: 100%;
+    border: 0;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 0.45rem 1rem;
+    border-radius: 0;
+}
+.select-dd-menu .dropdown-item.active {
+    background: var(--primary);
+    color: #fff;
+    font-weight: 600;
+}
+.select-dd-menu .dropdown-item:disabled {
+    color: var(--muted);
+    opacity: 0.6;
+    pointer-events: none;
+}
+[data-bs-theme='dark'] .select-dd-menu .dropdown-item.active {
+    color: var(--sidebar-bg);
+}
+
+/* Respect reduced motion: no popup animation */
+@media (prefers-reduced-motion: reduce) {
+    .select-dd-menu {
+        animation: none;
     }
 }

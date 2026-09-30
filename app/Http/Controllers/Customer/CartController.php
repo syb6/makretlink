@@ -22,6 +22,26 @@ class CartController extends Controller
     {
         $cart = $this->getCart()->load(['items.product.farmer.user', 'items.farmerMarket.market']);
 
+        // Auto-remove items that are no longer sellable (product hidden,
+        // farmer unapproved, stall/market inactive, week passed). Keeping
+        // them would let the totals show money the customer can't spend.
+        $removed = 0;
+        foreach ($cart->items as $item) {
+            $stock = WeeklyStock::sellable()
+                ->where('product_id', $item->product_id)
+                ->where('farmer_market_id', $item->farmer_market_id)
+                ->exists();
+            if (! $stock) {
+                $item->delete();
+                $removed++;
+            }
+        }
+        $cart->refresh()->load(['items.product.farmer.user', 'items.farmerMarket.market']);
+
+        if ($removed > 0) {
+            session()->flash('info', $removed.' item(s) removed from your cart — no longer available.');
+        }
+
         return view('customer.cart', ['cart' => $cart]);
     }
 
@@ -32,9 +52,17 @@ class CartController extends Controller
             'quantity' => ['required', 'numeric', 'min:0.5'],
         ]);
 
-        $stock = WeeklyStock::with('product')->findOrFail($data['stock_id']);
+        // Sellable scope enforces: available status + quantity, current/upcoming
+        // week, active product, approved farmer, active stall AND market.
+        $stock = WeeklyStock::sellable()->with('product')->find($data['stock_id']);
 
-        abort_if($stock->status !== 'available' || $stock->available_quantity <= 0, 422, 'This item is not available.');
+        if (! $stock) {
+            if ($request->expectsJson()) {
+                return response()->json(['ok' => false, 'message' => 'This item is no longer available.'], 422);
+            }
+
+            return back()->with('error', 'This item is no longer available.');
+        }
 
         $cart = $this->getCart();
 
@@ -45,7 +73,14 @@ class CartController extends Controller
 
         $newQty = ($item?->quantity ?? 0) + (float) $data['quantity'];
 
-        abort_if($newQty > (float) $stock->available_quantity, 422, 'Quantity exceeds available stock ('.$stock->available_quantity.' '.$stock->product->unit.').');
+        if ($newQty > (float) $stock->available_quantity) {
+            $message = 'Quantity exceeds available stock ('.$stock->available_quantity.' '.$stock->product->unit.').';
+            if ($request->expectsJson()) {
+                return response()->json(['ok' => false, 'message' => $message], 422);
+            }
+
+            return back()->with('error', $message);
+        }
 
         CartItem::updateOrCreate(
             [
@@ -55,6 +90,8 @@ class CartController extends Controller
             ],
             [
                 'quantity' => $newQty,
+                // Always mirror the live price — a stale cart price must
+                // never survive a farmer's price change.
                 'price' => $stock->product->price,
             ]
         );
@@ -72,15 +109,22 @@ class CartController extends Controller
 
         $data = $request->validate(['quantity' => ['required', 'numeric', 'min:0.5']]);
 
-        $stock = WeeklyStock::where('product_id', $item->product_id)
+        // Same sellable rules as add() — a hidden/inactive item can't be
+        // refreshed in the cart either.
+        $stock = WeeklyStock::sellable()
+            ->where('product_id', $item->product_id)
             ->where('farmer_market_id', $item->farmer_market_id)
             ->first();
 
-        if ($stock && (float) $data['quantity'] > (float) $stock->available_quantity) {
+        if (! $stock) {
+            return back()->with('error', 'This item is no longer available — please remove it.');
+        }
+
+        if ((float) $data['quantity'] > (float) $stock->available_quantity) {
             return back()->with('error', 'Only '.$stock->available_quantity.' '.$item->product->unit.' available.');
         }
 
-        $item->update(['quantity' => $data['quantity']]);
+        $item->update(['quantity' => $data['quantity'], 'price' => $stock->product->price]);
 
         return back()->with('success', 'Cart updated.');
     }

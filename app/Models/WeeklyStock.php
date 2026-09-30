@@ -53,6 +53,27 @@ class WeeklyStock extends Model
     }
 
     /**
+     * Stock a customer is allowed to order, right now. One shared definition
+     * so cart, checkout and every public listing enforce the same rules:
+     * stock row is available with quantity left, the week is current or
+     * upcoming (old weeks can't be ordered), the product is active, the
+     * farmer is approved, and the stall AND its market are active.
+     */
+    public function scopeSellable($query)
+    {
+        return $query
+            ->where('status', 'available')
+            ->where('available_quantity', '>', 0)
+            ->where('week_start', '>=', now()->startOfWeek(Carbon::SUNDAY)->toDateString())
+            ->whereHas('product', fn ($p) => $p
+                ->where('status', 'active')
+                ->whereHas('farmer', fn ($f) => $f->where('approval_status', 'approved')))
+            ->whereHas('farmerMarket', fn ($fm) => $fm
+                ->where('status', 'active')
+                ->whereHas('market', fn ($m) => $m->where('status', 'active')));
+    }
+
+    /**
      * Distinct active markets with live stock per product, for a set of stock
      * rows. Cards use this to say "also at 2 more markets" so a product sold
      * at multiple markets doesn't read as a duplicate listing.

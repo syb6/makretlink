@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Farmer;
 use App\Http\Controllers\Controller;
 use App\Models\FarmerMarket;
 use App\Models\Order;
+use App\Models\WeeklyStock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
@@ -60,11 +62,44 @@ class OrderController extends Controller
     {
         $this->authorizeOrder($order);
 
-        if ($order->status !== 'placed') {
-            return back()->with('error', 'Only newly placed orders can be declined.');
-        }
+        $error = null;
 
-        $order->markStatus('declined', 'Declined by farmer.', Auth::user());
+        DB::transaction(function () use ($order, &$error) {
+            // Row-lock the order inside the transaction: the status check and
+            // the stock restore are atomic, so declining twice can never
+            // restore stock twice.
+            $locked = Order::whereKey($order->id)->lockForUpdate()->first();
+
+            if ($locked->status !== 'placed') {
+                $error = 'Only newly placed orders can be declined.';
+
+                return;
+            }
+
+            // Declined orders must give the reserved stock back, exactly like
+            // a cancellation — otherwise the units are lost for the week.
+            foreach ($locked->items as $item) {
+                if ($item->product_id) {
+                    $stock = WeeklyStock::where('product_id', $item->product_id)
+                        ->where('farmer_market_id', $locked->farmer_market_id)
+                        ->lockForUpdate()
+                        ->first();
+                    if ($stock) {
+                        $stock->available_quantity = (float) $stock->available_quantity + (float) $item->quantity;
+                        if ($stock->status === 'sold_out' && $stock->available_quantity > 0) {
+                            $stock->status = 'available';
+                        }
+                        $stock->save();
+                    }
+                }
+            }
+
+            $locked->markStatus('declined', 'Declined by farmer.', Auth::user());
+        });
+
+        if ($error) {
+            return back()->with('error', $error);
+        }
 
         return back()->with('success', 'Order declined.');
     }

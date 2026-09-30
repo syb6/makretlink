@@ -116,6 +116,16 @@ class AuthController extends Controller
 
     public static function redirectByRole(User $user)
     {
+        // Unapproved farmers land on home with an explanation — the farmer
+        // area itself is blocked by the role middleware.
+        if ($user->isFarmer() && $user->farmerProfile?->approval_status !== 'approved') {
+            $message = $user->farmerProfile?->approval_status === 'rejected'
+                ? 'Your farmer application was rejected. Contact the administrator for details.'
+                : 'Your farmer account is still awaiting admin approval.';
+
+            return redirect()->route('home')->with('error', $message);
+        }
+
         return redirect()->route(match (true) {
             $user->isAdmin() => 'admin.dashboard',
             $user->isFarmer() => 'farmer.dashboard',

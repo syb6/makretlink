@@ -790,5 +790,162 @@
                 }
             }).observe(cartBadge, { childList: true });
         }
+
+        /* ---------- Themed dropdowns for native selects ----------
+           Native <select> popups are drawn by the OS (white, square, no
+           dark mode, wrong font) — the one thing this theme can't style.
+           On fine-pointer devices we mirror every select.form-select into
+           a Bootstrap dropdown: the closed control keeps the exact
+           .form-select look, the popup uses the themed dropdown-menu.
+           The native select stays in the DOM (hidden) so forms, server
+           validation and all `change` listeners keep working untouched.
+           Touch devices keep the native picker — those are better UX. */
+        var finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+        if (finePointer && window.bootstrap && window.bootstrap.Dropdown) {
+            document.querySelectorAll('select.form-select').forEach(function (sel) {
+                if (sel.dataset.selectDd || sel.multiple || sel.disabled) return;
+                sel.dataset.selectDd = '1';
+
+                var wrap = document.createElement('div');
+                wrap.className = 'select-dd';
+                // Mirror width-affecting hints (w-auto class + inline styles)
+                if (sel.classList.contains('w-auto')) wrap.classList.add('w-auto');
+                // Spacing utilities live on the select but must style the wrapper
+                Array.prototype.forEach.call(sel.classList, function (c) {
+                    if (/^m[tblry]?-\d+$/.test(c)) {
+                        wrap.classList.add(c);
+                        sel.classList.remove(c);
+                    }
+                });
+                ['width', 'min-width', 'max-width'].forEach(function (prop) {
+                    if (sel.style.getPropertyValue(prop)) {
+                        wrap.style.setProperty(prop, sel.style.getPropertyValue(prop));
+                        sel.style.removeProperty(prop);
+                    }
+                });
+                sel.parentNode.insertBefore(wrap, sel);
+                wrap.appendChild(sel);
+
+                // Keep the select for forms/validation, but out of sight + tab order
+                sel.classList.add('visually-hidden');
+                sel.setAttribute('tabindex', '-1');
+                sel.setAttribute('aria-hidden', 'true');
+
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'form-select select-dd-btn' + (sel.classList.contains('form-select-sm') ? ' form-select-sm' : '');
+                if (sel.classList.contains('is-invalid')) btn.classList.add('is-invalid');
+                if (sel.classList.contains('is-valid')) btn.classList.add('is-valid');
+                btn.setAttribute('data-bs-toggle', 'dropdown');
+                btn.setAttribute('aria-haspopup', 'listbox');
+                btn.setAttribute('aria-expanded', 'false');
+                var label = document.createElement('span');
+                label.className = 'select-dd-label';
+                btn.appendChild(label);
+
+                var menu = document.createElement('ul');
+                menu.className = 'dropdown-menu select-dd-menu';
+                menu.setAttribute('role', 'listbox');
+                wrap.appendChild(btn);
+                wrap.appendChild(menu);
+
+                function syncLabel() {
+                    var opt = sel.options[sel.selectedIndex];
+                    label.textContent = opt ? opt.textContent.trim() : '';
+                    label.classList.toggle('placeholder', !opt || opt.value === '');
+                }
+
+                function buildMenu() {
+                    menu.innerHTML = '';
+                    Array.prototype.forEach.call(sel.options, function (opt) {
+                        var li = document.createElement('li');
+                        var a = document.createElement('button');
+                        a.type = 'button';
+                        a.className = 'dropdown-item';
+                        a.setAttribute('role', 'option');
+                        a.dataset.value = opt.value;
+                        a.textContent = opt.textContent.trim();
+                        if (opt.disabled) a.disabled = true;
+                        li.appendChild(a);
+                        menu.appendChild(li);
+                    });
+                    syncActive();
+                }
+
+                function syncActive() {
+                    Array.prototype.forEach.call(menu.querySelectorAll('.dropdown-item'), function (a) {
+                        var on = a.dataset.value === sel.value;
+                        a.classList.toggle('active', on);
+                        if (on) a.setAttribute('aria-selected', 'true');
+                        else a.removeAttribute('aria-selected');
+                    });
+                    syncLabel();
+                }
+
+                buildMenu();
+
+                // Fixed positioning strategy: escapes overflow:hidden
+                // dashboard cards and stays above the sticky header.
+                // popperConfig as a FUNCTION keeps Bootstrap's default
+                // modifier set (offset/positioning) intact and only turns
+                // off flip + horizontal shift — replacing the array outright
+                // (as an object would) was what made menus land in the
+                // wrong place (bottom-left of the page bug).
+                var ddInst = new window.bootstrap.Dropdown(btn, {
+                    popperConfig: function (defaultConfig) {
+                        defaultConfig.strategy = 'fixed';
+                        defaultConfig.modifiers = defaultConfig.modifiers.map(function (m) {
+                            if (m.name === 'flip') {
+                                return Object.assign({}, m, { enabled: false });
+                            }
+                            if (m.name === 'preventOverflow') {
+                                return Object.assign({}, m, { options: Object.assign({}, m.options, { mainAxis: false }) });
+                            }
+                            return m;
+                        });
+                        return defaultConfig;
+                    },
+                });
+
+                menu.addEventListener('click', function (e) {
+                    var a = e.target.closest('.dropdown-item');
+                    if (!a || a.disabled) return;
+                    if (sel.value !== a.dataset.value) {
+                        sel.value = a.dataset.value;
+                        // Real change event — autosubmit filters, sort forms
+                        // and the stall picker keep working unmodified.
+                        sel.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                    syncActive();
+                    ddInst.hide();
+                    btn.focus();
+                });
+
+                // External updates (validation classes, JS-set values)
+                sel.addEventListener('change', syncActive);
+                if (window.MutationObserver) {
+                    new MutationObserver(function () {
+                        btn.classList.toggle('is-invalid', sel.classList.contains('is-invalid'));
+                        btn.classList.toggle('is-valid', sel.classList.contains('is-valid'));
+                        btn.disabled = sel.disabled;
+                    }).observe(sel, { attributes: true, attributeFilter: ['class', 'disabled'] });
+                }
+
+                btn.addEventListener('shown.bs.dropdown', function () {
+                    // Match the field's width exactly (CSS min-width alone
+                    // leaves the menu wider than the trigger sometimes).
+                    menu.style.minWidth = btn.offsetWidth + 'px';
+                    menu.style.width = btn.offsetWidth + 'px';
+                    var act = menu.querySelector('.dropdown-item.active');
+                    if (act) act.scrollIntoView({ block: 'nearest' });
+                });
+
+                if (sel.form) {
+                    sel.form.addEventListener('reset', function () {
+                        setTimeout(syncActive, 0);
+                    });
+                }
+            });
+        }
     });
 })();

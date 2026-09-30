@@ -65,7 +65,9 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    // Business operates in Karachi (PKT, UTC+5): cutoffs, "today" and
+    // week boundaries must follow local time, not UTC.
+    'timezone' => 'Asia/Karachi',
 
     /*
     |--------------------------------------------------------------------------
