@@ -26,11 +26,11 @@ class OrderLifecycleTest extends TestCase
         $this->actAsCustomer();
         $this->addToCart(2);
 
-        $response = $this->post(route('checkout.place'), [
+        $response = $this->postJson('/api/customer/checkout/place', [
             'slots' => [$this->stall->id => $this->slot->id],
         ]);
 
-        $response->assertRedirect(route('orders.index'));
+        $response->assertOk()->assertJsonPath('redirect', '/customer/orders');
 
         $order = Order::latest('id')->first();
         $this->assertNotNull($order);
@@ -53,9 +53,9 @@ class OrderLifecycleTest extends TestCase
         $this->actAsCustomer();
         $this->addToCart(5);
 
-        $this->post(route('checkout.place'), [
+        $this->postJson('/api/customer/checkout/place', [
             'slots' => [$this->stall->id => $this->slot->id],
-        ]);
+        ])->assertOk();
 
         $this->stock->refresh();
         $this->assertEquals(45.0, (float) $this->stock->available_quantity);
@@ -68,9 +68,9 @@ class OrderLifecycleTest extends TestCase
         $this->actAsCustomer();
         $this->addToCart(50); // everything
 
-        $this->post(route('checkout.place'), [
+        $this->postJson('/api/customer/checkout/place', [
             'slots' => [$this->stall->id => $this->slot->id],
-        ]);
+        ])->assertOk();
 
         $this->stock->refresh();
         $this->assertEquals(0.0, (float) $this->stock->available_quantity);
@@ -83,9 +83,9 @@ class OrderLifecycleTest extends TestCase
         $this->actAsCustomer();
         $this->addToCart(2);
 
-        $this->from(route('cart.index'))
-            ->post(route('checkout.place'), ['slots' => []])
-            ->assertSessionHasErrors('slots');
+        $this->postJson('/api/customer/checkout/place', ['slots' => []])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('slots');
 
         $this->assertEquals(0, Order::count());
     }
@@ -97,17 +97,17 @@ class OrderLifecycleTest extends TestCase
         $this->actAsFarmer();
 
         // placed -> accepted
-        $this->post(route('farmer.orders.accept', $order))->assertRedirect();
+        $this->postJson("/api/farmer/orders/{$order->id}/accept")->assertOk();
         $this->assertEquals('accepted', $order->fresh()->status);
         $this->assertNotNull($order->fresh()->accepted_at);
 
         // accepted -> ready_for_pickup
-        $this->post(route('farmer.orders.ready', $order))->assertRedirect();
+        $this->postJson("/api/farmer/orders/{$order->id}/ready")->assertOk();
         $this->assertEquals('ready_for_pickup', $order->fresh()->status);
         $this->assertNotNull($order->fresh()->ready_at);
 
         // ready_for_pickup -> completed
-        $this->post(route('farmer.orders.complete', $order))->assertRedirect();
+        $this->postJson("/api/farmer/orders/{$order->id}/complete")->assertOk();
         $this->assertEquals('completed', $order->fresh()->status);
         $this->assertNotNull($order->fresh()->completed_at);
 
@@ -122,7 +122,7 @@ class OrderLifecycleTest extends TestCase
         $order = $this->createOrder('placed');
         $this->actAsFarmer();
 
-        $this->post(route('farmer.orders.decline', $order))->assertRedirect();
+        $this->postJson("/api/farmer/orders/{$order->id}/decline")->assertOk();
 
         $this->assertEquals('declined', $order->fresh()->status);
         $this->assertEquals(['placed', 'declined'], $order->statusHistories()->orderBy('id')->pluck('status')->all());
@@ -134,11 +134,11 @@ class OrderLifecycleTest extends TestCase
         // Cannot accept an already-accepted order
         $accepted = $this->createOrder('accepted');
         $this->actAsFarmer();
-        $this->post(route('farmer.orders.accept', $accepted))->assertSessionHas('error');
+        $this->postJson("/api/farmer/orders/{$accepted->id}/accept")->assertOk()->assertJsonPath('ok', false);
 
         // Cannot complete an order that was never marked ready
         $placed = $this->createOrder('placed');
-        $this->post(route('farmer.orders.complete', $placed))->assertSessionHas('error');
+        $this->postJson("/api/farmer/orders/{$placed->id}/complete")->assertOk()->assertJsonPath('ok', false);
 
         $this->assertEquals('accepted', $accepted->fresh()->status);
         $this->assertEquals('placed', $placed->fresh()->status);
@@ -151,13 +151,13 @@ class OrderLifecycleTest extends TestCase
 
         // Place a real order through checkout so stock is deducted
         $this->addToCart(5);
-        $this->post(route('checkout.place'), ['slots' => [$this->stall->id => $this->slot->id]]);
+        $this->postJson('/api/customer/checkout/place', ['slots' => [$this->stall->id => $this->slot->id]]);
         $order = Order::latest('id')->first();
 
         $this->stock->refresh();
         $this->assertEquals(45.0, (float) $this->stock->available_quantity);
 
-        $this->post(route('orders.cancel', $order))->assertRedirect();
+        $this->postJson("/api/customer/orders/{$order->id}/cancel")->assertOk();
 
         $order->refresh();
         $this->assertEquals('cancelled', $order->status);
@@ -177,7 +177,7 @@ class OrderLifecycleTest extends TestCase
         $order = $this->createOrder('accepted');
         $order->pickupSlot->update(['cutoff_at' => now()->subHour()]);
 
-        $this->post(route('orders.cancel', $order))->assertSessionHas('error');
+        $this->postJson("/api/customer/orders/{$order->id}/cancel")->assertOk()->assertJsonPath('ok', false);
         $this->assertEquals('accepted', $order->fresh()->status);
     }
 
@@ -187,9 +187,9 @@ class OrderLifecycleTest extends TestCase
         $this->actAsCustomer();
         $order = $this->createOrder('completed');
 
-        $response = $this->post(route('orders.reorder', $order));
+        $response = $this->postJson("/api/customer/orders/{$order->id}/reorder");
 
-        $response->assertRedirect(route('cart.index'));
+        $response->assertOk()->assertJsonPath('redirect', '/customer/cart');
         $this->assertDatabaseHas('cart_items', [
             'product_id' => $this->product->id,
             'farmer_market_id' => $this->stall->id,
@@ -205,13 +205,13 @@ class OrderLifecycleTest extends TestCase
         $item = $order->items->first();
 
         // Blocked before completion
-        $this->post(route('orders.review.product', [$order, $item]), ['rating' => 5])->assertForbidden();
+        $this->postJson("/api/customer/orders/{$order->id}/review/product/{$item->id}", ['rating' => 5])->assertForbidden();
 
         // Allowed once completed
         $order->markStatus('completed', null, $this->farmerUser);
-        $this->post(route('orders.review.product', [$order, $item]), [
+        $this->postJson("/api/customer/orders/{$order->id}/review/product/{$item->id}", [
             'rating' => 5, 'comment' => 'Great tomatoes',
-        ])->assertRedirect();
+        ])->assertOk();
 
         $this->assertDatabaseHas('product_reviews', [
             'order_id' => $order->id, 'product_id' => $this->product->id, 'rating' => 5,
@@ -225,11 +225,11 @@ class OrderLifecycleTest extends TestCase
         $this->slot->update(['max_orders' => 1]);
 
         $this->addToCart(1);
-        $this->post(route('checkout.place'), ['slots' => [$this->stall->id => $this->slot->id]]);
+        $this->postJson('/api/customer/checkout/place', ['slots' => [$this->stall->id => $this->slot->id]]);
 
         // Fill the slot with a seeded order, then try to overbook it
         $this->addToCart(1);
-        $this->post(route('checkout.place'), ['slots' => [$this->stall->id => $this->slot->id]]);
+        $this->postJson('/api/customer/checkout/place', ['slots' => [$this->stall->id => $this->slot->id]]);
 
         // First placement succeeded (1 order), second must have been blocked
         $this->assertEquals(1, Order::count());
@@ -242,7 +242,7 @@ class OrderLifecycleTest extends TestCase
         $this->slot->update(['cutoff_at' => now()->subHour()]);
 
         $this->addToCart(2);
-        $this->post(route('checkout.place'), ['slots' => [$this->stall->id => $this->slot->id]]);
+        $this->postJson('/api/customer/checkout/place', ['slots' => [$this->stall->id => $this->slot->id]]);
 
         $this->assertEquals(0, Order::count());
     }

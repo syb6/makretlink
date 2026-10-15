@@ -20,6 +20,13 @@ class OrderSeeder extends Seeder
             return;
         }
 
+        // Idempotency: demo orders are randomized, so they have no stable key to
+        // updateOrCreate on. If any demo order already exists (this DB was seeded
+        // before), re-running would only pile up duplicates — skip instead.
+        if (Order::exists()) {
+            return;
+        }
+
         // Scenarios: mostly past/completed, a few placed/accepted in the future
         $scenarios = [
             ['status' => 'completed', 'daysOffset' => -21, 'count' => 3],

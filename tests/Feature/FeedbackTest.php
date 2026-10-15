@@ -30,14 +30,15 @@ class FeedbackTest extends TestCase
     {
         Mail::fake();
 
-        $response = $this->post(route('contact.send'), [
+        $response = $this->postJson('/api/contact', [
             'name' => 'Walk In Guest',
             'email' => 'guest@example.com',
             'message' => 'Do you sell organic tomatoes?',
         ]);
 
-        $response->assertRedirect();
-        $response->assertSessionHas('success');
+        $response->assertOk()
+            ->assertJsonPath('ok', true)
+            ->assertJsonPath('flash.success', 'Thanks for reaching out! Your message is on its way — we will get back to you soon.');
 
         $this->assertDatabaseHas('feedback_messages', [
             'name' => 'Walk In Guest',
@@ -51,11 +52,11 @@ class FeedbackTest extends TestCase
     {
         // No Mail::fake() -> the log/whatever transport is exercised; either
         // way the stored row is the source of truth and the visitor sees success.
-        $this->post(route('contact.send'), [
+        $this->postJson('/api/contact', [
             'name' => 'Mail Outage',
             'email' => 'outage@example.com',
             'message' => 'Is the site down?',
-        ])->assertRedirect()->assertSessionHas('success');
+        ])->assertOk()->assertJsonPath('ok', true);
 
         $this->assertDatabaseHas('feedback_messages', ['email' => 'outage@example.com']);
     }
@@ -63,10 +64,9 @@ class FeedbackTest extends TestCase
     /** @test */
     public function contact_form_validates_input(): void
     {
-        $this->from(route('contact'))
-            ->post(route('contact.send'), ['name' => '', 'email' => 'nope', 'message' => ''])
-            ->assertRedirect(route('contact'))
-            ->assertSessionHasErrors(['name', 'email', 'message']);
+        $this->postJson('/api/contact', ['name' => '', 'email' => 'nope', 'message' => ''])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['name', 'email', 'message']);
 
         $this->assertEquals(0, FeedbackMessage::count());
     }
@@ -79,11 +79,11 @@ class FeedbackTest extends TestCase
         ]);
 
         $this->actingAs($this->admin)
-            ->get(route('admin.feedback'))
+            ->getJson('/api/admin/feedback')
             ->assertOk()
-            ->assertSee('Curious Carla')
-            ->assertSee('carla@example.com')
-            ->assertSee('Hello there!');
+            ->assertJsonPath('rows.0.name', 'Curious Carla')
+            ->assertJsonPath('rows.0.email', 'carla@example.com')
+            ->assertJsonPath('rows.0.message', 'Hello there!');
     }
 
     /** @test */
@@ -94,20 +94,23 @@ class FeedbackTest extends TestCase
         ]);
 
         $this->actingAs($this->admin)
-            ->post(route('admin.feedback.toggleRead', $message))
-            ->assertRedirect();
+            ->postJson("/api/admin/feedback/{$message->id}/toggle-read")
+            ->assertOk()
+            ->assertJsonPath('ok', true);
 
         $this->assertNotNull($message->fresh()->read_at);
 
         $this->actingAs($this->admin)
-            ->post(route('admin.feedback.toggleRead', $message))
-            ->assertRedirect();
+            ->postJson("/api/admin/feedback/{$message->id}/toggle-read")
+            ->assertOk()
+            ->assertJsonPath('ok', true);
 
         $this->assertNull($message->fresh()->read_at);
 
         $this->actingAs($this->admin)
-            ->delete(route('admin.feedback.destroy', $message))
-            ->assertRedirect();
+            ->deleteJson("/api/admin/feedback/{$message->id}")
+            ->assertOk()
+            ->assertJsonPath('ok', true);
 
         $this->assertDatabaseMissing('feedback_messages', ['id' => $message->id]);
     }
@@ -115,13 +118,13 @@ class FeedbackTest extends TestCase
     /** @test */
     public function guests_and_customers_cannot_open_the_feedback_inbox(): void
     {
-        $this->get(route('admin.feedback'))->assertRedirect(route('login'));
+        $this->getJson('/api/admin/feedback')->assertUnauthorized();
 
         $customer = User::create([
             'name' => 'Customer', 'email' => 'customer-feedback@test.dev', 'phone' => '300',
             'role' => 'customer', 'status' => 'active', 'password' => Hash::make('password'),
         ]);
 
-        $this->actingAs($customer)->get(route('admin.feedback'))->assertForbidden();
+        $this->actingAs($customer)->getJson('/api/admin/feedback')->assertForbidden();
     }
 }

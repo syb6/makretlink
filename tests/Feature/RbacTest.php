@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Tests\Concerns\CreatesMarketLinkData;
 use Tests\TestCase;
 
@@ -22,65 +23,80 @@ class RbacTest extends TestCase
         $this->setUpMarketLink();
     }
 
+    private function loginAs(User $user): void
+    {
+        $this->postJson('/api/auth/login', ['email' => $user->email, 'password' => 'password'])
+            ->assertOk();
+    }
+
     /** @test */
-    public function guests_are_redirected_to_login_from_protected_areas(): void
+    public function guests_receive_json_unauthorized_for_protected_api_areas(): void
     {
         foreach ([
-            route('customer.dashboard'),
-            route('farmer.dashboard'),
-            route('admin.dashboard'),
-            route('orders.index'),
-            route('notifications.index'),
+            '/api/customer/dashboard',
+            '/api/farmer/dashboard',
+            '/api/admin/dashboard',
+            '/api/customer/orders',
+            '/api/notifications',
         ] as $url) {
-            $this->get($url)->assertRedirect(route('login'));
+            $this->getJson($url)->assertUnauthorized();
         }
     }
 
     /** @test */
     public function customer_area_is_forbidden_for_other_roles(): void
     {
-        $this->actAsAdmin();
-        $this->get(route('customer.dashboard'))->assertForbidden();
+        $this->loginAs($this->admin);
+        $this->getJson('/api/customer/dashboard')->assertForbidden();
 
-        $this->actAsFarmer();
-        $this->get(route('customer.dashboard'))->assertForbidden();
+        $this->postJson('/api/auth/logout');
+        $this->loginAs($this->farmerUser);
+        $this->getJson('/api/customer/dashboard')->assertForbidden();
     }
 
     /** @test */
     public function farmer_area_is_forbidden_for_other_roles(): void
     {
-        $this->actAsCustomer();
-        $this->get(route('farmer.dashboard'))->assertForbidden();
+        $this->loginAs($this->customerUser);
+        $this->getJson('/api/farmer/dashboard')->assertForbidden();
 
-        $this->actAsAdmin();
-        $this->get(route('farmer.dashboard'))->assertForbidden();
+        $this->postJson('/api/auth/logout');
+        $this->loginAs($this->admin);
+        $this->getJson('/api/farmer/dashboard')->assertForbidden();
     }
 
     /** @test */
     public function admin_area_is_forbidden_for_other_roles(): void
     {
-        $this->actAsCustomer();
-        $this->get(route('admin.dashboard'))->assertForbidden();
+        $this->loginAs($this->customerUser);
+        $this->getJson('/api/admin/dashboard')->assertForbidden();
 
-        $this->actAsFarmer();
-        $this->get(route('admin.dashboard'))->assertForbidden();
+        $this->postJson('/api/auth/logout');
+        $this->loginAs($this->farmerUser);
+        $this->getJson('/api/admin/dashboard')->assertForbidden();
     }
 
     /** @test */
     public function each_role_redirects_to_its_own_dashboard_after_login(): void
     {
-        $this->post('/login', ['email' => $this->customerUser->email, 'password' => 'password'])
-            ->assertRedirect(route('customer.dashboard'));
+        $this->postJson('/api/auth/login', ['email' => $this->customerUser->email, 'password' => 'password'])
+            ->assertOk()
+            ->assertJsonPath('redirect', '/customer/dashboard');
+        $this->getJson('/api/me')->assertJsonPath('user.role', 'customer');
 
-        $this->post('/logout');
+        $this->postJson('/api/auth/logout');
 
-        $this->post('/login', ['email' => $this->farmerUser->email, 'password' => 'password'])
-            ->assertRedirect(route('farmer.dashboard'));
+        $this->postJson('/api/auth/login', ['email' => $this->farmerUser->email, 'password' => 'password'])
+            ->assertOk()
+            ->assertJsonPath('redirect', '/farmer/dashboard');
+        $this->getJson('/api/me')->assertJsonPath('user.role', 'farmer');
 
-        $this->post('/logout');
+        $this->postJson('/api/auth/logout');
 
-        $this->post('/login', ['email' => $this->admin->email, 'password' => 'password'])
-            ->assertRedirect(route('admin.dashboard'));
+        $this->postJson('/api/auth/login', ['email' => $this->admin->email, 'password' => 'password'])
+            ->assertOk()
+            ->assertJsonPath('redirect', '/admin/dashboard');
+        $this->getJson('/api/me')->assertJsonPath('user.role', 'admin');
     }
 
     /** @test */
@@ -88,8 +104,9 @@ class RbacTest extends TestCase
     {
         $this->customerUser->update(['status' => 'suspended']);
 
-        $this->post('/login', ['email' => $this->customerUser->email, 'password' => 'password'])
-            ->assertInvalid('email'); // returned with an error, not logged in
+        $this->postJson('/api/auth/login', ['email' => $this->customerUser->email, 'password' => 'password'])
+            ->assertUnprocessable()
+            ->assertJsonStructure(['validation' => ['email']]);
 
         $this->assertGuest();
     }
@@ -99,9 +116,11 @@ class RbacTest extends TestCase
     {
         $this->actAsCustomer();
         $this->customerUser->update(['status' => 'suspended']);
+        Auth::forgetGuards();
 
-        $this->get(route('customer.dashboard'))
-            ->assertRedirect(route('login'));
+        $this->getJson('/api/customer/dashboard')
+            ->assertOk()
+            ->assertJsonPath('flash.error', 'Your account has been deactivated. Contact the administrator.');
 
         $this->assertGuest();
     }
@@ -118,8 +137,8 @@ class RbacTest extends TestCase
         $order = $this->createOrder('placed'); // belongs to $this->customer
 
         $this->actingAs($otherCustomer);
-        $this->get(route('orders.show', $order))->assertForbidden();
-        $this->post(route('orders.cancel', $order))->assertForbidden();
+        $this->getJson("/api/customer/orders/{$order->id}")->assertForbidden();
+        $this->postJson("/api/customer/orders/{$order->id}/cancel")->assertForbidden();
 
         // DB state untouched
         $this->assertEquals('placed', $order->fresh()->status);
@@ -146,8 +165,8 @@ class RbacTest extends TestCase
         $order->update(['farmer_market_id' => $otherStall->id]);
 
         $this->actAsFarmer(); // our farmer, not the owner
-        $this->post(route('farmer.orders.accept', $order))->assertForbidden();
-        $this->get(route('farmer.orders.show', $order))->assertForbidden();
+        $this->postJson("/api/farmer/orders/{$order->id}/accept")->assertForbidden();
+        $this->getJson("/api/farmer/orders/{$order->id}")->assertForbidden();
 
         $this->assertEquals('placed', $order->fresh()->status);
     }
@@ -175,7 +194,7 @@ class RbacTest extends TestCase
         $otherProduct->update(['farmer_id' => $otherFarmer->id]);
 
         $this->actAsFarmer();
-        $this->put(route('farmer.products.update', $otherProduct), [
+        $this->postJson("/api/farmer/products/{$otherProduct->id}", [
             'name' => 'Hacked', 'price' => 0.01, 'unit' => 'kg', 'status' => 'active',
         ])->assertForbidden();
 
@@ -191,7 +210,7 @@ class RbacTest extends TestCase
         $notification = $this->farmerUser->notifications()->first();
 
         $this->actAsCustomer();
-        $this->post(route('notifications.read', $notification))->assertForbidden();
+        $this->postJson("/api/notifications/{$notification->id}/read")->assertForbidden();
     }
 
     /** @test */
@@ -206,8 +225,8 @@ class RbacTest extends TestCase
         ]);
         $this->actingAs($otherCustomer);
 
-        $this->post(route('cart.update', $item), ['quantity' => 99])->assertForbidden();
-        $this->post(route('cart.remove', $item))->assertForbidden();
+        $this->postJson("/api/customer/cart/{$item->id}/update", ['quantity' => 99])->assertForbidden();
+        $this->postJson("/api/customer/cart/{$item->id}/remove")->assertForbidden();
 
         $this->assertEquals(2, $item->fresh()->quantity);
     }
@@ -236,10 +255,10 @@ class RbacTest extends TestCase
         $other->update(['farmer_market_id' => $otherStall->id]);
 
         $this->actAsFarmer();
-        $response = $this->get(route('farmer.orders.index'));
+        $response = $this->getJson('/api/farmer/orders');
 
         $response->assertOk();
-        $ids = $response->viewData('orders')->getCollection()->pluck('id');
+        $ids = collect($response->json('rows'))->pluck('id');
 
         $this->assertTrue($ids->contains($mine->id));
         $this->assertFalse($ids->contains($other->id));

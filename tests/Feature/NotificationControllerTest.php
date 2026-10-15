@@ -40,7 +40,9 @@ class NotificationControllerTest extends TestCase
 
         $this->assertEquals(2, $this->customerUser->unreadNotifications()->count());
 
-        $this->post(route('notifications.readAll'))->assertRedirect();
+        $this->postJson('/api/notifications/read-all')
+            ->assertOk()
+            ->assertJsonPath('ok', true);
 
         $this->assertEquals(0, $this->customerUser->unreadNotifications()->count());
         $this->assertEquals(2, $this->customerUser->notifications()->whereNotNull('read_at')->count());
@@ -53,7 +55,7 @@ class NotificationControllerTest extends TestCase
         $this->notify($this->customerUser, ['audience' => 'farmer']);
         $farmerNotification = $this->notify($this->farmerUser, ['audience' => 'farmer']);
 
-        $this->post(route('notifications.readAll'));
+        $this->postJson('/api/notifications/read-all');
 
         $this->assertNull($farmerNotification->fresh()->read_at);
     }
@@ -64,9 +66,10 @@ class NotificationControllerTest extends TestCase
         $this->actAsCustomer();
         $notification = $this->notify($this->customerUser, ['audience' => 'customer']);
 
-        $response = $this->post(route('notifications.read', $notification));
+        $response = $this->postJson("/api/notifications/{$notification->id}/read");
 
-        $response->assertRedirect(route('orders.show', $notification->fresh()->data['order_id']));
+        $response->assertOk()
+            ->assertJsonPath('redirect', '/customer/orders/'.$notification->fresh()->data['order_id']);
         $this->assertNotNull($notification->fresh()->read_at);
     }
 
@@ -78,8 +81,9 @@ class NotificationControllerTest extends TestCase
         $notification = $this->notify($this->customerUser, ['audience' => 'farmer']);
         $this->assertTrue(str_contains((string) parse_url($notification->data['url'], PHP_URL_PATH), '/farmer/'));
 
-        $this->post(route('notifications.read', $notification))
-            ->assertRedirect(route('notifications.index'));
+        $this->postJson("/api/notifications/{$notification->id}/read")
+            ->assertOk()
+            ->assertJsonPath('redirect', '/notifications');
 
         // Unread state was still cleared.
         $this->assertNotNull($notification->fresh()->read_at);
@@ -92,8 +96,9 @@ class NotificationControllerTest extends TestCase
         $notification = $this->notify($this->customerUser, ['audience' => 'customer']);
         $notification->forceFill(['data' => array_merge($notification->data, ['url' => 'javascript:alert(1)'])])->save();
 
-        $this->post(route('notifications.read', $notification))
-            ->assertRedirect(route('notifications.index'));
+        $this->postJson("/api/notifications/{$notification->id}/read")
+            ->assertOk()
+            ->assertJsonPath('redirect', '/notifications');
     }
 
     /** @test */
@@ -102,7 +107,7 @@ class NotificationControllerTest extends TestCase
         $this->actAsFarmer();
         $notification = $this->notify($this->customerUser, ['audience' => 'customer']);
 
-        $this->post(route('notifications.read', $notification))->assertForbidden();
+        $this->postJson("/api/notifications/{$notification->id}/read")->assertForbidden();
         $this->assertNull($notification->fresh()->read_at);
     }
 
@@ -112,8 +117,8 @@ class NotificationControllerTest extends TestCase
         $this->actAsCustomer();
         $this->notify($this->customerUser, ['audience' => 'farmer']);
 
-        $this->get(route('notifications.count'))
+        $this->getJson('/api/me')
             ->assertOk()
-            ->assertJson(['unread' => 1]);
+            ->assertJsonPath('unread', 1);
     }
 }

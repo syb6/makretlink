@@ -51,7 +51,7 @@ class ProfileUpdateTest extends TestCase
         Storage::fake('public');
         $user = $this->makeUser('customer');
 
-        $response = $this->actingAs($user)->post(route('profile.update'), [
+        $response = $this->actingAs($user)->post('/api/customer/profile', [
             'name' => 'New Name',
             'phone' => '999888',
             'address' => 'New Address 2',
@@ -76,7 +76,7 @@ class ProfileUpdateTest extends TestCase
         $user = $this->makeUser('customer');
         $oldHash = $user->password;
 
-        $this->actingAs($user)->post(route('profile.update'), [
+        $this->actingAs($user)->post('/api/customer/profile', [
             'name' => 'Same Name',
             'phone' => '111222',
             'address' => 'Changed Address',
@@ -93,7 +93,7 @@ class ProfileUpdateTest extends TestCase
         Storage::fake('public');
         $user = $this->makeUser('farmer');
 
-        $this->actingAs($user)->post(route('farmer.profile.update'), [
+        $this->actingAs($user)->post('/api/farmer/profile', [
             'business_name' => 'New Farm',
             'contact_person' => 'New Person',
             'address' => 'New Farm Road',
@@ -115,7 +115,7 @@ class ProfileUpdateTest extends TestCase
         Storage::fake('public');
         $user = $this->makeUser('admin');
 
-        $this->actingAs($user)->put(route('admin.profile.update'), [
+        $this->actingAs($user)->post('/api/admin/profile', [
             'name' => 'Admin New',
             'phone' => '555000',
             'profile_photo' => UploadedFile::fake()->image('admin.jpg', 100, 100),
@@ -132,7 +132,7 @@ class ProfileUpdateTest extends TestCase
     {
         $user = $this->makeUser('admin');
 
-        $this->actingAs($user)->put(route('admin.profile.update'), [
+        $this->actingAs($user)->post('/api/admin/profile', [
             'name' => $user->name,
             'phone' => $user->phone,
             'password' => 'brandnewpass',
@@ -148,10 +148,10 @@ class ProfileUpdateTest extends TestCase
         $user->customerProfile->delete(); // soft-delete the row
 
         // Edit page renders instead of erroring on a null profile.
-        $this->actingAs($user)->get(route('profile.edit'))->assertOk();
+        $this->actingAs($user)->getJson('/api/customer/profile')->assertOk();
 
         // Saving recreates the row and persists the update.
-        $this->actingAs($user)->post(route('profile.update'), [
+        $this->actingAs($user)->post('/api/customer/profile', [
             'name' => 'Repaired User',
             'phone' => '777000',
             'address' => 'Repaired Address',
@@ -167,7 +167,7 @@ class ProfileUpdateTest extends TestCase
         $user = $this->makeUser('customer');
         $user->customerProfile->delete();
 
-        $this->actingAs($user)->get(route('customer.dashboard'))->assertOk();
+        $this->actingAs($user)->getJson('/api/customer/dashboard')->assertOk();
     }
 
     public function test_farmer_profile_page_works_when_profile_row_is_missing(): void
@@ -175,9 +175,9 @@ class ProfileUpdateTest extends TestCase
         $user = $this->makeUser('farmer');
         $user->farmerProfile->delete();
 
-        $this->actingAs($user)->get(route('farmer.profile.edit'))->assertOk();
+        $this->actingAs($user)->getJson('/api/farmer/profile')->assertOk();
 
-        $this->actingAs($user)->post(route('farmer.profile.update'), [
+        $this->actingAs($user)->post('/api/farmer/profile', [
             'business_name' => 'Repaired Farm',
             'contact_person' => 'Repaired Person',
             'address' => 'Repaired Farm Road',
@@ -191,21 +191,20 @@ class ProfileUpdateTest extends TestCase
         $user = $this->makeUser('farmer');
         $user->farmerProfile->delete();
 
-        $this->actingAs($user)->get(route('farmer.dashboard'))->assertOk();
+        $this->actingAs($user)->getJson('/api/farmer/dashboard')->assertOk();
     }
 
     public function test_rejected_photo_is_reported_with_a_validation_error(): void
     {
         $user = $this->makeUser('customer');
 
-        $response = $this->actingAs($user)->from(route('profile.edit'))->post(route('profile.update'), [
+        $response = $this->actingAs($user)->from('/customer/profile')->post('/api/customer/profile', [
             'name' => 'Bad Photo',
             'phone' => '123',
             'address' => 'Somewhere',
             'profile_image' => UploadedFile::fake()->create('doc.pdf', 100, 'application/pdf'),
         ]);
 
-        $response->assertRedirect(route('profile.edit'));
         $response->assertSessionHasErrors('profile_image');
     }
 }

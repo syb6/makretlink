@@ -54,20 +54,20 @@ class AdminUsersFilterTest extends TestCase
     public function approval_pending_filter_shows_the_pending_farmer_only(): void
     {
         $this->actingAs($this->admin)
-            ->get(route('admin.users', ['role' => 'farmer', 'approval' => 'pending']))
+            ->getJson('/api/admin/users?role=farmer&approval=pending')
             ->assertOk()
-            ->assertSee('Pending Pastures')
-            ->assertDontSee('Approved Acres');
+            ->assertJsonPath('rows.0.farmer_profile.business_name', 'Pending Pastures')
+            ->assertJsonCount(1, 'rows');
     }
 
     /** @test */
     public function approval_approved_filter_shows_approved_farmers_only(): void
     {
         $this->actingAs($this->admin)
-            ->get(route('admin.users', ['role' => 'farmer', 'approval' => 'approved']))
+            ->getJson('/api/admin/users?role=farmer&approval=approved')
             ->assertOk()
-            ->assertSee('Approved Acres')
-            ->assertDontSee('Pending Pastures');
+            ->assertJsonPath('rows.0.farmer_profile.business_name', 'Approved Acres')
+            ->assertJsonCount(1, 'rows');
     }
 
     /** @test */
@@ -75,25 +75,23 @@ class AdminUsersFilterTest extends TestCase
     {
         // Both farmers have active accounts, so both show up here
         $this->actingAs($this->admin)
-            ->get(route('admin.users', ['role' => 'farmer', 'status' => 'active']))
+            ->getJson('/api/admin/users?role=farmer&status=active')
             ->assertOk()
-            ->assertSee('Pending Pastures')
-            ->assertSee('Approved Acres');
+            ->assertJsonCount(2, 'rows');
 
         // Suspended accounts match nothing
         $this->actingAs($this->admin)
-            ->get(route('admin.users', ['role' => 'farmer', 'status' => 'suspended']))
+            ->getJson('/api/admin/users?role=farmer&status=suspended')
             ->assertOk()
-            ->assertSee('No users found.');
+            ->assertJsonCount(0, 'rows');
     }
 
     /** @test */
     public function unfiltered_listing_shows_every_user(): void
     {
         $this->actingAs($this->admin)
-            ->get(route('admin.users'))
+            ->getJson('/api/admin/users')
             ->assertOk()
-            ->assertSee('Pending Pastures')
-            ->assertSee('Approved Acres');
+            ->assertJsonCount(3, 'rows');
     }
 }

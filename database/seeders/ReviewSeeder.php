@@ -37,17 +37,22 @@ class ReviewSeeder extends Seeder
             if (random_int(1, 10) <= 8) {
                 $rating = random_int(4, 5);
 
-                FarmerReview::create([
-                    'customer_id' => $order->customer_id,
-                    'farmer_id' => $order->farmerMarket->farmer_id,
-                    'order_id' => $order->id,
-                    'rating' => $rating,
-                    'comment' => collect($comments[$rating])->random(),
-                    'farmer_reply' => random_int(1, 10) <= 6 ? collect($farmerReplies)->random() : null,
-                    'replied_at' => now()->subDays(random_int(1, 5)),
-                    'status' => 'visible',
-                    'created_at' => $order->completed_at ?? now(),
-                ]);
+                // Idempotent: unique key is (customer_id, farmer_id, order_id).
+                FarmerReview::updateOrCreate(
+                    [
+                        'customer_id' => $order->customer_id,
+                        'farmer_id' => $order->farmerMarket->farmer_id,
+                        'order_id' => $order->id,
+                    ],
+                    [
+                        'rating' => $rating,
+                        'comment' => collect($comments[$rating])->random(),
+                        'farmer_reply' => random_int(1, 10) <= 6 ? collect($farmerReplies)->random() : null,
+                        'replied_at' => now()->subDays(random_int(1, 5)),
+                        'status' => 'visible',
+                        'created_at' => $order->completed_at ?? now(),
+                    ]
+                );
             }
 
             // Product reviews for some items
@@ -58,15 +63,20 @@ class ReviewSeeder extends Seeder
 
                 $rating = random_int(3, 5);
 
-                ProductReview::create([
-                    'customer_id' => $order->customer_id,
-                    'product_id' => $item->product_id,
-                    'order_id' => $order->id,
-                    'rating' => $rating,
-                    'comment' => collect($comments[$rating])->random(),
-                    'status' => 'visible',
-                    'created_at' => $order->completed_at ?? now(),
-                ]);
+                // Idempotent: unique key is (customer_id, product_id, order_id).
+                ProductReview::updateOrCreate(
+                    [
+                        'customer_id' => $order->customer_id,
+                        'product_id' => $item->product_id,
+                        'order_id' => $order->id,
+                    ],
+                    [
+                        'rating' => $rating,
+                        'comment' => collect($comments[$rating])->random(),
+                        'status' => 'visible',
+                        'created_at' => $order->completed_at ?? now(),
+                    ]
+                );
             }
         }
     }

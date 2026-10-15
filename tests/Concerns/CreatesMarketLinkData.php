@@ -100,17 +100,27 @@ trait CreatesMarketLinkData
 
     protected function actAsCustomer(): self
     {
-        return $this->actingAs($this->customerUser);
+        return $this->authenticateApiAs($this->customerUser);
     }
 
     protected function actAsFarmer(): self
     {
-        return $this->actingAs($this->farmerUser);
+        return $this->authenticateApiAs($this->farmerUser);
     }
 
     protected function actAsAdmin(): self
     {
-        return $this->actingAs($this->admin);
+        return $this->authenticateApiAs($this->admin);
+    }
+
+    private function authenticateApiAs(User $user): self
+    {
+        $this->postJson('/api/auth/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ])->assertOk();
+
+        return $this;
     }
 
     protected function addToCart(float $qty = 2): CartItem

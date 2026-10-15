@@ -8,6 +8,26 @@ use Illuminate\Support\Facades\Auth;
 class NotificationController extends Controller
 {
     /**
+     * JSON inbox for the Angular SPA (GET /api/notifications).
+     */
+    public function jsonIndex()
+    {
+        $notifications = Auth::user()->notifications()->take(30)->get();
+
+        return response()->json([
+            'unread' => Auth::user()->unreadNotifications()->count(),
+            'items' => $notifications->map(fn (DatabaseNotification $n) => [
+                'id' => $n->id,
+                'title' => $n->data['title'] ?? $n->data['message'] ?? 'Notification',
+                'message' => $n->data['message'] ?? null,
+                'read_at' => $n->read_at?->toISOString(),
+                'created_at' => $n->created_at?->toISOString(),
+                'url' => $this->readableUrl($n),
+            ]),
+        ]);
+    }
+
+    /**
      * Shared inbox for every role (SRS: "in-app alerts for order updates").
      */
     public function index()

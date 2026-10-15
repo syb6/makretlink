@@ -1,0 +1,624 @@
+html,
+body {
+  min-height: 100%;
+  overflow-x: clip;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  background: var(--light-bg, #f7f7f3);
+  color: var(--dark, #1c1c1c);
+  font-family: 'Poppins', system-ui, sans-serif;
+}
+
+app-root {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main.sp-shell {
+  display: block;
+  flex: 1 0 auto;
+  width: 100%;
+  color: var(--dark, #1c1c1c);
+}
+
+.sp-shell > router-outlet {
+  display: none;
+}
+
+.sp-shell > app-home {
+  display: block;
+  width: min(100%, 1320px);
+  margin: 0 auto;
+}
+
+.sp-shell > app-home .hero-section {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+}
+
+.sp-shell > app-home .hero-blend,
+.sp-shell > app-home .features-section {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+}
+
+.sp-shell > app-home > .section-padding,
+.sp-shell > app-home > .section-divider-leaf,
+.sp-shell > app-home > .promo-banner-section,
+.sp-shell > app-home > .cta-section,
+.sp-shell > app-about > .page-banner,
+.sp-shell > app-farmers > .page-banner,
+.sp-shell > app-products > .page-banner,
+.sp-shell > app-markets > .page-banner {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+}
+
+.sp-shell > app-home .section-padding > .container,
+.sp-shell > app-home .features-section > .container,
+.sp-shell > app-about > .page-banner > .container,
+.sp-shell > app-farmers > .page-banner > .container,
+.sp-shell > app-products > .page-banner > .container,
+.sp-shell > app-markets > .page-banner > .container {
+  width: min(100% - 2rem, 1320px);
+}
+
+.sp-shell > app-home .section-padding,
+.sp-shell > app-home .features-section {
+  padding-top: clamp(3rem, 6vw, 5.5rem);
+  padding-bottom: clamp(3rem, 6vw, 5.5rem);
+}
+
+.sp-shell > app-home .features-section {
+  padding-top: 0;
+}
+
+.sp-shell > app-home .hero-section {
+  min-height: 650px;
+}
+
+.sp-shell > app-home .hero-grid {
+  min-height: 520px;
+}
+
+.sp-shell > app-home .hero-image-wrapper img {
+  max-width: 100%;
+  height: auto;
+}
+
+.sp-shell > app-home .hero-title .w + .w {
+  margin-left: 0.22em;
+}
+
+.sp-shell > :not(router-outlet):not(app-home):not(app-admin-layout):not(app-customer-layout):not(app-farmer-layout) {
+  display: block;
+  width: min(100%, 1320px);
+  margin: 0 auto;
+  padding: 32px clamp(16px, 3vw, 36px);
+}
+
+.sp-shell > app-admin-layout {
+  display: block;
+  min-height: 100vh;
+  padding: 0;
+}
+
+.sp-shell > app-customer-layout,
+.sp-shell > app-farmer-layout {
+  display: block;
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+.sp-shell > app-customer-layout,
+.sp-shell > app-farmer-layout {
+  padding: clamp(1rem, 3vw, 2rem);
+}
+
+.sp-shell app-admin-layout .row,
+.sp-shell app-customer-layout .row,
+.sp-shell app-farmer-layout .row {
+  --bs-gutter-y: 1rem;
+}
+
+.sp-shell app-admin-layout .card,
+.sp-shell app-customer-layout .card,
+.sp-shell app-farmer-layout .card {
+  border-radius: var(--radius-md, 10px);
+  box-shadow: var(--card-shadow, 0 8px 20px rgba(0, 0, 0, 0.05));
+  overflow: hidden;
+}
+
+.sp-shell app-admin-layout .list-group-item,
+.sp-shell app-customer-layout .list-group-item,
+.sp-shell app-farmer-layout .list-group-item {
+  padding: 0.85rem 1rem;
+  border-color: var(--border-color, #e2e2d8);
+  background: var(--surface, #fff);
+  color: var(--dark, #1c1c1c);
+  font-weight: 500;
+  text-decoration: none;
+  transition: var(--transition, all 0.2s ease);
+}
+
+.sp-shell app-admin-layout .list-group-item:hover,
+.sp-shell app-admin-layout .list-group-item.active,
+.sp-shell app-customer-layout .list-group-item:hover,
+.sp-shell app-customer-layout .list-group-item.active,
+.sp-shell app-farmer-layout .list-group-item:hover,
+.sp-shell app-farmer-layout .list-group-item.active {
+  background: var(--primary-light, #ebf0c8);
+  color: var(--primary-contrast, #4a5410);
+  border-color: var(--border-color, #e2e2d8);
+}
+
+.sp-shell .alert {
+  border-radius: var(--radius-md, 10px);
+}
+
+.api-progress {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 2100;
+  height: 3px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--primary, #a2b231) 20%, transparent);
+}
+
+.api-progress span {
+  display: block;
+  width: 40%;
+  height: 100%;
+  background: var(--primary, #a2b231);
+  animation: api-progress-slide 1.2s ease-in-out infinite;
+}
+
+.api-error-banner {
+  position: sticky;
+  top: 0;
+  z-index: 1990;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  width: min(100% - 2rem, 1320px);
+  margin: 1rem auto 0;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--danger, #b02a37);
+  border-radius: var(--radius-md, 10px);
+  background: var(--surface, #fff);
+  color: var(--dark, #1c1c1c);
+  box-shadow: var(--card-shadow, 0 8px 20px rgba(0, 0, 0, 0.05));
+}
+
+.api-error-banner > .bi {
+  color: var(--danger, #b02a37);
+  font-size: 1.25rem;
+}
+
+.api-error-copy {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.spa-alert-stack {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2000;
+  width: min(92vw, 430px);
+}
+
+@media (max-width: 575.98px) {
+  .api-error-banner {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .api-error-banner .btn {
+    margin-left: 2rem;
+  }
+
+  .spa-alert-stack {
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+}
+
+@keyframes api-progress-slide {
+  from { transform: translateX(-110%); }
+  to { transform: translateX(260%); }
+}
+
+.card-img-cover {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.product-img-wrap > a {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.avatar-sm {
+  width: 28px;
+  height: 28px;
+  object-fit: cover;
+}
+
+.avatar-lg {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+}
+
+.stat-card .stat-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.section-title {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.table > :not(caption) > * > * {
+  padding: 0.65rem 0.75rem;
+}
+
+.badge {
+  text-transform: capitalize;
+}
+
+.rating-stars i {
+  color: #f5b301;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+/* Shared MarketLink treatment for every routed Angular page. */
+.sp-shell {
+  --route-radius: var(--radius-md, 10px);
+  --route-shadow: var(--card-shadow, 0 8px 20px rgba(0, 0, 0, 0.05));
+}
+
+.sp-shell h1,
+.sp-shell h2,
+.sp-shell h3,
+.sp-shell h4,
+.sp-shell h5,
+.sp-shell h6 {
+  color: var(--dark, #1c1c1c);
+}
+
+.sp-shell a:not(.btn):not(.text-reset) {
+  color: var(--primary-dark, #889721);
+  text-underline-offset: 0.15em;
+}
+
+.site-footer a:not(.btn) {
+  color: var(--muted, #666) !important;
+  text-decoration: none;
+}
+
+.site-footer a:not(.btn):hover {
+  color: var(--primary-dark, #889721) !important;
+}
+
+[data-bs-theme="dark"] .sp-shell a:not(.btn):not(.text-reset) {
+  color: var(--primary, #b3c33f);
+}
+
+[data-bs-theme="dark"] .site-footer a:not(.btn):hover {
+  color: var(--primary, #b3c33f) !important;
+}
+
+.sp-shell .section-title {
+  color: var(--dark, #1c1c1c);
+}
+
+.sp-shell .page-banner .section-title {
+  padding-bottom: 0;
+}
+
+.sp-shell .btn-success,
+.sp-shell .btn-primary {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--primary, #a2b231);
+  --bs-btn-border-color: var(--primary, #a2b231);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--primary-dark, #889721);
+  --bs-btn-hover-border-color: var(--primary-dark, #889721);
+  --bs-btn-active-bg: var(--primary-dark, #889721);
+  --bs-btn-active-border-color: var(--primary-dark, #889721);
+  --bs-btn-disabled-bg: var(--primary, #a2b231);
+  --bs-btn-disabled-border-color: var(--primary, #a2b231);
+}
+
+.sp-shell .btn-outline-success,
+.sp-shell .btn-outline-primary {
+  --bs-btn-color: var(--primary-dark, #889721);
+  --bs-btn-border-color: var(--primary, #a2b231);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--primary-dark, #889721);
+  --bs-btn-hover-border-color: var(--primary-dark, #889721);
+  --bs-btn-active-bg: var(--primary-dark, #889721);
+  --bs-btn-active-border-color: var(--primary-dark, #889721);
+}
+
+[data-bs-theme="dark"] .sp-shell .btn-outline-success,
+[data-bs-theme="dark"] .sp-shell .btn-outline-primary {
+  --bs-btn-color: var(--primary, #b3c33f);
+}
+
+app-root .btn-ml,
+app-root .btn-marketlink {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--primary, #a2b231);
+  --bs-btn-border-color: var(--primary, #a2b231);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--primary-dark, #889721);
+  --bs-btn-hover-border-color: var(--primary-dark, #889721);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--primary-dark, #889721);
+  --bs-btn-active-border-color: var(--primary-dark, #889721);
+  --bs-btn-disabled-color: #fff;
+  --bs-btn-disabled-bg: var(--primary, #a2b231);
+  --bs-btn-disabled-border-color: var(--primary, #a2b231);
+  font-weight: 600;
+}
+
+app-root .btn-outline-ml,
+app-root .btn-marketlink-outline {
+  --bs-btn-color: var(--dark, #1c1c1c);
+  --bs-btn-bg: var(--surface, #fff);
+  --bs-btn-border-color: var(--border-color, #e2e2d8);
+  --bs-btn-hover-color: var(--light-bg, #f7f7f3);
+  --bs-btn-hover-bg: var(--dark, #1c1c1c);
+  --bs-btn-hover-border-color: var(--dark, #1c1c1c);
+  --bs-btn-active-color: var(--light-bg, #f7f7f3);
+  --bs-btn-active-bg: var(--dark, #1c1c1c);
+  --bs-btn-active-border-color: var(--dark, #1c1c1c);
+  font-weight: 600;
+}
+
+[data-bs-theme="dark"] app-root .btn-outline-ml,
+[data-bs-theme="dark"] app-root .btn-marketlink-outline {
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--primary, #b3c33f);
+  --bs-btn-hover-border-color: var(--primary, #b3c33f);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--primary, #b3c33f);
+  --bs-btn-active-border-color: var(--primary, #b3c33f);
+}
+
+.sp-shell .text-success {
+  color: var(--primary-dark, #889721) !important;
+}
+
+[data-bs-theme="dark"] .sp-shell .text-success {
+  color: var(--primary, #b3c33f) !important;
+}
+
+.sp-shell .bg-success {
+  background-color: var(--primary-dark, #889721) !important;
+}
+
+.sp-shell .bg-light {
+  background-color: var(--surface-2, #faf9f5) !important;
+  color: var(--dark, #1c1c1c) !important;
+}
+
+.sp-shell .card,
+.sp-shell .card-ml,
+.sp-shell .dashboard-card,
+.sp-shell .stat-card {
+  border-color: var(--border-color, #e2e2d8);
+  border-radius: var(--route-radius);
+  background-color: var(--surface, #fff);
+  color: var(--dark, #1c1c1c);
+}
+
+.sp-shell .card:not(.stat-card),
+.sp-shell .dashboard-card {
+  box-shadow: var(--route-shadow);
+}
+
+.sp-shell .card-header,
+.sp-shell .card-footer {
+  border-color: var(--border-color, #e2e2d8);
+  background-color: var(--surface-2, #faf9f5);
+  color: var(--dark, #1c1c1c);
+}
+
+.sp-shell .card-header.bg-transparent {
+  background: var(--surface, #fff) !important;
+}
+
+.sp-shell .modal-content {
+  border-color: var(--border-color, #e2e2d8);
+  border-radius: var(--radius-lg, 14px);
+  background: var(--surface, #fff);
+  color: var(--dark, #1c1c1c);
+  box-shadow: var(--card-shadow-lg, 0 12px 30px rgba(0, 0, 0, 0.08));
+}
+
+.sp-shell .modal-header,
+.sp-shell .modal-footer {
+  border-color: var(--border-color, #e2e2d8);
+}
+
+.sp-shell .form-control,
+.sp-shell .form-select,
+.sp-shell .input-group-text {
+  border-color: var(--border-color, #e2e2d8);
+  background-color: var(--surface-2, #faf9f5);
+  color: var(--dark, #1c1c1c);
+}
+
+.sp-shell .form-control:focus,
+.sp-shell .form-select:focus {
+  border-color: var(--primary, #a2b231);
+  background-color: var(--surface, #fff);
+  color: var(--dark, #1c1c1c);
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--primary, #a2b231) 25%, transparent);
+}
+
+.sp-shell .form-control::placeholder {
+  color: var(--muted, #666);
+  opacity: 0.8;
+}
+
+.sp-shell .table {
+  --bs-table-color: var(--dark, #1c1c1c);
+  --bs-table-bg: var(--surface, #fff);
+  --bs-table-border-color: var(--border-color, #e2e2d8);
+  --bs-table-striped-bg: var(--surface-2, #faf9f5);
+  --bs-table-hover-bg: var(--primary-light, #ebf0c8);
+  vertical-align: middle;
+}
+
+.sp-shell .table > :not(caption) > * > * {
+  border-color: var(--border-color, #e2e2d8);
+}
+
+.sp-shell .list-group-item {
+  border-color: var(--border-color, #e2e2d8);
+  background-color: var(--surface, #fff);
+  color: var(--dark, #1c1c1c);
+}
+
+.sp-shell .list-group-item-action:hover,
+.sp-shell .list-group-item-action:focus {
+  background-color: var(--primary-light, #ebf0c8);
+  color: var(--primary-contrast, #4a5410);
+}
+
+.sp-shell .pagination {
+  --bs-pagination-color: var(--primary-dark, #889721);
+  --bs-pagination-bg: var(--surface, #fff);
+  --bs-pagination-border-color: var(--border-color, #e2e2d8);
+  --bs-pagination-hover-color: var(--primary-contrast, #4a5410);
+  --bs-pagination-hover-bg: var(--primary-light, #ebf0c8);
+  --bs-pagination-hover-border-color: var(--border-color, #e2e2d8);
+  --bs-pagination-active-color: var(--primary-contrast, #4a5410);
+  --bs-pagination-active-bg: var(--primary-light, #ebf0c8);
+  --bs-pagination-active-border-color: var(--primary, #a2b231);
+  --bs-pagination-disabled-color: var(--muted, #666);
+  --bs-pagination-disabled-bg: var(--surface-2, #faf9f5);
+  --bs-pagination-disabled-border-color: var(--border-color, #e2e2d8);
+}
+
+.sp-shell .detail-panel {
+  padding: clamp(1rem, 3vw, 2rem);
+  border: 1px solid var(--border-color, #e2e2d8);
+  border-radius: var(--radius-lg, 14px);
+  background: var(--surface, #fff);
+  box-shadow: var(--card-shadow, 0 8px 20px rgba(0, 0, 0, 0.05));
+}
+
+.sp-shell app-product-detail > .detail-panel,
+.sp-shell app-market-detail > .detail-panel,
+.sp-shell app-farmer-detail > .detail-panel {
+  margin-bottom: 2rem;
+}
+
+.sp-shell app-product-detail > .detail-panel > .row > .col-lg-5 img,
+.sp-shell app-market-detail > .detail-panel > .row > .col-lg-6 img {
+  max-height: 420px;
+  border-radius: var(--radius-lg, 14px);
+  object-fit: cover;
+}
+
+.sp-shell app-product-detail > .detail-panel h2,
+.sp-shell app-market-detail > .detail-panel h2,
+.sp-shell app-farmer-detail > .detail-panel h2 {
+  margin-bottom: 0.75rem;
+  font-weight: 700;
+}
+
+.sp-shell app-farmers .filter-card,
+.sp-shell app-products .filter-card {
+  border-radius: var(--radius-lg, 14px);
+  box-shadow: var(--route-shadow);
+}
+
+.sp-shell app-login .card,
+.sp-shell app-register .card,
+.sp-shell app-forgot-password .card,
+.sp-shell app-reset-password .card {
+  overflow: hidden;
+  border-top: 4px solid var(--primary, #a2b231);
+}
+
+.sp-shell app-about .about-grid {
+  align-items: center;
+  padding: clamp(1.25rem, 4vw, 3rem);
+  border: 1px solid var(--border-color, #e2e2d8);
+  border-radius: var(--radius-lg, 14px);
+  background: var(--surface, #fff);
+  box-shadow: var(--route-shadow);
+}
+
+.sp-shell app-about .about-img-box {
+  overflow: hidden;
+  border-radius: var(--radius-lg, 14px);
+}
+
+.sp-shell app-about .about-img-box img {
+  min-height: 280px;
+  object-fit: cover;
+}
+
+.sp-shell app-about .about-value-icon {
+  color: var(--primary-dark, #889721);
+  font-size: 2rem;
+}
+
+.sp-shell app-about .about-cta {
+  padding: clamp(2rem, 5vw, 4rem);
+  background: var(--cream, #eae3cf);
+}
+
+.sp-shell app-not-found > .text-center {
+  padding: clamp(3rem, 9vw, 7rem) 1rem !important;
+  border: 1px solid var(--border-color, #e2e2d8);
+  border-radius: var(--radius-lg, 14px);
+  background: var(--surface, #fff);
+  box-shadow: var(--route-shadow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .api-progress span {
+    animation-duration: 3s;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .sp-shell > app-home .hero-section {
+    min-height: 0;
+    padding: 64px 0 88px;
+  }
+
+  .sp-shell > app-home .hero-grid {
+    min-height: 0;
+  }
+
+  .sp-shell .detail-panel {
+    padding: 1rem;
+  }
+
+  .sp-shell app-about .about-grid {
+    padding: 1rem;
+  }
+}

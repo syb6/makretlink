@@ -34,29 +34,49 @@ class StockSeeder extends Seeder
                 };
 
                 // Recurring weekly stock template (the "recurring weekly stock" feature)
-                StockTemplate::create([
-                    'product_id' => $product->id,
-                    'farmer_market_id' => $fm->id,
-                    'default_quantity' => $templateQty,
-                    'is_active' => true,
-                ]);
+                // Idempotent: unique key is (product_id, farmer_market_id).
+                StockTemplate::updateOrCreate(
+                    [
+                        'product_id' => $product->id,
+                        'farmer_market_id' => $fm->id,
+                    ],
+                    [
+                        'default_quantity' => $templateQty,
+                        'is_active' => true,
+                    ]
+                );
 
                 foreach ([$thisWeek, $nextWeek] as $weekStart) {
                     $qty = max(1, $templateQty + random_int(-10, 10));
 
-                    // Leave this week's stock partly sold so numbers look realistic
+                    // Leave this week's stock partly sold so numbers look realistic.
+                    // Skip refresh when the row was already sold from (e.g. customer
+                    // orders between reseeds) — don't resurrect sold stock.
+                    $existing = WeeklyStock::where('product_id', $product->id)
+                        ->where('farmer_market_id', $fm->id)
+                        ->where('week_start', $weekStart->toDateString())
+                        ->first();
+                    if ($existing && ($existing->quantity - $existing->available_quantity) > 0) {
+                        continue;
+                    }
+
                     $sold = $weekStart->isSameWeek(now(), Carbon::SUNDAY) ? random_int(0, max(1, (int) ($qty * 0.6))) : 0;
                     $available = max(0, $qty - $sold);
 
-                    WeeklyStock::create([
-                        'product_id' => $product->id,
-                        'farmer_market_id' => $fm->id,
-                        'stock_template_id' => null,
-                        'week_start' => $weekStart->toDateString(),
-                        'quantity' => $qty,
-                        'available_quantity' => $available,
-                        'status' => $available > 0 ? 'available' : 'sold_out',
-                    ]);
+                    // Idempotent: unique key is (product_id, farmer_market_id, week_start).
+                    WeeklyStock::updateOrCreate(
+                        [
+                            'product_id' => $product->id,
+                            'farmer_market_id' => $fm->id,
+                            'week_start' => $weekStart->toDateString(),
+                        ],
+                        [
+                            'stock_template_id' => null,
+                            'quantity' => $qty,
+                            'available_quantity' => $available,
+                            'status' => $available > 0 ? 'available' : 'sold_out',
+                        ]
+                    );
                 }
             }
 
@@ -82,15 +102,20 @@ class StockSeeder extends Seeder
                             $cutoff = now()->addHours(3);
                         }
 
-                        PickupSlot::create([
-                            'farmer_market_id' => $fm->id,
-                            'pickup_date' => $pickupDate->toDateString(),
-                            'start_time' => $s->format('H:i'),
-                            'end_time' => $e->format('H:i'),
-                            'cutoff_at' => $cutoff,
-                            'max_orders' => random_int(10, 25),
-                            'status' => 'active',
-                        ]);
+                        // Idempotent: unique key is (farmer_market_id, pickup_date, start_time, end_time).
+                        PickupSlot::updateOrCreate(
+                            [
+                                'farmer_market_id' => $fm->id,
+                                'pickup_date' => $pickupDate->toDateString(),
+                                'start_time' => $s->format('H:i'),
+                                'end_time' => $e->format('H:i'),
+                            ],
+                            [
+                                'cutoff_at' => $cutoff,
+                                'max_orders' => random_int(10, 25),
+                                'status' => 'active',
+                            ]
+                        );
                     }
                 }
             }

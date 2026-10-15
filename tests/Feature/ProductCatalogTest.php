@@ -32,7 +32,7 @@ class ProductCatalogTest extends TestCase
     {
         $this->actAsFarmer();
 
-        $response = $this->post(route('farmer.products.store'), [
+        $response = $this->postJson('/api/farmer/products', [
             'name' => 'Fresh Okra',
             'category_id' => $this->product->category_id,
             'price' => '12.50',
@@ -42,7 +42,7 @@ class ProductCatalogTest extends TestCase
             'initial_quantity' => '25',
         ]);
 
-        $response->assertRedirect()->assertSessionHas('success');
+        $response->assertOk()->assertJsonPath('ok', true);
 
         $product = Product::where('name', 'Fresh Okra')->firstOrFail();
 
@@ -56,25 +56,25 @@ class ProductCatalogTest extends TestCase
         ]);
 
         // And the public listing shows it.
-        $this->get(route('products.index'))->assertOk()->assertSee('Fresh Okra');
+        $this->getJson('/api/products')->assertOk()->assertJsonFragment(['name' => 'Fresh Okra']);
     }
 
     public function test_new_product_without_stock_is_created_but_listing_hint_is_shown(): void
     {
         $this->actAsFarmer();
 
-        $this->post(route('farmer.products.store'), [
+        $this->postJson('/api/farmer/products', [
             'name' => 'Stockless Turnip',
             'price' => '5',
             'unit' => 'kg',
             'status' => 'active',
-        ])->assertRedirect()->assertSessionHas('success');
+        ])->assertOk()->assertJsonPath('ok', true);
 
         $product = Product::where('name', 'Stockless Turnip')->firstOrFail();
         $this->assertDatabaseMissing('weekly_stocks', ['product_id' => $product->id]);
 
         // Without weekly stock the product must NOT appear on the listing.
-        $this->get(route('products.index'))->assertOk()->assertDontSee('Stockless Turnip');
+        $this->getJson('/api/products')->assertOk()->assertJsonMissing(['name' => 'Stockless Turnip']);
     }
 
     public function test_farmer_cannot_seed_initial_stock_on_another_farmers_stall(): void
@@ -97,7 +97,7 @@ class ProductCatalogTest extends TestCase
         $this->actAsFarmer();
 
         // Try stocking the rival's stall through the initial-stock path.
-        $this->post(route('farmer.products.store'), [
+        $this->postJson('/api/farmer/products', [
             'name' => 'Sneaky Squash',
             'price' => '5',
             'unit' => 'kg',
@@ -126,13 +126,13 @@ class ProductCatalogTest extends TestCase
         ];
 
         foreach ($badQueries as $bad) {
-            $response = $this->get(route('products.index', $bad));
-            $this->assertTrue(in_array($response->status(), [200, 302]), 'Unexpected status '.$response->status());
+            $response = $this->getJson('/api/products?'.http_build_query($bad));
+            $this->assertTrue(in_array($response->status(), [200, 422]), 'Unexpected status '.$response->status());
         }
 
         // Valid filters still work.
-        $this->get(route('products.index', ['category' => $this->product->category_id]))->assertOk();
-        $this->get(route('products.index', ['min_price' => '1', 'max_price' => '100']))->assertOk();
+        $this->getJson('/api/products?category='.$this->product->category_id)->assertOk();
+        $this->getJson('/api/products?min_price=1&max_price=100')->assertOk();
     }
 
     public function test_deleting_product_removes_its_uploaded_image(): void
@@ -158,7 +158,7 @@ class ProductCatalogTest extends TestCase
         $this->assertFileExists($fullPath);
 
         $this->actAsFarmer();
-        $this->delete(route('farmer.products.destroy', $product))->assertRedirect();
+        $this->deleteJson("/api/farmer/products/{$product->id}")->assertOk();
 
         $this->assertSoftDeleted('products', ['id' => $product->id]);
         $this->assertFileDoesNotExist($fullPath); // upload freed from disk
@@ -184,7 +184,7 @@ class ProductCatalogTest extends TestCase
         ]);
 
         $this->actAsFarmer();
-        $this->delete(route('farmer.products.destroy', $product))->assertRedirect();
+        $this->deleteJson("/api/farmer/products/{$product->id}")->assertOk();
 
         // The shared asset file must survive the product delete.
         $this->assertFileExists($fullPath);
@@ -206,7 +206,9 @@ class ProductCatalogTest extends TestCase
         $this->assertFileExists($fullPath);
 
         $this->actAsAdmin();
-        $this->delete(route('admin.markets.destroy', $market))->assertRedirect()->assertSessionHas('success');
+        $this->deleteJson("/api/admin/markets/{$market->id}")
+            ->assertOk()
+            ->assertJsonPath('flash.success', 'Market removed.');
 
         $this->assertSoftDeleted('markets', ['id' => $market->id]);
         $this->assertFileDoesNotExist($fullPath);
@@ -233,7 +235,9 @@ class ProductCatalogTest extends TestCase
         file_put_contents($fullPath, 'keep me');
 
         $this->actAsAdmin();
-        $this->delete(route('admin.markets.destroy', $market))->assertRedirect()->assertSessionHas('error');
+        $this->deleteJson("/api/admin/markets/{$market->id}")
+            ->assertOk()
+            ->assertJsonPath('flash.error', 'Cannot delete: this market has farmer stalls or orders attached. Set it inactive instead.');
 
         $this->assertDatabaseHas('markets', ['id' => $market->id]);
         $this->assertFileExists($fullPath);
@@ -245,31 +249,31 @@ class ProductCatalogTest extends TestCase
         $this->actAsFarmer();
 
         // Quantity required when a stall is chosen.
-        $this->post(route('farmer.products.store'), [
+        $this->postJson('/api/farmer/products', [
             'name' => 'Half Stocked',
             'price' => '5',
             'unit' => 'kg',
             'status' => 'active',
             'initial_market_id' => $this->stall->id,
-        ])->assertSessionHasErrors('initial_quantity');
+        ])->assertUnprocessable()->assertJsonValidationErrors('initial_quantity');
 
         // Negative quantity rejected.
-        $this->post(route('farmer.products.store'), [
+        $this->postJson('/api/farmer/products', [
             'name' => 'Negative Stock',
             'price' => '5',
             'unit' => 'kg',
             'status' => 'active',
             'initial_market_id' => $this->stall->id,
             'initial_quantity' => '-4',
-        ])->assertSessionHasErrors('initial_quantity');
+        ])->assertUnprocessable()->assertJsonValidationErrors('initial_quantity');
 
         // Unknown stall id rejected.
-        $this->post(route('farmer.products.store'), [
+        $this->postJson('/api/farmer/products', [
             'name' => 'Ghost Stall',
             'price' => '5',
             'unit' => 'kg',
             'status' => 'active',
             'initial_market_id' => 999999,
-        ])->assertSessionHasErrors('initial_market_id');
+        ])->assertUnprocessable()->assertJsonValidationErrors('initial_market_id');
     }
 }

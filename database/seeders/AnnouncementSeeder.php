@@ -36,15 +36,18 @@ class AnnouncementSeeder extends Seeder
         foreach ($announcements as $a) {
             $date = now()->setDay($a['day']);
 
-            Announcement::create([
-                'created_by'   => $admin?->id,
-                'title'        => $a['title'],
-                'message'      => $a['message'],
-                'status'       => $a['status'],
-                'published_at' => $a['status'] === 'published' ? $date : null,
-                'created_at'   => $date,
-                'updated_at'   => $date,
-            ]);
+            // Idempotent: keyed by title — a reseed refreshes instead of duplicating.
+            Announcement::updateOrCreate(
+                ['title' => $a['title']],
+                [
+                    'created_by'   => $admin?->id,
+                    'message'      => $a['message'],
+                    'status'       => $a['status'],
+                    'published_at' => $a['status'] === 'published' ? $date : null,
+                    'created_at'   => $date,
+                    'updated_at'   => $date,
+                ]
+            );
         }
     }
 }

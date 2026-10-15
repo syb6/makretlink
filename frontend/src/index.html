@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en" data-bs-theme="light">
+<head>
+  <meta charset="utf-8">
+  <title>MarketLink · Fresh from your local market</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Pre-order farm-fresh produce online, collect and pay at your local market stall.">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <script>
+    (function () {
+      var theme = localStorage.getItem('ml-theme');
+      if (theme !== 'light' && theme !== 'dark') {
+        theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-bs-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/css/app.min.css" data-beasties-skip>
+</head>
+<body>
+  <app-root></app-root>
+</body>
+</html>
