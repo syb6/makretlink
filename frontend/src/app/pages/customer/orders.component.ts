@@ -2,11 +2,13 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@ang
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../../core/api.service';
 import { money, date, statusLabel, statusBadge } from '../../core/utils';
+import { LoadingStateComponent } from '../../layout/loading-state.component';
+import { ToastService } from '../../core/toast.service';
 
 @Component({
   selector: 'app-customer-orders',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink],
+  imports: [RouterLink, LoadingStateComponent],
   template: `
     <h2 class="section-title mb-3">My orders</h2>
 
@@ -27,7 +29,12 @@ import { money, date, statusLabel, statusBadge } from '../../core/utils';
               </td>
             </tr>
           } @empty {
-            <tr><td colspan="7" class="text-muted">No orders yet.</td></tr>
+            <tr>
+              <td colspan="7" class="text-muted">
+                @if (loaded()) { No orders yet. }
+                @else { <app-loading-state label="Loading orders…" /> }
+              </td>
+            </tr>
           }
         </tbody>
       </table>
@@ -44,8 +51,10 @@ import { money, date, statusLabel, statusBadge } from '../../core/utils';
 })
 export class CustomerOrdersComponent implements OnInit {
   private api = inject(ApiService);
+  private toast = inject(ToastService);
 
   rows = signal<any[]>([]);
+  loaded = signal(false);
   page = signal(1);
   lastPage = signal(1);
 
@@ -58,9 +67,16 @@ export class CustomerOrdersComponent implements OnInit {
   pages(): number[] { return Array.from({ length: this.lastPage() }, (_, i) => i + 1); }
 
   async load(): Promise<void> {
-    const d = await this.api.get<any>('/customer/orders?page=' + this.page());
-    this.rows.set(d.rows);
-    this.page.set(d.page);
-    this.lastPage.set(d.last_page);
+    this.loaded.set(false);
+    try {
+      const d = await this.api.get<any>('/customer/orders?page=' + this.page());
+      this.rows.set(d.rows);
+      this.page.set(d.page);
+      this.lastPage.set(d.last_page);
+    } catch (e) {
+      this.toast.fromValidation(e);
+    } finally {
+      this.loaded.set(true);
+    }
   }
 }

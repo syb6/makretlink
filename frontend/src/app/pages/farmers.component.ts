@@ -5,11 +5,12 @@ import { ApiService } from '../core/api.service';
 import { AuthService } from '../core/auth.service';
 import { ToastService } from '../core/toast.service';
 import { dayName, limit } from '../core/utils';
+import { LoadingStateComponent } from '../layout/loading-state.component';
 
 @Component({
   selector: 'app-farmers',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, FormsModule],
+  imports: [RouterLink, FormsModule, LoadingStateComponent],
   template: `
     <section class="page-banner anim-up">
       <i class="bi bi-flower2 page-banner-icon" aria-hidden="true"></i>
@@ -31,7 +32,10 @@ import { dayName, limit } from '../core/utils';
     </form>
 
     <div class="row g-4">
-      @for (f of list(); track f.id) {
+      @if (loading() && list().length === 0) {
+        <div class="col-12"><app-loading-state label="Loading local farmers…" /></div>
+      } @else {
+        @for (f of list(); track f.id) {
         <div class="col-sm-6 col-lg-4">
           <div class="card-ml h-100 p-4 d-flex flex-column position-relative">
             @if (auth.isCustomer()) {
@@ -59,8 +63,9 @@ import { dayName, limit } from '../core/utils';
             </div>
           </div>
         </div>
-      } @empty {
-        <div class="col-12"><div class="ml-note"><i class="bi bi-info-circle"></i>No farmers found. Try different filters.</div></div>
+        } @empty {
+          <div class="col-12"><div class="ml-note"><i class="bi bi-info-circle"></i>No farmers found. Try different filters.</div></div>
+        }
       }
     </div>
 
@@ -89,6 +94,7 @@ export class FarmersComponent implements OnInit {
   favs = signal<Set<number>>(new Set());
   page = signal(1);
   lastPage = signal(1);
+  loading = signal(true);
 
   dayName = dayName;
   limit = limit;
@@ -110,15 +116,22 @@ export class FarmersComponent implements OnInit {
   pages(): number[] { return Array.from({ length: this.lastPage() }, (_, i) => i + 1); }
 
   async load(): Promise<void> {
+    this.loading.set(true);
     const qs = new URLSearchParams({ page: String(this.page()) });
     if (this.q) qs.set('q', this.q);
     if (this.market) qs.set('market', this.market);
-    const d = await this.api.get<any>('/farmers?' + qs);
-    this.list.set(d.data);
-    this.markets.set(d.markets);
-    this.favs.set(new Set(d.favoriteFarmerIds ?? []));
-    this.page.set(d.page);
-    this.lastPage.set(d.last_page);
+    try {
+      const d = await this.api.get<any>('/farmers?' + qs);
+      this.list.set(d.data);
+      this.markets.set(d.markets);
+      this.favs.set(new Set(d.favoriteFarmerIds ?? []));
+      this.page.set(d.page);
+      this.lastPage.set(d.last_page);
+    } catch (error) {
+      this.toast.fromValidation(error);
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   async toggleFav(f: any): Promise<void> {

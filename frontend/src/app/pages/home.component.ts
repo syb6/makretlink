@@ -5,6 +5,7 @@ import { ApiService } from '../core/api.service';
 import { ToastService } from '../core/toast.service';
 import { date, dayName, formatTime, imageError, imageLoaded, img, limit, money, openDaysLabel } from '../core/utils';
 import { PersonAvatarComponent } from '../core/person-avatar.component';
+import { LoadingStateComponent } from '../layout/loading-state.component';
 interface HomeMarketSchedule { id: number; day_of_week: number; is_closed: boolean; opening_time: string; closing_time: string; }
 
 interface HomeStock {
@@ -47,7 +48,7 @@ interface HomeData {
 @Component({
   selector: 'app-home',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, PersonAvatarComponent],
+  imports: [RouterLink, PersonAvatarComponent, LoadingStateComponent],
   template: `
     <section class="hero-section" id="home">
       <div class="hero-bg-photo" aria-hidden="true">
@@ -151,7 +152,11 @@ interface HomeData {
               <h3 class="category-title">{{ category.name }}</h3>
             </a>
           } @empty {
-            <p class="text-muted">No categories yet.</p>
+            @if (loaded()) {
+              <p class="text-muted">No categories yet.</p>
+            } @else {
+              <app-loading-state label="Loading categories…" />
+            }
           }
         </div>
       </div>
@@ -193,7 +198,11 @@ interface HomeData {
               </div>
             </article>
           } @empty {
-            <div class="ml-note"><i class="bi bi-info-circle"></i>No active markets yet. Check back soon!</div>
+            @if (loaded()) {
+              <div class="ml-note"><i class="bi bi-info-circle"></i>No active markets yet. Check back soon!</div>
+            } @else {
+              <app-loading-state label="Loading markets…" />
+            }
           }
         </div>
         <div class="text-center mt-4">
@@ -253,7 +262,13 @@ interface HomeData {
               </article>
             </div>
           } @empty {
-            <div class="col-12"><div class="ml-note"><i class="bi bi-info-circle"></i>No weekly stock has been published yet. Check back soon!</div></div>
+            <div class="col-12">
+              @if (loaded()) {
+                <div class="ml-note"><i class="bi bi-info-circle"></i>No weekly stock has been published yet. Check back soon!</div>
+              } @else {
+                <app-loading-state label="Loading fresh picks…" />
+              }
+            </div>
           }
         </div>
         <div class="text-center mt-4">
@@ -309,6 +324,7 @@ export class HomeComponent implements OnInit {
   readonly auth = inject(AuthService);
 
   data = signal<HomeData | null>(null);
+  loaded = signal(false);
   favs = signal<Set<number>>(new Set());
 
   money = money;
@@ -344,7 +360,8 @@ export class HomeComponent implements OnInit {
     this.api.get<HomeData>('/home').then((data) => {
       this.data.set(data);
       this.favs.set(new Set(data.favoriteProductIds ?? []));
-    }).catch((error: unknown) => this.toast.fromValidation(error));
+    }).catch((error: unknown) => this.toast.fromValidation(error))
+      .finally(() => this.loaded.set(true));
   }
 
   isFav(stock: HomeStock): boolean {

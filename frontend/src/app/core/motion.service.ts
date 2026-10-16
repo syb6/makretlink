@@ -25,6 +25,7 @@ export class MotionService {
   private mo: MutationObserver | null = null;
   private initialized = false;
   private handled = new WeakSet<Element>();
+  private imageSources = new WeakMap<HTMLImageElement, string>();
 
   start(): void {
     if (this.initialized) return;
@@ -54,7 +55,13 @@ export class MotionService {
     this.zone.runOutsideAngular(() => {
       this.scanWholePage();
       this.mo = new MutationObserver(() => this.scanWholePage());
-      this.mo.observe(document.body, { childList: true, characterData: true, subtree: true });
+      this.mo.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['src', 'srcset'],
+        childList: true,
+        characterData: true,
+        subtree: true,
+      });
     });
   }
 
@@ -69,6 +76,8 @@ export class MotionService {
   }
 
   private scanWholePage(): void {
+    document.querySelectorAll<HTMLImageElement>('img').forEach((image) => this.prepareImage(image));
+
     const matched = document.querySelectorAll<HTMLElement>(`${REVEAL_SELECTOR}, .stat-number`);
 
     matched.forEach((el) => {
@@ -80,6 +89,35 @@ export class MotionService {
       this.handled.add(el);
       this.prepareReveal(el);
     });
+  }
+
+  private prepareImage(image: HTMLImageElement): void {
+    const source = `${image.getAttribute('src') ?? ''}\u0000${image.getAttribute('srcset') ?? ''}`;
+    if (source === '\u0000' || this.imageSources.get(image) === source) return;
+    this.imageSources.set(image, source);
+    image.classList.remove('image-ready', 'image-failed');
+
+    if (image.complete && image.naturalWidth > 0) {
+      image.classList.add('image-ready');
+      return;
+    }
+
+    image.classList.add('image-loading');
+    image.addEventListener('load', () => {
+      if (this.imageSources.get(image) !== source) return;
+      image.classList.remove('image-loading', 'image-failed');
+      image.classList.add('image-ready');
+    }, { once: true });
+    image.addEventListener('error', () => {
+      if (this.imageSources.get(image) !== source) return;
+      image.classList.remove('image-loading');
+      image.classList.add('image-failed');
+    }, { once: true });
+
+    if (image.complete) {
+      image.classList.remove('image-loading');
+      image.classList.add('image-failed');
+    }
   }
 
   private prepareReveal(el: HTMLElement): void {

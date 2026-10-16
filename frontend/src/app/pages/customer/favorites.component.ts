@@ -4,11 +4,12 @@ import { ApiService } from '../../core/api.service';
 import { ToastService } from '../../core/toast.service';
 import { imageError, img, money } from '../../core/utils';
 import { PersonAvatarComponent } from '../../core/person-avatar.component';
+import { LoadingStateComponent } from '../../layout/loading-state.component';
 
 @Component({
   selector: 'app-favorites',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, PersonAvatarComponent],
+  imports: [RouterLink, PersonAvatarComponent, LoadingStateComponent],
   template: `
     <h2 class="section-title mb-3">Favorites</h2>
 
@@ -32,7 +33,10 @@ import { PersonAvatarComponent } from '../../core/person-avatar.component';
                 </div>
               </div>
             </div>
-          } @empty { <p class="text-muted">Nothing favorited yet — tap the ♥ on any product.</p> }
+          } @empty {
+            @if (loaded()) { <p class="text-muted">Nothing favorited yet — tap the ♥ on any product.</p> }
+            @else { <app-loading-state label="Loading favorite products…" /> }
+          }
         </div>
       }
       @case ('farmers') {
@@ -48,7 +52,10 @@ import { PersonAvatarComponent } from '../../core/person-avatar.component';
                 <button class="btn btn-sm btn-outline-danger" (click)="unfav('farmer', f.id)">Remove</button>
               </div></div>
             </div>
-          } @empty { <p class="text-muted">No favorite farmers yet.</p> }
+          } @empty {
+            @if (loaded()) { <p class="text-muted">No favorite farmers yet.</p> }
+            @else { <app-loading-state label="Loading favorite farmers…" /> }
+          }
         </div>
       }
       @case ('markets') {
@@ -64,7 +71,10 @@ import { PersonAvatarComponent } from '../../core/person-avatar.component';
                 </div>
               </div>
             </div>
-          } @empty { <p class="text-muted">No favorite markets yet.</p> }
+          } @empty {
+            @if (loaded()) { <p class="text-muted">No favorite markets yet.</p> }
+            @else { <app-loading-state label="Loading favorite markets…" /> }
+          }
         </div>
       }
     }
@@ -75,6 +85,7 @@ export class FavoritesComponent implements OnInit {
   private toast = inject(ToastService);
 
   tab = signal<'products' | 'farmers' | 'markets'>('products');
+  loaded = signal(false);
   products = signal<any[]>([]);
   farmers = signal<any[]>([]);
   markets = signal<any[]>([]);
@@ -86,10 +97,17 @@ export class FavoritesComponent implements OnInit {
   }
 
   async load(): Promise<void> {
-    const d = await this.api.get<any>('/customer/favorites');
-    this.products.set(d.products ?? []);
-    this.farmers.set(d.farmers ?? []);
-    this.markets.set(d.markets ?? []);
+    this.loaded.set(false);
+    try {
+      const d = await this.api.get<any>('/customer/favorites');
+      this.products.set(d.products ?? []);
+      this.farmers.set(d.farmers ?? []);
+      this.markets.set(d.markets ?? []);
+    } catch (e) {
+      this.toast.fromValidation(e);
+    } finally {
+      this.loaded.set(true);
+    }
   }
 
   async unfav(type: string, id: number): Promise<void> {

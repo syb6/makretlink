@@ -9,11 +9,12 @@ import { FooterComponent } from './layout/footer.component';
 import { ToastsComponent } from './layout/toasts.component';
 import { BackToTopComponent } from './layout/back-to-top.component';
 import { ChatbotComponent } from './layout/chatbot.component';
+import { LoadingIndicatorComponent } from './layout/loading-indicator.component';
 
 @Component({
   selector: 'app-root',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, NavbarComponent, FooterComponent, ToastsComponent, BackToTopComponent, ChatbotComponent],
+  imports: [RouterOutlet, NavbarComponent, FooterComponent, ToastsComponent, BackToTopComponent, ChatbotComponent, LoadingIndicatorComponent],
   template: `
     @if (api.activeRequests() > 0) {
       <div class="api-progress" role="progressbar" aria-label="Loading" aria-valuetext="Loading">
@@ -47,9 +48,10 @@ import { ChatbotComponent } from './layout/chatbot.component';
         </div>
       }
     }
-    <main id="main" class="sp-shell" tabindex="-1">
+    <main id="main" class="sp-shell" tabindex="-1" [attr.aria-busy]="api.activeRequests() > 0">
       <router-outlet />
     </main>
+    <app-loading-indicator />
     @if (!adminArea()) { <app-footer /> }
     @if (showChatbot()) { <app-chatbot /> }
     <app-toasts />

@@ -179,6 +179,21 @@ main.sp-shell {
   animation: api-progress-slide 1.2s ease-in-out infinite;
 }
 
+img.image-loading {
+  background: linear-gradient(
+    100deg,
+    color-mix(in srgb, var(--primary, #a2b231) 8%, var(--surface, #fff)) 35%,
+    color-mix(in srgb, var(--primary, #a2b231) 20%, var(--surface, #fff)) 50%,
+    color-mix(in srgb, var(--primary, #a2b231) 8%, var(--surface, #fff)) 65%
+  );
+  background-size: 220% 100%;
+  animation: image-loading-shimmer 1.4s ease-in-out infinite;
+}
+
+.sp-shell[aria-busy="true"] {
+  cursor: progress;
+}
+
 .api-error-banner {
   position: sticky;
   top: 0;
@@ -234,6 +249,17 @@ main.sp-shell {
 @keyframes api-progress-slide {
   from { transform: translateX(-110%); }
   to { transform: translateX(260%); }
+}
+
+@keyframes image-loading-shimmer {
+  to { background-position-x: -220%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  img.image-loading {
+    animation: none;
+    background-size: 100% 100%;
+  }
 }
 
 .card-img-cover {

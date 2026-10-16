@@ -5,6 +5,7 @@ import { ApiService } from '../core/api.service';
 import { AuthService } from '../core/auth.service';
 import { ToastService } from '../core/toast.service';
 import { dayName, formatTime, imageError, img, openDaysLabel } from '../core/utils';
+import { LoadingStateComponent } from '../layout/loading-state.component';
 
 interface MarketSchedule { id: number; day_of_week: number; is_closed: boolean; opening_time: string; closing_time: string; }
 interface MarketRow { id: number; name: string; address: string; image?: string | null; status?: string; farmers_count?: number; schedules?: MarketSchedule[]; }
@@ -16,7 +17,7 @@ declare const L: any;
 @Component({
   selector: 'app-markets',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, FormsModule],
+  imports: [RouterLink, FormsModule, LoadingStateComponent],
   template: `
     <section class="page-banner anim-up">
       <i class="bi bi-geo-alt-fill page-banner-icon" aria-hidden="true"></i>
@@ -85,7 +86,10 @@ declare const L: any;
 
           <div class="col-lg-8">
             <div class="row g-4">
-              @for (m of list(); track m.id; let index = $index) {
+              @if (loading() && list().length === 0) {
+                <div class="col-12"><app-loading-state label="Loading farmers markets…" /></div>
+              } @else {
+                @for (m of list(); track m.id; let index = $index) {
                 <div class="col-md-6">
                   <div class="market-card h-100 position-relative">
                     <div class="market-img-box">
@@ -123,10 +127,11 @@ declare const L: any;
                     </div>
                   </div>
                 </div>
-              } @empty {
-                <div class="col-12">
-                  <div class="ml-note"><i class="bi bi-info-circle"></i>No markets match that day. Try another filter.</div>
-                </div>
+                } @empty {
+                  <div class="col-12">
+                    <div class="ml-note"><i class="bi bi-info-circle"></i>No markets match that day. Try another filter.</div>
+                  </div>
+                }
               }
             </div>
 
@@ -160,6 +165,7 @@ export class MarketsComponent implements OnInit, OnDestroy {
   favs = signal<Set<number>>(new Set());
   page = signal(1);
   lastPage = signal(1);
+  loading = signal(true);
 
   nearbyBusy = signal(false);
   nearbyStatus = signal<{ type: 'error' | 'info'; html: string } | null>(null);
@@ -210,6 +216,7 @@ export class MarketsComponent implements OnInit, OnDestroy {
   }
 
   async load(): Promise<void> {
+    this.loading.set(true);
     const qs = new URLSearchParams();
     if (this.day !== '') qs.set('day', this.day);
     qs.set('page', String(this.page()));
@@ -222,6 +229,8 @@ export class MarketsComponent implements OnInit, OnDestroy {
       this.lastPage.set(d.last_page);
     } catch (error) {
       this.toast.fromValidation(error);
+    } finally {
+      this.loading.set(false);
     }
     void this.initMap();
   }

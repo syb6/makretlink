@@ -5,11 +5,12 @@ import { AuthService } from '../core/auth.service';
 import { ToastService } from '../core/toast.service';
 import { dayName, formatTime, imageError, img, money } from '../core/utils';
 import { PersonAvatarComponent } from '../core/person-avatar.component';
+import { LoadingStateComponent } from '../layout/loading-state.component';
 
 @Component({
   selector: 'app-farmer-detail',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PersonAvatarComponent],
+  imports: [PersonAvatarComponent, LoadingStateComponent],
   template: `
     @if (d(); as x) {
       <div class="card detail-panel farmer-profile-panel mb-4">
@@ -62,6 +63,12 @@ import { PersonAvatarComponent } from '../core/person-avatar.component';
         }
       </div>
     }
+    @else if (!loaded()) {
+      <app-loading-state label="Loading farmer profile…" />
+    }
+    @else {
+      <div class="alert alert-warning" role="alert">This farmer profile could not be loaded. Please try again.</div>
+    }
   `,
 })
 export class FarmerDetailComponent implements OnInit {
@@ -71,6 +78,7 @@ export class FarmerDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
 
   d = signal<any>(null);
+  loaded = signal(false);
   favs = signal<Set<number>>(new Set());
   pFavs = signal<Set<number>>(new Set());
 
@@ -82,7 +90,8 @@ export class FarmerDetailComponent implements OnInit {
       this.d.set(x);
       this.favs.set(new Set(x.favoriteFarmerIds ?? []));
       this.pFavs.set(new Set(x.favoriteProductIds ?? []));
-    });
+    }).catch((error: unknown) => this.toast.fromValidation(error))
+      .finally(() => this.loaded.set(true));
   }
 
   async toggleFav(): Promise<void> {

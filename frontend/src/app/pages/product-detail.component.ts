@@ -5,13 +5,14 @@ import { ApiService } from '../core/api.service';
 import { AuthService } from '../core/auth.service';
 import { ToastService } from '../core/toast.service';
 import { imageError, img, money } from '../core/utils';
+import { LoadingStateComponent } from '../layout/loading-state.component';
 
 /** Mirror of products/show.blade.php — breadcrumb, availability box,
  *  single stock select + qty + add-to-cart, favorites, reviews, related. */
 @Component({
   selector: 'app-product-detail',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, FormsModule],
+  imports: [RouterLink, FormsModule, LoadingStateComponent],
   template: `
     @if (d(); as data) {
       <section class="py-4 py-md-5">
@@ -148,7 +149,11 @@ import { imageError, img, money } from '../core/utils';
         </div>
       </section>
     } @else {
-      <div class="text-center py-5"><div class="spinner-border text-success"></div></div>
+      @if (loaded()) {
+        <div class="alert alert-warning m-4" role="alert">This product could not be loaded. Please try again.</div>
+      } @else {
+        <app-loading-state label="Loading product…" />
+      }
     }
   `,
 })
@@ -159,6 +164,7 @@ export class ProductDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
 
   d = signal<any>(null);
+  loaded = signal(false);
   stockId: number | string = '';
   qtyInput: string | number = 1;
   busy = false;
@@ -176,7 +182,8 @@ export class ProductDetailComponent implements OnInit {
         this.stockId = first.id;
       }
       this.isFav = (x.favoriteProductIds ?? []).includes(Number(id));
-    });
+    }).catch((error: unknown) => this.toast.fromValidation(error))
+      .finally(() => this.loaded.set(true));
   }
 
   syncStock(): void { /* stock select drives addToCart(); keeps parity with the blade data-stock-id swap */ }

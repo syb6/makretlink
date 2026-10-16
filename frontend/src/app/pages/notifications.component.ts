@@ -3,10 +3,13 @@ import { Router } from '@angular/router';
 import { ApiService } from '../core/api.service';
 import { AuthService } from '../core/auth.service';
 import { date } from '../core/utils';
+import { LoadingStateComponent } from '../layout/loading-state.component';
+import { ToastService } from '../core/toast.service';
 
 @Component({
   selector: 'app-notifications',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [LoadingStateComponent],
   template: `
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h2 class="section-title mb-0">Notifications</h2>
@@ -27,7 +30,10 @@ import { date } from '../core/utils';
           @if (!n.read_at) { <span class="badge bg-danger rounded-pill">new</span> }
         </div>
       } @empty {
-        <div class="list-group-item text-muted">No notifications yet.</div>
+        <div class="list-group-item text-muted">
+          @if (loaded()) { No notifications yet. }
+          @else { <app-loading-state label="Loading notifications…" /> }
+        </div>
       }
     </div>
   `,
@@ -36,9 +42,11 @@ export class NotificationsComponent implements OnInit {
   private api = inject(ApiService);
   private auth = inject(AuthService);
   private router = inject(Router);
+  private toast = inject(ToastService);
 
   items = signal<any[]>([]);
   unread = signal(0);
+  loaded = signal(false);
 
   date = date;
 
@@ -47,10 +55,17 @@ export class NotificationsComponent implements OnInit {
   }
 
   async load(): Promise<void> {
-    const d = await this.api.get<any>('/notifications');
-    this.items.set(d.items);
-    this.unread.set(d.unread);
-    void this.auth.load();
+    this.loaded.set(false);
+    try {
+      const d = await this.api.get<any>('/notifications');
+      this.items.set(d.items);
+      this.unread.set(d.unread);
+      void this.auth.load();
+    } catch (e) {
+      this.toast.fromValidation(e);
+    } finally {
+      this.loaded.set(true);
+    }
   }
 
   async open(n: any): Promise<void> {

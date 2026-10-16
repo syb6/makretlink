@@ -6,11 +6,12 @@ import { AuthService } from '../core/auth.service';
 import { ToastService } from '../core/toast.service';
 import { imageError, money, img, limit } from '../core/utils';
 import { PersonAvatarComponent } from '../core/person-avatar.component';
+import { LoadingStateComponent } from '../layout/loading-state.component';
 
 @Component({
   selector: 'app-products',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, FormsModule, PersonAvatarComponent],
+  imports: [RouterLink, FormsModule, PersonAvatarComponent, LoadingStateComponent],
   template: `
     <section class="page-banner anim-up">
       <i class="bi bi-basket2-fill page-banner-icon" aria-hidden="true"></i>
@@ -78,7 +79,10 @@ import { PersonAvatarComponent } from '../core/person-avatar.component';
 
       <p class="text-muted mb-3">{{ stocks().length }} products on this page</p>
       <div class="row g-4">
-        @for (s of stocks(); track s.id; let index = $index) {
+        @if (loading() && stocks().length === 0) {
+          <div class="col-12"><app-loading-state label="Loading fresh products…" /></div>
+        } @else {
+          @for (s of stocks(); track s.id; let index = $index) {
           <div class="col-6 col-md-4 col-xl-3">
             <article class="product-card">
               <div class="product-img-wrap">
@@ -119,8 +123,9 @@ import { PersonAvatarComponent } from '../core/person-avatar.component';
               </div>
             </article>
           </div>
-        } @empty {
-          <div class="col-12"><div class="ml-note"><i class="bi bi-info-circle"></i>No products match your filters.</div></div>
+          } @empty {
+            <div class="col-12"><div class="ml-note"><i class="bi bi-info-circle"></i>No products match your filters.</div></div>
+          }
         }
       </div>
 
@@ -154,6 +159,7 @@ export class ProductsComponent implements OnInit {
   page = signal(1);
   lastPage = signal(1);
   total = signal(0);
+  loading = signal(true);
 
   money = money;
   img = img;
@@ -188,6 +194,7 @@ export class ProductsComponent implements OnInit {
   }
 
   async load(): Promise<void> {
+    this.loading.set(true);
     const params = new URLSearchParams();
     for (const [k, v] of Object.entries(this.f)) {
       if (v !== '' && v !== null) params.set(k, String(v));
@@ -206,6 +213,8 @@ export class ProductsComponent implements OnInit {
       this.total.set(d.total ?? d.data.length);
     } catch (e) {
       this.toast.fromValidation(e);
+    } finally {
+      this.loading.set(false);
     }
   }
 

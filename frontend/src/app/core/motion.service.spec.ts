@@ -47,4 +47,50 @@ describe('MotionService', () => {
 
     motion.stop();
   });
+
+  it('shows image loading state until the image finishes loading', async () => {
+    vi.stubGlobal('matchMedia', vi.fn(() => ({ matches: false })));
+    vi.stubGlobal('IntersectionObserver', MockIntersectionObserver);
+    TestBed.configureTestingModule({ providers: [MotionService] });
+
+    const image = document.createElement('img');
+    image.src = '/slow-image.png';
+    document.body.append(image);
+
+    const motion = TestBed.inject(MotionService);
+    motion.start();
+
+    expect(image.classList.contains('image-loading')).toBe(true);
+    image.dispatchEvent(new Event('load'));
+    expect(image.classList.contains('image-loading')).toBe(false);
+    expect(image.classList.contains('image-ready')).toBe(true);
+
+    motion.stop();
+  });
+
+  it('restarts the image loading state when an existing image source changes', async () => {
+    vi.stubGlobal('matchMedia', vi.fn(() => ({ matches: false })));
+    vi.stubGlobal('IntersectionObserver', MockIntersectionObserver);
+    TestBed.configureTestingModule({ providers: [MotionService] });
+
+    const image = document.createElement('img');
+    image.src = '/first-image.png';
+    document.body.append(image);
+
+    const motion = TestBed.inject(MotionService);
+    motion.start();
+    image.dispatchEvent(new Event('load'));
+    expect(image.classList.contains('image-ready')).toBe(true);
+
+    image.src = '/second-image.png';
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(image.classList.contains('image-loading')).toBe(true);
+    expect(image.classList.contains('image-ready')).toBe(false);
+
+    image.dispatchEvent(new Event('load'));
+    expect(image.classList.contains('image-loading')).toBe(false);
+    expect(image.classList.contains('image-ready')).toBe(true);
+
+    motion.stop();
+  });
 });

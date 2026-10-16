@@ -4,6 +4,7 @@ import { ApiService } from '../core/api.service';
 import { AuthService } from '../core/auth.service';
 import { ToastService } from '../core/toast.service';
 import { dayName, formatTime, imageError, img, money, openDaysLabel } from '../core/utils';
+import { LoadingStateComponent } from '../layout/loading-state.component';
 
 declare const L: any;
 
@@ -12,7 +13,7 @@ declare const L: any;
 @Component({
   selector: 'app-market-detail',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink],
+  imports: [RouterLink, LoadingStateComponent],
   template: `
     @if (d(); as x) {
       <section class="py-4 py-md-5">
@@ -102,7 +103,11 @@ declare const L: any;
         </div>
       </section>
     } @else {
-      <div class="text-center py-5"><div class="spinner-border text-success"></div></div>
+      @if (loaded()) {
+        <div class="alert alert-warning m-4" role="alert">This market could not be loaded. Please try again.</div>
+      } @else {
+        <app-loading-state label="Loading market…" />
+      }
     }
   `,
 })
@@ -113,6 +118,7 @@ export class MarketDetailComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
 
   d = signal<any>(null);
+  loaded = signal(false);
   isFav = false;
 
   dayName = dayName; img = img; money = money; onImageError = imageError;
@@ -161,6 +167,8 @@ export class MarketDetailComponent implements OnInit, OnDestroy {
       void this.initMap(x);
     } catch {
       this.toast.fromValidation(new Error('This market could not be loaded.'));
+    } finally {
+      this.loaded.set(true);
     }
   }
 
