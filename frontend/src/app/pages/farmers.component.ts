@@ -4,77 +4,73 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../core/api.service';
 import { AuthService } from '../core/auth.service';
 import { ToastService } from '../core/toast.service';
-import { dayName } from '../core/utils';
-import { PersonAvatarComponent } from '../core/person-avatar.component';
+import { dayName, limit } from '../core/utils';
 
 @Component({
   selector: 'app-farmers',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, FormsModule, PersonAvatarComponent],
+  imports: [RouterLink, FormsModule],
   template: `
-    <section class="page-banner">
+    <section class="page-banner anim-up">
+      <i class="bi bi-flower2 page-banner-icon" aria-hidden="true"></i>
       <div class="container">
         <span class="badge-sub">MEET THE GROWERS</span>
-        <h1 class="section-title">Local <span class="accent">Farmers</span></h1>
-        <p class="section-subtitle">Discover the people and small businesses bringing fresh goods to your market.</p>
-        <i class="bi bi-people page-banner-icon" aria-hidden="true"></i>
+        <h1 class="section-title mb-1">Our Farmers</h1>
+        <p class="section-subtitle mb-0">Meet the people growing your food.</p>
       </div>
     </section>
 
     <div class="container py-4 py-lg-5">
-    <form class="card filter-card mb-4" autocomplete="off">
-      <div class="card-body row g-2 align-items-end">
-        <div class="col-md-6">
-          <label class="form-label small mb-1" for="farmer-search">Search farmers</label>
-          <input id="farmer-search" class="form-control" name="q" [(ngModel)]="q" placeholder="Search by farm, person or name…" (input)="load()">
-        </div>
-        <div class="col-md-4">
-          <label class="form-label small mb-1" for="farmer-market">Market</label>
-          <select id="farmer-market" class="form-select" name="market" [(ngModel)]="market" (change)="load()">
-            <option value="">All markets</option>
-            @for (m of markets(); track m.id) { <option [value]="m.id">{{ m.name }}</option> }
-          </select>
-        </div>
-      </div>
+    <form class="d-flex gap-2 flex-wrap justify-content-center mb-4" (ngSubmit)="page.set(1); load()">
+      <input type="text" name="q" class="form-control" style="max-width:220px" placeholder="Search farmers..." [(ngModel)]="q">
+      <select name="market" class="form-select" style="max-width:200px" [(ngModel)]="market">
+        <option value="">All markets</option>
+        @for (m of markets(); track m.id) { <option [value]="m.id">{{ m.name }}</option> }
+      </select>
+      <button class="btn btn-ml">Filter</button>
     </form>
 
     <div class="row g-4">
       @for (f of list(); track f.id) {
-        <div class="col-md-6 col-lg-4">
-          <div class="card h-100 shadow-sm">
-            <div class="card-body">
-              <div class="d-flex align-items-center mb-2">
-                <app-person-avatar [name]="f.name || f.contact_person" [src]="f.avatar || f.profile_image" class="avatar-lg rounded-circle me-3" />
-                <div class="flex-grow-1">
-                  <h6 class="mb-0 fw-bold"><a [routerLink]="['/farmers', f.id]" class="text-decoration-none text-reset">{{ f.business_name }}</a></h6>
-                  <div class="small text-muted">{{ f.name }} @if (f.contact_person && f.contact_person !== f.name) { · {{ f.contact_person }} }</div>
-                </div>
-                @if (auth.isCustomer()) {
-                  <button class="btn btn-link text-danger fs-5 p-0" (click)="toggleFav(f)"><i class="bi" [class.bi-heart-fill]="favs().has(f.id)" [class.bi-heart]="!favs().has(f.id)"></i></button>
-                }
+        <div class="col-sm-6 col-lg-4">
+          <div class="card-ml h-100 p-4 d-flex flex-column position-relative">
+            @if (auth.isCustomer()) {
+              <button type="button" class="fav-btn" (click)="toggleFav(f)"
+                      [attr.title]="favs().has(f.id) ? 'Remove from favorites' : 'Save to favorites'"
+                      aria-label="Toggle favorite farmer">
+                <i class="bi" [class.bi-heart-fill]="favs().has(f.id)" [class.bi-heart]="!favs().has(f.id)"></i>
+              </button>
+            }
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <span class="brand-leaf">{{ initial(f.business_name) }}</span>
+              <div>
+                <h5 class="fw-bold mb-0">{{ f.business_name }}</h5>
+                <small class="text-muted"><i class="bi bi-person me-1"></i>{{ f.contact_person }}</small>
               </div>
-              @if (f.description) { <p class="small text-muted mb-2">{{ f.description }}</p> }
-              <div class="small">
-                @for (m of (f.markets ?? []).slice(0, 3); track m.id) {
-                  <div class="mb-1">
-                    <i class="bi bi-shop me-1 text-success"></i>{{ m.market?.name }}
-                    @for (s of m.schedules; track s.id) { <span class="badge bg-light text-dark me-1">{{ dayName(s.day_of_week) }}</span> }
-                  </div>
-                } @empty { <span class="text-muted">No stalls yet</span> }
-              </div>
+            </div>
+            <p class="small text-muted mb-3">{{ limit(f.description || f.address, 110) }}</p>
+            <div class="mb-3">
+              @for (m of f.markets ?? []; track m.id) {
+                <span class="badge badge-soft mb-1"><i class="bi bi-geo-alt me-1"></i>{{ m.market?.name }}</span>
+              }
+            </div>
+            <div class="mt-auto">
+              <a [routerLink]="['/farmers', f.id]" class="btn btn-outline-ml btn-sm w-100">View profile &amp; stock</a>
             </div>
           </div>
         </div>
       } @empty {
-        <p class="text-muted">No farmers found.</p>
+        <div class="col-12"><div class="ml-note"><i class="bi bi-info-circle"></i>No farmers found. Try different filters.</div></div>
       }
     </div>
 
     @if (lastPage() > 1) {
       <nav class="mt-4"><ul class="pagination justify-content-center">
+        <li class="page-item" [class.disabled]="page() <= 1"><button class="page-link" type="button" (click)="go(page() - 1)" aria-label="Previous page">‹</button></li>
         @for (p of pages(); track p) {
-          <li class="page-item" [class.active]="p === page()"><button class="page-link" (click)="page.set(p); load()">{{ p }}</button></li>
+          <li class="page-item" [class.active]="p === page()"><button class="page-link" type="button" (click)="go(p)">{{ p }}</button></li>
         }
+        <li class="page-item" [class.disabled]="page() >= lastPage()"><button class="page-link" type="button" (click)="go(page() + 1)" aria-label="Next page">›</button></li>
       </ul></nav>
     }
     </div>
@@ -95,8 +91,19 @@ export class FarmersComponent implements OnInit {
   lastPage = signal(1);
 
   dayName = dayName;
+  limit = limit;
   ngOnInit(): void {
     this.market = this.route.snapshot.queryParamMap.get('market') ?? '';
+    void this.load();
+  }
+
+  initial(name: string | null | undefined): string {
+    return (name ?? '').trim().charAt(0).toUpperCase();
+  }
+
+  go(p: number): void {
+    if (p < 1 || p > this.lastPage()) return;
+    this.page.set(p);
     void this.load();
   }
 

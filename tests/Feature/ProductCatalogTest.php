@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Category;
 use App\Models\FarmerMarket;
+use App\Models\FavoriteProduct;
 use App\Models\Market;
 use App\Models\Product;
 use App\Models\WeeklyStock;
@@ -75,6 +76,19 @@ class ProductCatalogTest extends TestCase
 
         // Without weekly stock the product must NOT appear on the listing.
         $this->getJson('/api/products')->assertOk()->assertJsonMissing(['name' => 'Stockless Turnip']);
+    }
+
+    public function test_product_detail_includes_the_signed_in_customers_favorites(): void
+    {
+        $this->actAsCustomer();
+        FavoriteProduct::create([
+            'customer_id' => $this->customer->id,
+            'product_id' => $this->product->id,
+        ]);
+
+        $this->getJson('/api/products/'.$this->product->id)
+            ->assertOk()
+            ->assertJsonPath('favoriteProductIds.0', $this->product->id);
     }
 
     public function test_farmer_cannot_seed_initial_stock_on_another_farmers_stall(): void

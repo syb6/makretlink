@@ -59,6 +59,7 @@ Route::get('/markets/{market}', [PublicDataController::class, 'marketShow']);
 Route::get('/markets-map', [MarketController::class, 'mapData']);
 Route::get('/farmers', [PublicDataController::class, 'farmers']);
 Route::get('/farmers/{farmer}', [PublicDataController::class, 'farmerShow']);
+Route::get('/contact', [PublicDataController::class, 'contact']);
 
 // Public mutations (guest or any role) — bridged to the Blade controllers.
 Route::post('/auth/register', [AuthController::class, 'register']);

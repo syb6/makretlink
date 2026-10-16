@@ -10,23 +10,50 @@ import { ToastService } from '../../core/toast.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule],
   template: `
-    <div class="row justify-content-center">
-      <div class="col-md-6 col-lg-5">
-        <div class="card shadow-sm">
-          <div class="card-body p-4">
-            <h2 class="fw-bold mb-1">Set a new password</h2>
-            <p class="text-muted small mb-4">You'll be signed in automatically afterwards.</p>
-
-            <form (ngSubmit)="submit()" autocomplete="off">
-              <div class="mb-3"><label class="form-label">Email</label><input class="form-control" type="email" name="email" [(ngModel)]="email" required></div>
-              <div class="mb-3"><label class="form-label">New password</label><input class="form-control" type="password" name="password" [(ngModel)]="password" required minlength="8"></div>
-              <div class="mb-3"><label class="form-label">Confirm new password</label><input class="form-control" type="password" name="password_confirmation" [(ngModel)]="passwordConfirmation" required minlength="8"></div>
-              <button class="btn btn-success w-100" [disabled]="busy()">@if (busy()) { <span class="spinner-border spinner-border-sm me-1"></span> }Change password</button>
-            </form>
+    <section class="py-5">
+      <div class="auth-container">
+        <div class="auth-card">
+          <div class="text-center mb-4">
+            <div class="auth-icon mb-3"><i class="bi bi-shield-lock"></i></div>
+            <h1 class="section-title mb-1">Choose a new password</h1>
+            <p class="text-muted small mb-0">
+              <i class="bi bi-hourglass-split me-1"></i>Reset links expire <strong>30 minutes</strong>
+              after they are sent and work only once.
+            </p>
           </div>
+
+          <form (ngSubmit)="submit()" novalidate>
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="email">Email address</label>
+              <input id="email" type="email" name="email" class="form-control"
+                     [(ngModel)]="email" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="password">New password</label>
+              <input id="password" type="password" name="password" class="form-control"
+                     [(ngModel)]="password" required autocomplete="new-password"
+                     placeholder="At least 8 characters">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="password_confirmation">Repeat new password</label>
+              <input id="password_confirmation" type="password" name="password_confirmation" class="form-control"
+                     [(ngModel)]="passwordConfirmation" required autocomplete="new-password"
+                     placeholder="Same password again">
+            </div>
+
+            <button type="submit" class="btn btn-ml w-100 mb-3" [disabled]="busy()">
+              @if (busy()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+              <i class="bi bi-check2-circle me-1"></i> Change password
+            </button>
+            <div class="text-center small">
+              <a routerLink="/login" class="fw-semibold text-decoration-none"><i class="bi bi-arrow-left me-1"></i>Back to sign in</a>
+            </div>
+          </form>
         </div>
       </div>
-    </div>
+    </section>
   `,
 })
 export class ResetPasswordComponent {
@@ -36,7 +63,7 @@ export class ResetPasswordComponent {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
-  email = (this.route.snapshot.queryParamMap.get('email') ?? '');
+  email = this.route.snapshot.queryParamMap.get('email') ?? '';
   password = '';
   passwordConfirmation = '';
   busy = signal(false);

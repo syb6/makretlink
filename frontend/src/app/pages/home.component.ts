@@ -3,8 +3,9 @@ import { RouterLink } from '@angular/router';
 import { AuthService } from '../core/auth.service';
 import { ApiService } from '../core/api.service';
 import { ToastService } from '../core/toast.service';
-import { date, dayName, formatTime, imageError, imageLoaded, img, money } from '../core/utils';
+import { date, dayName, formatTime, imageError, imageLoaded, img, limit, money, openDaysLabel } from '../core/utils';
 import { PersonAvatarComponent } from '../core/person-avatar.component';
+interface HomeMarketSchedule { id: number; day_of_week: number; is_closed: boolean; opening_time: string; closing_time: string; }
 
 interface HomeStock {
   id: number;
@@ -18,6 +19,7 @@ interface HomeStock {
   };
   farmer?: { business_name: string; name?: string | null; avatar?: string | null; profile_image?: string | null } | null;
   farmerMarket?: { market?: { name: string } | null } | null;
+  available?: number;
 }
 
 interface HomeMarket {
@@ -113,9 +115,9 @@ interface HomeData {
       </div>
 
       <div class="hero-chips-strip" role="presentation">
-        <span class="hero-float-chips chip-1" aria-hidden="true"><i class="bi bi-basket2-fill"></i> Fresh weekly selections</span>
-        <span class="hero-float-chips chip-2" aria-hidden="true"><i class="bi bi-shop"></i> Local markets near you</span>
-        <span class="hero-float-chips chip-3" aria-hidden="true"><i class="bi bi-patch-check-fill"></i> Verified farmers</span>
+        <span class="hero-float-chips chip-1" aria-hidden="true"><i class="bi bi-basket2-fill"></i> 1,200+ baskets reserved</span>
+        <span class="hero-float-chips chip-2" aria-hidden="true"><i class="bi bi-star-fill"></i> 9 farms near you</span>
+        <span class="hero-float-chips chip-3" aria-hidden="true"><i class="bi bi-patch-check-fill"></i> 100% verified farmers</span>
       </div>
       <a class="hero-scroll-cue" href="#features" aria-label="Scroll to features"><span>Scroll</span><i class="bi bi-chevron-double-down"></i></a>
     </section>
@@ -166,23 +168,26 @@ interface HomeData {
           @for (market of data()?.markets ?? []; track market.id) {
             <article class="market-card">
               <div class="market-img-box">
-                <span class="market-status-tag">Local market</span>
+                <span class="market-status-tag">{{ openDaysLabel(market.schedules) }}</span>
                 <img [src]="img('market', market.image)" (error)="onImageError($event, 'market')"
                      [alt]="market.name" width="600" height="400" loading="lazy">
               </div>
               <div class="market-details">
                 <h3 class="market-title">{{ market.name }}</h3>
                 <div class="market-meta">
-                  <span><i class="bi bi-geo-alt-fill"></i>{{ market.address }}</span>
-                  @for (schedule of market.schedules ?? []; track schedule.id) {
-                    @if (!schedule.is_closed) {
-                      <span><i class="bi bi-clock-fill"></i>{{ dayName(schedule.day_of_week) }} · {{ time(schedule.opening_time) }}–{{ time(schedule.closing_time) }}</span>
-                    }
+                  <span><i class="bi bi-geo-alt-fill"></i> {{ market.address }}</span>
+                  @if (firstOpen(market)) {
+                    <span><i class="bi bi-clock-fill"></i> {{ dayName(firstOpen(market)!.day_of_week) }}: {{ time(firstOpen(market)!.opening_time) }} - {{ time(firstOpen(market)!.closing_time) }}</span>
                   }
                 </div>
-                <p class="market-desc">{{ market.description || 'A community market with local growers and artisans.' }}</p>
+                @if (openCount(market) > 1) {
+                  <p class="market-desc mb-2">
+                    <span class="multi-market-note"><i class="bi bi-calendar-week me-1"></i>Trades {{ openCount(market) }} days weekly — {{ openNames(market) }}</span>
+                  </p>
+                }
+                <p class="market-desc">{{ limit(market.description || 'A community market with local growers and artisans.', 110) }}</p>
                 <div class="market-bottom">
-                  <span class="vendor-count"><i class="bi bi-shop me-1"></i>{{ market.farmers_count ?? 0 }} Local Farmers</span>
+                  <span class="vendor-count"><i class="bi bi-shop me-1"></i> {{ market.farmers_count ?? 0 }} Local Farmer{{ (market.farmers_count ?? 0) === 1 ? '' : 's' }}</span>
                   <a [routerLink]="['/markets', market.id]" class="btn-explore-market">View Market</a>
                 </div>
               </div>
@@ -215,7 +220,10 @@ interface HomeData {
                     <img [src]="img('product', stock.product.image)" (error)="onImageError($event, 'product')"
                          [alt]="stock.product.name" width="600" height="400" loading="lazy">
                   </a>
-                  <span class="product-badge">Fresh this week</span>
+                  <span class="product-badge">{{ (stock.available ?? 0) > 0 ? 'In Stock' : 'Sold Out' }}</span>
+                  @if ((data()?.marketCounts?.[stock.product.id] ?? 1) > 1) {
+                    <span class="product-badge product-badge-alt"><i class="bi bi-geo-alt-fill me-1"></i>{{ data()?.marketCounts?.[stock.product.id] }} markets</span>
+                  }
                   @if (auth.isCustomer()) {
                     <button class="fav-btn" type="button" (click)="toggleFav(stock)"
                             [attr.aria-label]="isFav(stock) ? 'Remove from favorites' : 'Save to favorites'">
@@ -231,7 +239,7 @@ interface HomeData {
                                        [src]="stock.farmer?.avatar || stock.farmer?.profile_image"
                                        class="avatar-sm rounded-circle me-1" />
                     {{ stock.farmer?.business_name ?? 'Local farmer' }}
-                    <span class="d-block"><i class="bi bi-geo-alt me-1"></i>{{ stock.farmerMarket?.market?.name ?? 'Local market' }}</span>
+                    <span class="d-block"><i class="bi bi-geo-alt me-1"></i>{{ limit(stock.farmerMarket?.market?.name, 26) }}@if ((data()?.marketCounts?.[stock.product.id] ?? 1) > 1) { · +{{ (data()?.marketCounts?.[stock.product.id] ?? 1) - 1 }} more }@endif</span>
                   </div>
                   <div class="product-bottom">
                     <span class="product-price">{{ money(stock.product.price) }} <small>/{{ stock.product.unit }}</small></span>
@@ -278,7 +286,7 @@ interface HomeData {
           <a routerLink="/markets" class="btn btn-white">Explore Markets Nearby</a>
         </div>
         <div class="promo-img-box d-none d-md-block">
-          <img src="/images/hero-basket.webp" alt="A basket of fresh vegetables" width="600" height="600" loading="lazy">
+          <img src="https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&w=600&q=80" alt="Fresh vegetable basket" width="600" height="600" loading="lazy" (error)="$any($event.target).style.display='none'">
         </div>
       </div>
     </section>
@@ -286,8 +294,11 @@ interface HomeData {
     <section class="cta-section" id="contact">
       <div class="container cta-box">
         <h2>Ready to Discover Your Local Market?</h2>
-        <p>Explore fresh seasonal produce and support the farmers in your community.</p>
-        <a routerLink="/markets" class="btn btn-ml">Find a Market <i class="bi bi-arrow-right ms-1"></i></a>
+        <p class="reveal" style="--d: 90ms">Explore fresh seasonal produce, support local farming families, and reserve your next market pickup effortlessly — or list your own harvest as a farmer.</p>
+        <div class="cta-btns reveal" style="--d: 180ms">
+          <a routerLink="/register" class="btn btn-ml">Sign Up as a Customer</a>
+          <a routerLink="/register" [queryParams]="{ role: 'farmer' }" class="btn btn-outline-ml">Register as a Farmer</a>
+        </div>
       </div>
     </section>
   `,
@@ -307,6 +318,27 @@ export class HomeComponent implements OnInit {
   time = formatTime;
   onImageError = imageError;
   onImageLoad = imageLoaded;
+  limit = limit;
+  openDaysLabel = openDaysLabel;
+
+  /** Mirror of $openDays = $market->openDays(); used for the card meta lines. */
+  openDays(market: HomeMarket): HomeMarketSchedule[] {
+    return (market.schedules ?? [])
+      .filter((s) => !s.is_closed)
+      .sort((a, b) => Number(a.day_of_week) - Number(b.day_of_week));
+  }
+
+  firstOpen(market: HomeMarket): HomeMarketSchedule | null {
+    return this.openDays(market)[0] ?? null;
+  }
+
+  openCount(market: HomeMarket): number {
+    return this.openDays(market).length;
+  }
+
+  openNames(market: HomeMarket): string {
+    return this.openDays(market).map((s) => dayName(s.day_of_week)).join(' & ');
+  }
 
   ngOnInit(): void {
     this.api.get<HomeData>('/home').then((data) => {

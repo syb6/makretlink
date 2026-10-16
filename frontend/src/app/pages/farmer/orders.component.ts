@@ -29,7 +29,7 @@ import { money, date, statusLabel, statusBadge } from '../../core/utils';
               <td>{{ o.items_count }}</td>
               <td>{{ money(o.total_amount) }}</td>
               <td><span class="badge" [class]="'text-bg-' + badge(o.status)">{{ label(o.status) }}</span></td>
-              <td class="text-end"><a [routerLink]="['/farmer/orders', o.id]" class="btn btn-sm btn-outline-success">Manage</a></td>
+              <td class="text-end"><a [routerLink]="['/farmer/orders', o.id]" class="btn btn-sm btn-outline-ml">Manage</a></td>
             </tr>
           } @empty { <tr><td colspan="7" class="text-muted">No orders match.</td></tr> }
         </tbody>

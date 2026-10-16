@@ -11,7 +11,7 @@ import { imageError, img, statusLabel } from '../../core/utils';
   template: `
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h2 class="section-title mb-0">Categories</h2>
-      <button class="btn btn-success btn-sm" (click)="startNew()"><i class="bi bi-plus-lg me-1"></i>New category</button>
+      <button class="btn btn-ml btn-sm" (click)="startNew()"><i class="bi bi-plus-lg me-1"></i>New category</button>
     </div>
 
     @if (editing() !== null) {
@@ -28,7 +28,7 @@ import { imageError, img, statusLabel } from '../../core/utils';
             </div>
             <div class="modal-footer">
               <button class="btn btn-outline-secondary" (click)="editing.set(null)">Cancel</button>
-              <button class="btn btn-success" (click)="save()" [disabled]="busy()">@if (busy()) { <span class="spinner-border spinner-border-sm me-1"></span> }Save</button>
+              <button class="btn btn-ml" (click)="save()" [disabled]="busy()">@if (busy()) { <span class="spinner-border spinner-border-sm me-1"></span> }Save</button>
             </div>
           </div>
         </div>
@@ -48,7 +48,7 @@ import { imageError, img, statusLabel } from '../../core/utils';
               <td>{{ c.products_count }}</td>
               <td><span class="badge" [class]="c.status === 'active' ? 'text-bg-success' : 'text-bg-secondary'">{{ label(c.status) }}</span></td>
               <td class="text-end">
-                <button class="btn btn-sm btn-outline-success me-1" (click)="startEdit(c)">Edit</button>
+                <button class="btn btn-sm btn-outline-ml me-1" (click)="startEdit(c)">Edit</button>
                 <button class="btn btn-sm btn-outline-danger" (click)="remove(c)"><i class="bi bi-trash"></i></button>
               </td>
             </tr>

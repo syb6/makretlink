@@ -15,7 +15,7 @@ import { PersonAvatarComponent } from '../../core/person-avatar.component';
       <div class="card-body">
         <div class="d-flex align-items-center gap-3 mb-3">
           <app-person-avatar [name]="f.contact_person" [src]="avatarPath()" class="avatar-lg rounded-circle" />
-          <label class="btn btn-outline-success btn-sm mb-0">
+          <label class="btn btn-outline-ml btn-sm mb-0">
             Change photo<input type="file" accept="image/png,image/jpeg,image/webp" class="d-none" (change)="photo.set($any($event.target).files?.[0] ?? null)">
           </label>
         </div>
@@ -25,7 +25,7 @@ import { PersonAvatarComponent } from '../../core/person-avatar.component';
         </div>
         <div class="mb-3"><label class="form-label">Address</label><textarea class="form-control" name="address" [(ngModel)]="f.address" required rows="2" maxlength="1000"></textarea></div>
         <div class="mb-3"><label class="form-label">Description</label><textarea class="form-control" name="description" [(ngModel)]="f.description" rows="3" maxlength="2000"></textarea></div>
-        <button class="btn btn-success" [disabled]="busy()">@if (busy()) { <span class="spinner-border spinner-border-sm me-1"></span> }Save changes</button>
+        <button class="btn btn-ml" [disabled]="busy()">@if (busy()) { <span class="spinner-border spinner-border-sm me-1"></span> }Save changes</button>
       </div>
     </form>
   `,

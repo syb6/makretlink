@@ -2,8 +2,8 @@
 
 export function money(v: number | string | null | undefined): string {
   const n = Number(v ?? 0);
-  // Rs. mirrors the Blade format_money; prices are plain decimals, no intl needed.
-  return 'Rs ' + n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  // Mirrors Blade's number_format($x, 2): "Rs 1,234.56".
+  return 'Rs ' + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 export function date(v: string | null | undefined, withTime = false): string {
@@ -12,6 +12,30 @@ export function date(v: string | null | undefined, withTime = false): string {
   if (isNaN(d.getTime())) return v;
   return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
     + (withTime ? ', ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '');
+}
+
+export function shortDate(v: string | null | undefined): string {
+  if (!v) return '—';
+  const d = new Date(v);
+  if (isNaN(d.getTime())) return v;
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+export function limit(value: string | null | undefined, chars: number): string {
+  const text = value ?? '';
+  return text.length > chars ? text.slice(0, chars).trim() + '…' : text;
+}
+
+/** Port of Market::openDaysLabel() — "Open Saturdays" / "Open Sat & Sun" / "Open multiple days". */
+export function openDaysLabel(schedules: { day_of_week: number; is_closed: boolean }[] | null | undefined): string {
+  const days = (schedules ?? [])
+    .filter((s) => !s.is_closed)
+    .sort((a, b) => Number(a.day_of_week) - Number(b.day_of_week));
+
+  if (days.length === 0) return 'See schedule';
+  if (days.length === 1) return 'Open ' + dayName(days[0].day_of_week);
+  if (days.length === 2) return 'Open ' + days.map((s) => dayName(s.day_of_week).slice(0, 3)).join(' & ');
+  return 'Open multiple days';
 }
 
 export function formatTime(value: string | null | undefined): string {

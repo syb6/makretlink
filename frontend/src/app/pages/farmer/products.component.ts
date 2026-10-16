@@ -11,7 +11,7 @@ import { imageError, money, img, statusBadge, statusLabel } from '../../core/uti
   template: `
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h2 class="section-title mb-0">Products</h2>
-      <button class="btn btn-success btn-sm" (click)="startNew()"><i class="bi bi-plus-lg me-1"></i>New product</button>
+      <button class="btn btn-ml btn-sm" (click)="startNew()"><i class="bi bi-plus-lg me-1"></i>New product</button>
     </div>
 
     @if (editing(); as p) {
@@ -50,7 +50,7 @@ import { imageError, money, img, statusBadge, statusLabel } from '../../core/uti
             </div>
             <div class="modal-footer">
               <button class="btn btn-outline-secondary" (click)="editing.set(null)">Cancel</button>
-              <button class="btn btn-success" (click)="save()" [disabled]="busy()">@if (busy()) { <span class="spinner-border spinner-border-sm me-1"></span> }Save</button>
+              <button class="btn btn-ml" (click)="save()" [disabled]="busy()">@if (busy()) { <span class="spinner-border spinner-border-sm me-1"></span> }Save</button>
             </div>
           </div>
         </div>
@@ -76,7 +76,7 @@ import { imageError, money, img, statusBadge, statusLabel } from '../../core/uti
                 @else { <span class="badge" [class]="'text-bg-' + badge(p.status)">{{ label(p.status) }}</span> }
               </td>
               <td class="text-end">
-                <button class="btn btn-sm btn-outline-success me-1" (click)="startEdit(p)">Edit</button>
+                <button class="btn btn-sm btn-outline-ml me-1" (click)="startEdit(p)">Edit</button>
                 @if (!p.deleted_at) {
                   <button class="btn btn-sm btn-outline-danger" (click)="remove(p)"><i class="bi bi-trash"></i></button>
                 } @else {

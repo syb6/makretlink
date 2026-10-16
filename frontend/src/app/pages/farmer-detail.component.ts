@@ -52,7 +52,7 @@ import { PersonAvatarComponent } from '../core/person-avatar.component';
                 <div class="text-success fw-bold">{{ money(s.product.price) }} <span class="text-muted small fw-normal">/ {{ s.product.unit }}</span></div>
                 <div class="small text-muted mb-2">{{ s.week_start }} · {{ s.farmerMarket?.market?.name }}</div>
                 @if (auth.isCustomer()) {
-                  <button class="btn btn-sm btn-success w-100" (click)="add(s)">Add to cart</button>
+                  <button class="btn btn-sm btn-ml w-100" (click)="add(s)">Add to cart</button>
                 }
               </div>
             </div>

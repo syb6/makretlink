@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { ToastService } from '../../core/toast.service';
 
@@ -9,48 +10,113 @@ import { ToastService } from '../../core/toast.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule, RouterLink],
   template: `
-    <div class="row justify-content-center">
-      <div class="col-md-8 col-lg-7">
-        <div class="card shadow-sm">
-          <div class="card-body p-4">
-            <h2 class="fw-bold mb-1">Join MarketLink</h2>
-            <p class="text-muted small mb-3">Customers pre-order. Farmers sell at the market (admin approval required).</p>
+    <div class="auth-main">
+      <div class="auth-container wide">
+        <div class="auth-card">
+          <div class="text-center mb-4">
+            <a routerLink="/" class="logo-brand justify-content-center mb-3"><i class="bi bi-basket2-fill"></i>Market<span>Link</span></a>
+            <h1 class="h3 mb-2">Create Your Account</h1>
+            <p class="text-muted small mb-0">Join as a customer or farmer to get started on MarketLink.</p>
+          </div>
 
-            <div class="btn-group w-100 mb-3" role="group">
-              <button type="button" class="btn" [class.btn-success]="role() === 'customer'" [class.btn-outline-success]="role() !== 'customer'" (click)="role.set('customer')">
-                <i class="bi bi-bag me-1"></i>I'm a customer
-              </button>
-              <button type="button" class="btn" [class.btn-success]="role() === 'farmer'" [class.btn-outline-success]="role() !== 'farmer'" (click)="role.set('farmer')">
-                <i class="bi bi-basket2 me-1"></i>I'm a farmer
-              </button>
+          <form (ngSubmit)="submit()" id="registerForm" novalidate>
+            <label class="form-label d-block mb-2">I want to join as</label>
+            <div class="role-selector-wrapper">
+              <div>
+                <input type="radio" class="role-btn-input" name="roleRadio" id="roleCustomer"
+                       [checked]="role() === 'customer'" (change)="role.set('customer')">
+                <label class="role-btn-label" for="roleCustomer">
+                  <i class="bi bi-bag-heart"></i>
+                  <span>Customer</span>
+                  <small>Pre-order fresh local items</small>
+                </label>
+              </div>
+              <div>
+                <input type="radio" class="role-btn-input" name="roleRadio" id="roleFarmer"
+                       [checked]="role() === 'farmer'" (change)="role.set('farmer')">
+                <label class="role-btn-label" for="roleFarmer">
+                  <i class="bi bi-shop"></i>
+                  <span>Farmer</span>
+                  <small>List produce &amp; manage stall</small>
+                </label>
+              </div>
             </div>
 
-            <form (ngSubmit)="submit()" autocomplete="off">
-              <div class="row">
-                <div class="col-md-6 mb-3"><label class="form-label">Full name</label><input class="form-control" name="name" [(ngModel)]="f.name" required maxlength="120"></div>
-                <div class="col-md-6 mb-3"><label class="form-label">Phone</label><input class="form-control" name="phone" [(ngModel)]="f.phone" required maxlength="30"></div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="fullName" class="form-label">Full Name</label>
+                <input type="text" class="form-control" id="fullName" name="name"
+                       [(ngModel)]="f.name" required placeholder="e.g. Jane Smith">
               </div>
-              <div class="mb-3"><label class="form-label">Email</label><input class="form-control" type="email" name="email" [(ngModel)]="f.email" required></div>
+              <div class="col-md-6 mb-3">
+                <label for="phoneNumber" class="form-label">Phone</label>
+                <input type="tel" class="form-control" id="phoneNumber" name="phone"
+                       [(ngModel)]="f.phone" required placeholder="+92 3XX XXXXXXX">
+              </div>
+            </div>
 
-              @if (roleIs('customer')) {
-                <div class="mb-3"><label class="form-label">Delivery/pickup address</label><textarea class="form-control" name="address" [(ngModel)]="f.address" required rows="2" maxlength="1000"></textarea></div>
-              } @else {
+            <div class="mb-3">
+              <label for="emailAddress" class="form-label">Email Address</label>
+              <input type="email" class="form-control" id="emailAddress" name="email"
+                     [(ngModel)]="f.email" required placeholder="name@example.com">
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="accountPassword" class="form-label">Password</label>
+                <input type="password" class="form-control" id="accountPassword" name="password"
+                       [(ngModel)]="f.password" required placeholder="Create a password">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="passwordConfirmation" class="form-label">Confirm Password</label>
+                <input type="password" class="form-control" id="passwordConfirmation" name="password_confirmation"
+                       [(ngModel)]="f.password_confirmation" required placeholder="Repeat your password">
+              </div>
+            </div>
+
+            @if (roleIs('customer')) {
+              <div class="role-fields role-customer">
+                <label class="form-label">Delivery / contact address <span class="text-danger">*</span></label>
+                <textarea name="address" rows="2" class="form-control" placeholder="Street, city..." [(ngModel)]="f.address"></textarea>
+              </div>
+            } @else {
+              <div class="role-fields role-farmer">
                 <div class="row">
-                  <div class="col-md-6 mb-3"><label class="form-label">Business name</label><input class="form-control" name="business_name" [(ngModel)]="f.business_name" required maxlength="150"></div>
-                  <div class="col-md-6 mb-3"><label class="form-label">Contact person (optional)</label><input class="form-control" name="contact_person" [(ngModel)]="f.contact_person" maxlength="120"></div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Stall / business name <span class="text-danger">*</span></label>
+                    <input type="text" name="business_name" class="form-control" [(ngModel)]="f.business_name">
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Contact person <span class="optional-tag">(optional)</span></label>
+                    <input type="text" name="contact_person" class="form-control" [(ngModel)]="f.contact_person">
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label">Farm / business address</label>
+                    <textarea name="business_address" rows="2" class="form-control" [(ngModel)]="f.business_address"></textarea>
+                    <div class="form-text">Farmer accounts are reviewed by an administrator before you can list products.</div>
+                  </div>
                 </div>
-                <div class="mb-3"><label class="form-label">Business address</label><textarea class="form-control" name="business_address" [(ngModel)]="f.business_address" rows="2" maxlength="1000"></textarea></div>
-              }
-
-              <div class="row">
-                <div class="col-md-6 mb-3"><label class="form-label">Password</label><input class="form-control" type="password" name="password" [(ngModel)]="f.password" required minlength="8"></div>
-                <div class="col-md-6 mb-3"><label class="form-label">Confirm password</label><input class="form-control" type="password" name="password_confirmation" [(ngModel)]="f.password_confirmation" required minlength="8"></div>
               </div>
+            }
 
-              <button class="btn btn-success w-100" [disabled]="busy()">@if (busy()) { <span class="spinner-border spinner-border-sm me-1"></span> }Create account</button>
-            </form>
+            <div class="form-check mb-4 mt-2">
+              <input class="form-check-input" type="checkbox" id="termsCheck" name="terms" required [(ngModel)]="terms">
+              <label class="form-check-label small text-muted" for="termsCheck">
+                I agree to MarketLink's
+                <a routerLink="/about" class="text-dark text-decoration-underline">Terms of Service</a> and
+                <a routerLink="/about" class="text-dark text-decoration-underline">Privacy Policy</a>.
+              </label>
+            </div>
 
-            <p class="text-center small text-muted mt-3 mb-0">Already a member? <a routerLink="/login">Sign in</a></p>
+            <button type="submit" class="btn btn-ml w-100 py-2" [disabled]="busy()">
+              @if (busy()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+              <i class="bi bi-person-plus me-1"></i> Create Account
+            </button>
+          </form>
+
+          <div class="text-center mt-4 small">
+            <span class="text-muted">Already have an account?</span>
+            <a routerLink="/login" class="fw-semibold text-decoration-none">Log in</a>
           </div>
         </div>
       </div>
@@ -61,11 +127,16 @@ export class RegisterComponent {
   private auth = inject(AuthService);
   private toast = inject(ToastService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
-  role = signal<'customer' | 'farmer'>('customer');
+  /** ?role=farmer deep-link from the footer/hero, mirroring the controller default. */
+  role = signal<'customer' | 'farmer'>(
+    this.route.snapshot.queryParamMap.get('role') === 'farmer' ? 'farmer' : 'customer',
+  );
   busy = signal(false);
+  terms = false;
 
-  f: any = {
+  f = {
     name: '', email: '', phone: '', password: '', password_confirmation: '',
     address: '', business_name: '', contact_person: '', business_address: '',
   };
@@ -75,6 +146,10 @@ export class RegisterComponent {
   }
 
   async submit(): Promise<void> {
+    if (!this.terms) {
+      this.toast.error("Please agree to MarketLink's Terms of Service and Privacy Policy.");
+      return;
+    }
     if (this.f.password !== this.f.password_confirmation) {
       this.toast.error('Passwords do not match.');
       return;
@@ -91,7 +166,7 @@ export class RegisterComponent {
       const res = await this.auth.register(fields);
       this.toast.success('Welcome to MarketLink!');
       this.router.navigateByUrl(res?.redirect ?? '/');
-    } catch (e: any) {
+    } catch (e) {
       this.toast.fromValidation(e);
     } finally {
       this.busy.set(false);

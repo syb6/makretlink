@@ -16,7 +16,7 @@ import { imageError, money, img } from '../../core/utils';
       <div class="text-center py-5 text-muted">
         <i class="bi bi-cart-x fs-1"></i>
         <p class="mt-2">Your cart is empty.</p>
-        <a routerLink="/products" class="btn btn-success">Browse products</a>
+        <a routerLink="/products" class="btn btn-ml">Browse products</a>
       </div>
     }
 
@@ -57,7 +57,7 @@ import { imageError, money, img } from '../../core/utils';
           <div class="card shadow-sm">
             <div class="card-body">
               <div class="d-flex justify-content-between fs-5 fw-bold"><span>Total</span><span>{{ total() }}</span></div>
-              <a routerLink="/customer/checkout" class="btn btn-success w-100 mt-3">Go to checkout</a>
+              <a routerLink="/customer/checkout" class="btn btn-ml w-100 mt-3">Go to checkout</a>
             </div>
           </div>
         </div>

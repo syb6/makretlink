@@ -51,7 +51,7 @@ import { PersonAvatarComponent } from '../../core/person-avatar.component';
                   <span class="badge" [class]="'text-bg-' + badge(u.farmer_profile.approval_status)">{{ label(u.farmer_profile.approval_status) }}</span>
                   @if (u.farmer_profile.approval_status !== 'approved') {
                     <div class="mt-1 d-flex gap-1">
-                      <button class="btn btn-sm btn-outline-success" (click)="approve(u)">Approve</button>
+                      <button class="btn btn-sm btn-outline-ml" (click)="approve(u)">Approve</button>
                       <button class="btn btn-sm btn-outline-danger" (click)="reject(u)">Reject</button>
                     </div>
                   }

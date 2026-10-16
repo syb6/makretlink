@@ -20,7 +20,7 @@ import { dayName } from '../../core/utils';
             </select>
           </div>
           <div class="col-md-4"><input class="form-control form-control-sm" name="stall_name" [(ngModel)]="newStallName" placeholder="Stall name (optional)"></div>
-          <div class="col-md-3 d-grid"><button class="btn btn-sm btn-success" (click)="join()" [disabled]="!newMarket">Join market</button></div>
+          <div class="col-md-3 d-grid"><button class="btn btn-sm btn-ml" (click)="join()" [disabled]="!newMarket">Join market</button></div>
         </div>
       </div>
     </div>
@@ -51,7 +51,7 @@ import { dayName } from '../../core/utils';
                       <input class="form-control form-control-sm" type="time" value="14:00" [class.d-none]="true">
                     </div>
                     <div class="d-flex gap-1 mt-1">
-                      <button class="btn btn-outline-success btn-sm" (click)="saveDay(s, day)">Save</button>
+                      <button class="btn btn-outline-ml btn-sm" (click)="saveDay(s, day)">Save</button>
                       <button class="btn btn-outline-danger btn-sm" (click)="removeDay(s, day)">Remove day</button>
                     </div>
                   </div>

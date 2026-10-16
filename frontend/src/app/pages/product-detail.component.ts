@@ -1,91 +1,152 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { ApiService } from '../core/api.service';
 import { AuthService } from '../core/auth.service';
 import { ToastService } from '../core/toast.service';
-import { date, imageError, img, money } from '../core/utils';
+import { imageError, img, money } from '../core/utils';
 
+/** Mirror of products/show.blade.php — breadcrumb, availability box,
+ *  single stock select + qty + add-to-cart, favorites, reviews, related. */
 @Component({
   selector: 'app-product-detail',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink],
+  imports: [RouterLink, FormsModule],
   template: `
     @if (d(); as data) {
-      <div class="detail-panel">
-      <div class="row g-4">
-        <div class="col-lg-5">
-          <img [src]="img('product', data.product.image)" (error)="onImageError($event, 'product')" class="w-100 rounded-4 shadow-sm" [alt]="data.product.name">
-        </div>
-        <div class="col-lg-7">
-          <h2 class="fw-bold">{{ data.product.name }}</h2>
-          <div class="rating-stars mb-2">
-            @for (i of [1,2,3,4,5]; track i) {
-              <i class="bi" [class.bi-star-fill]="i <= round(data.avgRating)" [class.bi-star]="i > round(data.avgRating)"></i>
-            }
-            <span class="small text-muted ms-1">{{ data.reviewCount }} review(s)</span>
-          </div>
-          <div class="text-success fw-bold fs-3 mb-2">{{ money(data.product.price) }} <small class="text-muted fs-6 fw-normal">/ {{ data.product.unit }}</small></div>
-          <p class="text-muted">{{ data.product.description }}</p>
-          <div class="small text-muted mb-3">
-            Sold by <a [routerLink]="['/farmers', data.product.farmer?.id]">{{ data.product.farmer?.business_name }}</a>
-            @if (data.product.farmer?.markets?.length) {
-              · @for (m of data.product.farmer.markets; track m.id) { <span class="badge bg-light text-dark me-1">{{ m.market?.name }}</span> }
-            }
-          </div>
+      <section class="py-4 py-md-5">
+        <div class="container">
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb small">
+              <li class="breadcrumb-item"><a routerLink="/products">Products</a></li>
+              <li class="breadcrumb-item active">{{ data.product.name }}</li>
+            </ol>
+          </nav>
 
-          <h6 class="fw-bold">Buy this week at</h6>
-          <div class="list-group mb-3">
-            @for (s of data.stocks; track s.id) {
-              <div class="list-group-item d-flex justify-content-between align-items-center">
-                <div>
-                  <strong>{{ s.market?.name }}</strong>
-                  @if (s.stall_name) { <span class="text-muted small"> · {{ s.stall_name }}</span> }
-                  <div class="small text-secondary">{{ s.available }} {{ s.unit }} left</div>
-                </div>
-                @if (auth.isCustomer()) {
-                  <div class="d-flex align-items-center gap-2">
-                    <input class="form-control form-control-sm" type="number" min="0.5" step="0.5" [value]="qty()" (input)="qty.set(+$any($event.target).value)" style="width: 72px">
-                    <button class="btn btn-success btn-sm" (click)="addToCart(s)">Add</button>
-                  </div>
-                }
+          <div class="row g-5">
+            <div class="col-lg-6">
+              <img [src]="img('product', data.product.image)" (error)="onImageError($event, 'product')"
+                   class="w-100 rounded-4 shadow-sm" style="max-height:420px;object-fit:cover" [alt]="data.product.name">
+            </div>
+            <div class="col-lg-6">
+              <span class="badge badge-soft mb-2">{{ data.product.category?.name ?? 'General' }}</span>
+              <h1 class="section-title">{{ data.product.name }}</h1>
+              <p class="text-muted">by
+                <a [routerLink]="['/farmers', data.product.farmer?.id]" class="fw-semibold text-decoration-none">{{ data.product.farmer?.business_name }}</a>
+              </p>
+
+              <div class="d-flex align-items-center gap-2 mb-3">
+                <span class="product-price fs-3">{{ money(data.product.price) }}</span>
+                <span class="text-muted">/ {{ data.product.unit }}</span>
               </div>
-            } @empty {
-              <div class="list-group-item text-muted">Currently unavailable — check back next week.</div>
-            }
-          </div>
-        </div>
-      </div>
-      </div>
 
-      <h2 class="section-title mt-5 mb-3">Customer reviews</h2>
-      @for (r of data.reviews; track r.id) {
-        <div class="border-bottom pb-2 mb-2">
-          <div class="rating-stars">
-            @for (i of [1,2,3,4,5]; track i) { <i class="bi" [class.bi-star-fill]="i <= r.rating" [class.bi-star]="i > r.rating"></i> }
-          </div>
-          <div class="small fw-semibold">{{ r.customer }}</div>
-          <div class="small text-muted">{{ r.comment }} · {{ date(r.created_at) }}</div>
-        </div>
-      } @empty {
-        <p class="text-muted">No reviews yet.</p>
-      }
-
-      @if (data.related.length) {
-        <h2 class="section-title mt-5 mb-3">More from this category</h2>
-        <div class="row g-3">
-          @for (p of data.related; track p.id) {
-            <div class="col-6 col-md-3">
-              <a [routerLink]="['/products', p.id]" class="card text-decoration-none text-reset h-100 shadow-sm">
-                <img [src]="img('product', p.image)" (error)="onImageError($event, 'product')" class="card-img-top card-img-cover" [alt]="p.name">
-                <div class="card-body py-2">
-                  <div class="small fw-semibold text-truncate">{{ p.name }}</div>
-                  <div class="small text-success fw-bold">{{ money(p.price) }}</div>
+              @if (data.avgRating) {
+                <div class="mb-3">
+                  <span class="stars">
+                    @for (i of [1,2,3,4,5]; track i) {
+                      <i class="bi {{ i <= round(data.avgRating) ? 'bi-star-fill' : 'bi-star' }}"></i>
+                    }
+                  </span>
+                  <span class="small text-muted ms-1">{{ data.avgRating?.toFixed(1) }} ({{ data.reviewCount }} review{{ data.reviewCount === 1 ? '' : 's' }})</span>
                 </div>
-              </a>
+              }
+
+              <p>{{ data.product.description }}</p>
+
+              @if ((data.stocks?.length ?? 0) > 1) {
+                <div class="market-availability">
+                  <div class="market-availability-title">
+                    <i class="bi bi-geo-alt-fill me-1"></i>Same product, available at {{ data.stocks.length }} markets
+                  </div>
+                  <ul class="market-availability-list">
+                    @for (s of data.stocks; track s.id) {
+                      <li>
+                        <span>{{ s.market?.name }}</span>
+                        <span class="text-muted small">{{ s.available }} {{ data.product.unit }} in stock</span>
+                      </li>
+                    }
+                  </ul>
+                  <p class="small text-muted mb-0 mt-2">
+                    <i class="bi bi-info-circle me-1"></i>Pick whichever stall suits your week — stock is tracked per stall.
+                  </p>
+                </div>
+              }
+
+              @if (auth.isCustomer()) {
+                <div class="card card-ml p-3 mb-3">
+                  <label class="form-label fw-semibold small">Pick a stall / market stock</label>
+                  <select name="stockId" [(ngModel)]="stockId" class="form-select mb-2" (change)="syncStock()">
+                    @for (s of data.stocks; track s.id) {
+                      <option [value]="s.id">
+                        {{ s.market?.name }} — {{ s.stall_name ?? s.farmer_name ?? data.product.farmer?.business_name }}
+                        ({{ s.available }} {{ data.product.unit }} available)
+                      </option>
+                    } @empty {
+                      <option disabled>No stock available this week</option>
+                    }
+                  </select>
+                  <div class="d-flex gap-2 align-items-center">
+                    <input type="number" name="qty" class="form-control" style="max-width:110px"
+                           min="0.5" step="0.5" [(ngModel)]="qtyInput">
+                    <button class="btn btn-ml flex-grow-1" type="button" (click)="addToCart()" [disabled]="busy">
+                      <i class="bi bi-cart-plus me-1"></i> Add to cart
+                    </button>
+                    <button class="btn btn-outline-danger" type="button" (click)="toggleFav()"
+                            [attr.title]="isFav ? 'Remove from favorites' : 'Save to favorites'"
+                            aria-label="Save to favorites">
+                      <i class="bi {{ isFav ? 'bi-heart-fill' : 'bi-heart' }}"></i>
+                    </button>
+                  </div>
+                </div>
+              } @else if (!auth.user()) {
+                <a routerLink="/login" class="btn btn-ml btn-lg">Log in to pre-order</a>
+              }
+            </div>
+          </div>
+
+          <div class="mt-5">
+            <h4 class="fw-bold mb-3">Customer reviews</h4>
+            <div class="row g-3">
+              @for (r of data.reviews; track r.id) {
+                <div class="col-md-6">
+                  <div class="card-ml p-3 h-100">
+                    <div class="d-flex justify-content-between gap-2">
+                      <strong>{{ r.customer }}</strong>
+                      <span class="stars">
+                        @for (i of [1,2,3,4,5]; track i) {
+                          <i class="bi {{ i <= r.rating ? 'bi-star-fill' : 'bi-star' }} small"></i>
+                        }
+                      </span>
+                    </div>
+                    <p class="small mb-0 text-muted">{{ r.comment }}</p>
+                  </div>
+                </div>
+              } @empty {
+                <div class="col-12"><p class="text-muted small">No reviews yet. Reviews can be left after completing an order.</p></div>
+              }
+            </div>
+          </div>
+
+          @if (data.related?.length) {
+            <h4 class="fw-bold mt-5 mb-3">Related products</h4>
+            <div class="row g-4">
+              @for (p of data.related; track p.id) {
+                <div class="col-6 col-md-3">
+                  <a [routerLink]="['/products', p.id]" class="text-decoration-none">
+                    <div class="product-card h-100">
+                      <img [src]="img('product', p.image)" (error)="onImageError($event, 'product')" class="product-thumb" [alt]="p.name">
+                      <div class="p-2">
+                        <div class="fw-semibold small">{{ p.name }}</div>
+                        <span class="product-price small">{{ money(p.price) }}</span>
+                      </div>
+                    </div>
+                  </a>
+                </div>
+              }
             </div>
           }
         </div>
-      }
+      </section>
     } @else {
       <div class="text-center py-5"><div class="spinner-border text-success"></div></div>
     }
@@ -98,21 +159,47 @@ export class ProductDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
 
   d = signal<any>(null);
-  qty = signal(1);
+  stockId: number | string = '';
+  qtyInput: string | number = 1;
+  busy = false;
 
-  money = money; img = img; date = date; onImageError = imageError;
+  isFav = false;
+  money = money; img = img; onImageError = imageError;
   round = Math.round;
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
-    this.api.get<any>('/products/' + id).then((x) => this.d.set(x));
+    this.api.get<any>('/products/' + id).then((x) => {
+      this.d.set(x);
+      const first = x.stocks?.[0];
+      if (first) {
+        this.stockId = first.id;
+      }
+      this.isFav = (x.favoriteProductIds ?? []).includes(Number(id));
+    });
   }
 
-  async addToCart(s: any): Promise<void> {
+  syncStock(): void { /* stock select drives addToCart(); keeps parity with the blade data-stock-id swap */ }
+
+  async addToCart(): Promise<void> {
+    if (!this.stockId) return;
+    this.busy = true;
     try {
-      await this.api.form('/customer/cart/add', { stock_id: s.id, quantity: this.qty() });
+      await this.api.form('/customer/cart/add', { stock_id: this.stockId, quantity: this.qtyInput || 1 });
       this.toast.success('Added to cart.');
       void this.auth.load();
+    } catch (e) {
+      this.toast.fromValidation(e);
+    } finally {
+      this.busy = false;
+    }
+  }
+
+  async toggleFav(): Promise<void> {
+    try {
+      const res = await this.api.form<{ state: string }>('/customer/favorites/product', { product_id: this.d().product.id });
+      this.isFav = res.state === 'added';
+      if (this.isFav) this.toast.success('Saved to favorites ♥');
     } catch (e) {
       this.toast.fromValidation(e);
     }

@@ -23,8 +23,8 @@ describe('ToastService', () => {
       title: 'Please fix the following',
       text: '2 things need fixing before you continue',
       messages: [
-        'The name field is required.',
-        'The email must be a valid email address.',
+        'The name field is required. — Use letters and spaces, up to 120 characters — e.g. “Ayesha Khan”.',
+        'The email must be a valid email address. — Use a real format like name@example.com — this is how you log in.',
       ],
       ttl: 0,
     }]);

@@ -1,16 +1,19 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { AuthService } from './core/auth.service';
 import { ApiService } from './core/api.service';
+import { MotionService } from './core/motion.service';
 import { NavbarComponent } from './layout/navbar.component';
 import { FooterComponent } from './layout/footer.component';
 import { ToastsComponent } from './layout/toasts.component';
+import { BackToTopComponent } from './layout/back-to-top.component';
+import { ChatbotComponent } from './layout/chatbot.component';
 
 @Component({
   selector: 'app-root',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, NavbarComponent, FooterComponent, ToastsComponent],
+  imports: [RouterOutlet, NavbarComponent, FooterComponent, ToastsComponent, BackToTopComponent, ChatbotComponent],
   template: `
     @if (api.activeRequests() > 0) {
       <div class="api-progress" role="progressbar" aria-label="Loading" aria-valuetext="Loading">
@@ -48,16 +51,21 @@ import { ToastsComponent } from './layout/toasts.component';
       <router-outlet />
     </main>
     @if (!adminArea()) { <app-footer /> }
+    @if (showChatbot()) { <app-chatbot /> }
     <app-toasts />
+    <app-back-to-top />
   `,
 })
-export class App {
+export class App implements OnInit {
   private auth = inject(AuthService);
   private router = inject(Router);
   readonly api = inject(ApiService);
+  private motion = inject(MotionService);
+
   online = signal(navigator.onLine);
   backOnline = signal(false);
   adminArea = signal(this.router.url.startsWith('/admin'));
+  isAuthPage = signal(false);
 
   constructor() {
     void this.auth.load();
@@ -73,8 +81,20 @@ export class App {
     this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
       .subscribe((event) => {
-        this.adminArea.set(event.urlAfterRedirects.startsWith('/admin'));
+        const url = event.urlAfterRedirects;
+        this.adminArea.set(url.startsWith('/admin'));
+        // Blade hides the assistant on login/register/password/* pages.
+        this.isAuthPage.set(/^\/(login|register|forgot-password|reset-password)/.test(url));
       });
+  }
+
+  ngOnInit(): void {
+    this.motion.start();
+  }
+
+  /** Same visibility rule as the Blade layout: hidden on admin and auth routes. */
+  showChatbot(): boolean {
+    return !this.adminArea() && !this.isAuthPage();
   }
 
   reloadPage(): void {

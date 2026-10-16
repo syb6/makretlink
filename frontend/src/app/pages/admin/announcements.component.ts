@@ -11,7 +11,7 @@ import { date, statusBadge, statusLabel } from '../../core/utils';
   template: `
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h2 class="section-title mb-0">Announcements</h2>
-      <button class="btn btn-success btn-sm" (click)="startNew()"><i class="bi bi-plus-lg me-1"></i>New announcement</button>
+      <button class="btn btn-ml btn-sm" (click)="startNew()"><i class="bi bi-plus-lg me-1"></i>New announcement</button>
     </div>
 
     @if (editing() !== null) {
@@ -30,7 +30,7 @@ import { date, statusBadge, statusLabel } from '../../core/utils';
             </div>
             <div class="modal-footer">
               <button class="btn btn-outline-secondary" (click)="editing.set(null)">Cancel</button>
-              <button class="btn btn-success" (click)="save()">Save</button>
+              <button class="btn btn-ml" (click)="save()">Save</button>
             </div>
           </div>
         </div>
@@ -46,7 +46,7 @@ import { date, statusBadge, statusLabel } from '../../core/utils';
               <div class="small text-muted">{{ date(a.published_at ?? a.created_at, true) }} by {{ a.author?.name }}</div>
             </div>
             <div>
-              <button class="btn btn-sm btn-outline-success me-1" (click)="startEdit(a)">Edit</button>
+              <button class="btn btn-sm btn-outline-ml me-1" (click)="startEdit(a)">Edit</button>
               <button class="btn btn-sm btn-outline-danger" (click)="remove(a)"><i class="bi bi-trash"></i></button>
             </div>
           </div>

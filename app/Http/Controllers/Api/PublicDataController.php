@@ -122,7 +122,7 @@ class PublicDataController extends Controller
         ]);
     }
 
-    public function productShow(Product $product): JsonResponse
+    public function productShow(Request $request, Product $product): JsonResponse
     {
         abort_unless($product->status === 'active', 404);
         abort_unless($product->farmer->approval_status === 'approved', 404);
@@ -141,6 +141,8 @@ class PublicDataController extends Controller
         $related = Product::where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)->where('status', 'active')
             ->get(['id', 'name', 'slug', 'image', 'price', 'unit']);
+
+        [$favoriteProductIds] = $this->favoriteSets($request, ['product']);
 
         return response()->json([
             'product' => array_merge($product->only([
@@ -165,6 +167,29 @@ class PublicDataController extends Controller
             'avgRating' => (float) ProductReview::where('product_id', $product->id)->where('status', 'visible')->avg('rating'),
             'reviewCount' => (int) ProductReview::where('product_id', $product->id)->where('status', 'visible')->count(),
             'related' => $related,
+            'favoriteProductIds' => $favoriteProductIds,
+        ]);
+    }
+
+    /** Mirror of the contact page data: flagship market address + open days. */
+    public function contact(): JsonResponse
+    {
+        $flagship = Market::where('name', 'Green Valley Community Market')
+            ->with('schedules')->first();
+
+        return response()->json([
+            'flagship' => $flagship ? [
+                'id' => $flagship->id,
+                'name' => $flagship->name,
+                'address' => $flagship->address,
+                'latitude' => $flagship->latitude,
+                'longitude' => $flagship->longitude,
+                'schedules' => $flagship->openDays()->map(fn ($s) => [
+                    'day' => \App\Models\MarketSchedule::DAYS[$s->day_of_week],
+                    'opening_time' => $s->opening_time?->format('g:i A'),
+                    'closing_time' => $s->closing_time?->format('g:i A'),
+                ])->values(),
+            ] : null,
         ]);
     }
 

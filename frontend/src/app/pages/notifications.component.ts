@@ -11,7 +11,7 @@ import { date } from '../core/utils';
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h2 class="section-title mb-0">Notifications</h2>
       @if (unread() > 0) {
-        <button class="btn btn-sm btn-outline-success" (click)="markAll()">Mark all read ({{ unread() }})</button>
+        <button class="btn btn-sm btn-outline-ml" (click)="markAll()">Mark all read ({{ unread() }})</button>
       }
     </div>
 

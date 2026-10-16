@@ -4,6 +4,38 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
+/** Ported verbatim from the <x-form-errors> component's $copy map. */
+const FIX_HINTS: Record<string, string> = {
+  name: 'Use letters and spaces, up to 120 characters — e.g. “Ayesha Khan”.',
+  business_name: 'Give your stall a clear name, up to 150 characters — e.g. “Green Valley Farms”.',
+  contact_person: 'Tell us who customers should ask for, up to 120 characters.',
+  email: 'Use a real format like name@example.com — this is how you log in.',
+  phone: 'Digits (and + or -) only, up to 30 characters — e.g. +92 300 1234567.',
+  address: 'Write where you are located (max 1000 characters) so people can find you.',
+  password: 'Use at least 8 characters; both password boxes must match exactly.',
+  password_confirmation: 'Type the same password in both boxes — watch for caps lock.',
+  price: 'Enter a positive amount in Rs, like 120.00 — no letters or symbols.',
+  unit: 'How you sell it: kg, dozen, bunch, pc… (max 30 characters).',
+  quantity: 'Enter how much stock you have, as a positive number.',
+  category_id: 'Pick a category from the list.',
+  image: 'Use a JPG, PNG or WebP image under 2 MB.',
+  profile_image: 'Use a JPG, PNG or WebP image under 2 MB.',
+  profile_photo: 'Use a JPG, PNG or WebP image under 2 MB.',
+  message: 'Write your question (a few words up to ~1000 characters).',
+  role: 'Choose whether you are joining as a Customer or a Farmer.',
+  slots: 'Pick a pickup slot for every stall in your order.',
+  pickup_date: 'Choose one of the available pickup windows.',
+  title: 'A short headline, up to 150 characters.',
+  subject: 'A short subject, up to 150 characters.',
+  reply: 'Write a short reply (a few words up to ~500 characters).',
+};
+
+/** Auth failures keyed on 'email' — the address itself is fine, no hint. */
+const AUTH_MESSAGES = new Set([
+  'Invalid email or password.',
+  'Your account has been deactivated. Please contact the administrator.',
+]);
+
 export interface Toast {
   kind: 'success' | 'error' | 'info';
   text: string;
@@ -102,12 +134,23 @@ export class ToastService {
       : [];
 
     if (validation.length) {
-      const count = validation.length;
+      // Every message carries the same "why + how to fix" copy the Blade
+      // <x-form-errors /> box shows, matched by field key.
+      const detailed = validationData
+        ? Object.entries(validationData).flatMap(([field, messages]) =>
+            (Array.isArray(messages) ? messages : [messages])
+              .filter((message): message is string => typeof message === 'string')
+              .map((message) => {
+                const fix = AUTH_MESSAGES.has(message) ? null : FIX_HINTS[field];
+                return fix ? `${message} — ${fix}` : message;
+              }))
+        : validation;
+      const count = detailed.length;
       this.show(
         'error',
         `${count} thing${count === 1 ? '' : 's'} need${count === 1 ? 's' : ''} fixing before you continue`,
         'Please fix the following',
-        validation,
+        detailed,
         0,
       );
       return;

@@ -19,7 +19,7 @@ import { date } from '../../core/utils';
               <div class="small text-secondary">{{ date(m.created_at, true) }}</div>
             </div>
             <div class="d-flex gap-1">
-              <button class="btn btn-sm" [class.btn-outline-success]="!m.read_at" [class.btn-outline-secondary]="!!m.read_at" (click)="toggle(m)">
+              <button class="btn btn-sm" [class.btn-outline-ml]="!m.read_at" [class.btn-outline-secondary]="!!m.read_at" (click)="toggle(m)">
                 {{ m.read_at ? 'Mark unread' : 'Mark read' }}
               </button>
               <button class="btn btn-sm btn-outline-danger" (click)="remove(m)"><i class="bi bi-trash"></i></button>

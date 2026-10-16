@@ -23,7 +23,7 @@ import { money, date, statusLabel, statusBadge } from '../../core/utils';
               <td>{{ money(o.total_amount) }}</td>
               <td><span class="badge" [class]="'text-bg-' + badge(o.status)">{{ label(o.status) }}</span></td>
               <td class="text-end">
-                <a [routerLink]="['/customer/orders', o.id]" class="btn btn-sm btn-outline-success">Details</a>
+                <a [routerLink]="['/customer/orders', o.id]" class="btn btn-sm btn-outline-ml">Details</a>
               </td>
             </tr>
           } @empty {

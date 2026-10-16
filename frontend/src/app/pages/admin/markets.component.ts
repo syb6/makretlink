@@ -11,7 +11,7 @@ import { dayName, formatTime, imageError, img, statusLabel } from '../../core/ut
   template: `
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h2 class="section-title mb-0">Markets</h2>
-      <button class="btn btn-success btn-sm" (click)="startNew()"><i class="bi bi-plus-lg me-1"></i>New market</button>
+      <button class="btn btn-ml btn-sm" (click)="startNew()"><i class="bi bi-plus-lg me-1"></i>New market</button>
     </div>
 
     @if (editing(); as m) {
@@ -52,7 +52,7 @@ import { dayName, formatTime, imageError, img, statusLabel } from '../../core/ut
             </div>
             <div class="modal-footer">
               <button class="btn btn-outline-secondary" (click)="editing.set(null)">Cancel</button>
-              <button class="btn btn-success" (click)="save()" [disabled]="busy()">@if (busy()) { <span class="spinner-border spinner-border-sm me-1"></span> }Save</button>
+              <button class="btn btn-ml" (click)="save()" [disabled]="busy()">@if (busy()) { <span class="spinner-border spinner-border-sm me-1"></span> }Save</button>
             </div>
           </div>
         </div>
@@ -77,7 +77,7 @@ import { dayName, formatTime, imageError, img, statusLabel } from '../../core/ut
               <td>{{ m.farmer_markets_count }}</td>
               <td><span class="badge" [class]="m.status === 'active' ? 'text-bg-success' : 'text-bg-secondary'">{{ label(m.status) }}</span></td>
               <td class="text-end">
-                <button class="btn btn-sm btn-outline-success me-1" (click)="startEdit(m)">Edit</button>
+                <button class="btn btn-sm btn-outline-ml me-1" (click)="startEdit(m)">Edit</button>
                 <button class="btn btn-sm btn-outline-danger" (click)="remove(m)"><i class="bi bi-trash"></i></button>
               </td>
             </tr>

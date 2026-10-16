@@ -4,39 +4,67 @@ import { RouterLink } from '@angular/router';
 import { ApiService } from '../../core/api.service';
 import { ToastService } from '../../core/toast.service';
 
+interface ResetEmailResult {
+  ok?: boolean;
+  flash?: Record<string, string>;
+  redirect?: string;
+}
+
 @Component({
   selector: 'app-forgot-password',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule, RouterLink],
   template: `
-    <div class="row justify-content-center">
-      <div class="col-md-6 col-lg-5">
-        <div class="card shadow-sm">
-          <div class="card-body p-4">
-            <h2 class="fw-bold mb-1">Forgot password</h2>
-            <p class="text-muted small mb-4">We'll email a reset link — valid for 30 minutes, single use.</p>
-
-            @if (resetUrl()) {
-              <div class="alert alert-info small">
-                Dev mail driver detected — your reset link:<br>
-                <a [href]="resetUrl()">Open reset page</a>
-                <div class="text-secondary mt-1">Expires: {{ expiry() }}</div>
-              </div>
-            }
-
-            <form (ngSubmit)="submit()" autocomplete="off">
-              <div class="mb-3">
-                <label class="form-label">Email</label>
-                <input class="form-control" type="email" name="email" [(ngModel)]="email" required>
-              </div>
-              <button class="btn btn-success w-100" [disabled]="busy()">@if (busy()) { <span class="spinner-border spinner-border-sm me-1"></span> }Email reset link</button>
-            </form>
-
-            <p class="text-center small text-muted mt-3 mb-0"><a routerLink="/login">Back to login</a></p>
+    <section class="py-5">
+      <div class="auth-container">
+        <div class="auth-card">
+          <div class="text-center mb-4">
+            <div class="auth-icon mb-3"><i class="bi bi-key"></i></div>
+            <h1 class="section-title mb-1">Forgot your password?</h1>
+            <p class="text-muted small mb-0">
+              Enter your account email and we'll send you a secure reset link.
+              Links expire after <strong>30 minutes</strong> and work only once.
+            </p>
           </div>
+
+          @if (status()) {
+            <div class="ml-alert success" role="status" data-ml-alert data-ttl="8000">
+              <div class="ml-alert-icon"><i class="bi bi-check-circle-fill"></i></div>
+              <div class="ml-alert-body">
+                <div class="ml-alert-msg">
+                  <i class="bi bi-envelope-check me-1"></i> {{ status() }}
+                  <div class="small mt-1 opacity-75">The link <strong>expires after 30 minutes</strong> and can be used only once.</div>
+                </div>
+              </div>
+              <button type="button" class="ml-alert-close" aria-label="Dismiss" (click)="status.set(null)"><i class="bi bi-x-lg"></i></button>
+              <span class="ml-alert-progress" aria-hidden="true" style="--ttl: 8s"></span>
+            </div>
+          }
+
+          @if (devUrl()) {
+            <div class="dev-reset-link">
+              <div class="fw-semibold mb-1"><i class="bi bi-terminal me-1"></i>Local mail preview — your reset link (valid until {{ expiry() }}):</div>
+              <a [href]="devUrl()" class="dev-reset-url">{{ devUrl() }}</a>
+            </div>
+          }
+
+          <form (ngSubmit)="submit()" novalidate>
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="email">Email address</label>
+              <input id="email" type="email" name="email" class="form-control"
+                     [(ngModel)]="email" required placeholder="name@example.com">
+            </div>
+            <button type="submit" class="btn btn-ml w-100 mb-3" [disabled]="busy()">
+              @if (busy()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+              <i class="bi bi-send me-1"></i> Send reset link
+            </button>
+            <div class="text-center small">
+              <a routerLink="/login" class="fw-semibold text-decoration-none"><i class="bi bi-arrow-left me-1"></i>Back to sign in</a>
+            </div>
+          </form>
         </div>
       </div>
-    </div>
+    </section>
   `,
 })
 export class ForgotPasswordComponent {
@@ -45,20 +73,21 @@ export class ForgotPasswordComponent {
 
   email = '';
   busy = signal(false);
-  resetUrl = signal<string | null>(null);
+  status = signal<string | null>(null);
+  devUrl = signal<string | null>(null);
   expiry = signal('');
 
   async submit(): Promise<void> {
     this.busy.set(true);
-    this.resetUrl.set(null);
+    this.devUrl.set(null);
     try {
-      const res = await this.api.form<{ flash: Record<string, string> }>('/password/email', { email: this.email });
-      this.toast.fromFlash(res.flash);
+      const res = await this.api.form<ResetEmailResult>('/password/email', { email: this.email });
+      this.status.set(res.flash?.['success'] ?? 'We emailed you a password reset link!');
       if (res.flash?.['reset-url']) {
-        this.resetUrl.set(String(res.flash['reset-url']));
-        this.expiry.set(String(res.flash['reset-expiry'] ?? ''));
+        this.devUrl.set(res.flash['reset-url']);
+        this.expiry.set(res.flash['reset-expiry'] ?? '');
       }
-    } catch (e) {
+    } catch (e: unknown) {
       this.toast.fromValidation(e);
     } finally {
       this.busy.set(false);

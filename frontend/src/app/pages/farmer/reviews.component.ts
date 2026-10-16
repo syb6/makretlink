@@ -29,7 +29,7 @@ import { date, statusBadge } from '../../core/utils';
           } @else {
             <div class="input-group input-group-sm">
               <input class="form-control" name="reply-{{ r.id }}" [(ngModel)]="drafts[r.id]" placeholder="Reply to this customer…">
-              <button class="btn btn-success" (click)="reply(r)">Post reply</button>
+              <button class="btn btn-ml" (click)="reply(r)">Post reply</button>
             </div>
           }
         </div>

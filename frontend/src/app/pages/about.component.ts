@@ -5,46 +5,44 @@ import { RouterLink } from '@angular/router';
   selector: 'app-about',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="page-banner">
+    <section class="py-4 py-md-5">
       <div class="container">
-        <span class="badge-sub">OUR MISSION</span>
-        <h1 class="section-title">Fresh. Local. <span class="accent">Predictable.</span></h1>
-        <p class="section-subtitle">MarketLink connects local farmers with the people who love fresh food.</p>
-        <i class="bi bi-basket2 page-banner-icon" aria-hidden="true"></i>
-      </div>
-    </section>
-
-    <div class="container py-4 py-lg-5">
+        <div class="text-center mb-5">
+          <span class="badge-sub">OUR MISSION</span>
+          <h1 class="section-title display-6">Fresh. Local. <span class="accent">Predictable.</span></h1>
+        </div>
       <div class="about-grid mb-5">
         <div class="about-content">
-          <h2 class="h3 fw-bold">Why MarketLink exists</h2>
-          <p>Local farmers markets are thriving, but shoppers do not always know which growers will be there, what they will bring, or what is still available. MarketLink makes weekly stock and prices easy to discover before market day.</p>
-          <p>Farmers publish their produce and customers browse, reserve, and collect at the market. That means fewer wasted trips, better harvest planning, and stronger local communities.</p>
+          <h4 class="fw-bold">Why MarketLink exists</h4>
+          <p>Local farmers markets are booming, but customers rarely know which farmers will be at the market on a given day, what stock they have, or at what price. Availability is shared on chalkboards, flyers and word of mouth — so shoppers arrive to find their favourite items sold out.</p>
+          <p>MarketLink brings farmers and customers onto a single platform: farmers publish weekly stock and pricing, and customers browse, pre-order, and pick up at the market. Fewer wasted trips, better planning, stronger communities.</p>
           <div class="about-mini-grid">
-            <div class="about-mini-card"><i class="bi bi-basket"></i><span>Fresh &amp; local</span></div>
-            <div class="about-mini-card"><i class="bi bi-clock-history"></i><span>Easy planning</span></div>
-            <div class="about-mini-card"><i class="bi bi-people"></i><span>Stronger community</span></div>
+            <div class="about-mini-card"><i class="bi bi-basket"></i><span>Fresh &amp; Local</span></div>
+            <div class="about-mini-card"><i class="bi bi-clock-history"></i><span>Convenience</span></div>
+            <div class="about-mini-card"><i class="bi bi-people"></i><span>Community</span></div>
           </div>
         </div>
         <div class="about-img-box">
-          <img src="/images/placeholders/market-images/green-villey-community-market.jpeg"
-               class="w-100 h-100" alt="Farmers market stall" fetchpriority="high">
+          <img src="https://images.unsplash.com/photo-1488459716781-31db52582fe9?auto=format&amp;fit=crop&amp;w=800&amp;q=80"
+               alt="Farmers market stall" loading="lazy">
         </div>
       </div>
 
       <div class="row g-4 mb-5">
-        <div class="col-6 col-lg-3"><article class="card-ml p-4 text-center h-100"><i class="bi bi-flower1 about-value-icon"></i><h3 class="h6 fw-bold mt-3">Local produce</h3><p class="small text-muted mb-0">Seasonal, fresh, and grown nearby.</p></article></div>
-        <div class="col-6 col-lg-3"><article class="card-ml p-4 text-center h-100"><i class="bi bi-basket about-value-icon"></i><h3 class="h6 fw-bold mt-3">Pre-order</h3><p class="small text-muted mb-0">Reserve before market day and skip the disappointment.</p></article></div>
-        <div class="col-6 col-lg-3"><article class="card-ml p-4 text-center h-100"><i class="bi bi-hand-thumbs-up about-value-icon"></i><h3 class="h6 fw-bold mt-3">Fair for farmers</h3><p class="small text-muted mb-0">Plan harvests against real demand.</p></article></div>
-        <div class="col-6 col-lg-3"><article class="card-ml p-4 text-center h-100"><i class="bi bi-geo-alt about-value-icon"></i><h3 class="h6 fw-bold mt-3">Simple pickup</h3><p class="small text-muted mb-0">Know where and when to collect your order.</p></article></div>
+        <div class="col-md-3 col-6"><div class="card-ml p-4 text-center h-100"><div class="fs-1">🌱</div><h6 class="fw-bold mt-2">Local produce</h6><p class="small text-muted mb-0">Seasonal, fresh, and grown nearby.</p></div></div>
+        <div class="col-md-3 col-6"><div class="card-ml p-4 text-center h-100"><div class="fs-1">🧺</div><h6 class="fw-bold mt-2">Pre-order</h6><p class="small text-muted mb-0">Reserve before market day, skip the disappointment.</p></div></div>
+        <div class="col-md-3 col-6"><div class="card-ml p-4 text-center h-100"><div class="fs-1">🤝</div><h6 class="fw-bold mt-2">Fair for farmers</h6><p class="small text-muted mb-0">Farmers plan harvests against real demand.</p></div></div>
+        <div class="col-md-3 col-6"><div class="card-ml p-4 text-center h-100"><div class="fs-1">📍</div><h6 class="fw-bold mt-2">Easy pickup</h6><p class="small text-muted mb-0">Maps, stall locations, and clear pickup windows.</p></div></div>
       </div>
 
-      <div class="about-cta rounded-4 text-center">
-        <h2 class="h3">Ready to taste the difference?</h2>
-        <p>Join as a customer to pre-order, or as a farmer to start selling.</p>
-        <div class="d-flex flex-wrap justify-content-center gap-2">
-          <a routerLink="/register" class="btn btn-ml px-4">Join as a customer</a>
-          <a routerLink="/register" [queryParams]="{ role: 'farmer' }" class="btn btn-outline-ml px-4">Join as a farmer</a>
+      <div class="cta-section rounded-4">
+        <div class="cta-box">
+          <h2 class="h3">Ready to taste the difference?</h2>
+          <p>Join as a customer to pre-order, or as a farmer to start selling.</p>
+          <div class="cta-btns">
+            <a routerLink="/register" class="btn btn-ml px-4">Join as Customer</a>
+            <a routerLink="/register" [queryParams]="{ role: 'farmer' }" class="btn btn-outline-ml px-4">Join as Farmer</a>
+          </div>
         </div>
       </div>
     </div>

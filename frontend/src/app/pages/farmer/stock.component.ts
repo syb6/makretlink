@@ -12,9 +12,9 @@ import { imageError, money, img, statusBadge, statusLabel } from '../../core/uti
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h2 class="section-title mb-0">Weekly stock</h2>
       <div class="btn-group">
-        <button class="btn btn-outline-success btn-sm" (click)="week.set(prevWeek); load()">‹</button>
+        <button class="btn btn-outline-ml btn-sm" (click)="week.set(prevWeek); load()">‹</button>
         <span class="btn btn-light btn-sm" style="pointer-events:none">{{ week() }}</span>
-        <button class="btn btn-outline-success btn-sm" (click)="week.set(nextWeek); load()">›</button>
+        <button class="btn btn-outline-ml btn-sm" (click)="week.set(nextWeek); load()">›</button>
       </div>
     </div>
 
@@ -29,7 +29,7 @@ import { imageError, money, img, statusBadge, statusLabel } from '../../core/uti
           @for (s of stalls(); track s.id) { <option [value]="s.id">{{ s.market?.name }}</option> }
         </select></div>
         <div class="col-md-2"><input class="form-control form-control-sm" type="number" min="0" step="0.5" name="stock_qty" [(ngModel)]="sp.quantity" placeholder="Qty"></div>
-        <div class="col-md-2 d-grid"><button class="btn btn-sm btn-success" (click)="saveStock()">Save</button></div>
+        <div class="col-md-2 d-grid"><button class="btn btn-sm btn-ml" (click)="saveStock()">Save</button></div>
       </div>
     </div>
 
@@ -55,7 +55,7 @@ import { imageError, money, img, statusBadge, statusLabel } from '../../core/uti
               <td class="fw-semibold">{{ s.available }}</td>
               <td><span class="badge" [class]="'text-bg-' + badge(s.status)">{{ label(s.status) }}</span></td>
               <td class="text-end">
-                <button class="btn btn-sm btn-outline-success me-1" (click)="updateRow(s, s.quantity, 'available')">Open</button>
+                <button class="btn btn-sm btn-outline-ml me-1" (click)="updateRow(s, s.quantity, 'available')">Open</button>
                 <button class="btn btn-sm btn-outline-danger" (click)="updateRow(s, s.quantity, 'unavailable')">Close</button>
               </td>
             </tr>

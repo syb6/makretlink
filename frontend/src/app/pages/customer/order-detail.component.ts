@@ -35,7 +35,7 @@ import { money, date, statusLabel, statusBadge } from '../../core/utils';
                         @if (reviewed(i)) {
                           <span class="badge bg-success">reviewed</span>
                         } @else {
-                          <button class="btn btn-sm btn-outline-success" (click)="rateStart(i)">Rate</button>
+                          <button class="btn btn-sm btn-outline-ml" (click)="rateStart(i)">Rate</button>
                         }
                       }
                     </td>
@@ -59,9 +59,9 @@ import { money, date, statusLabel, statusBadge } from '../../core/utils';
                     </button>
                   }</div>
                   <input class="form-control mb-2" name="farmerComment" [(ngModel)]="farmerComment" placeholder="Optional comment">
-                  <button class="btn btn-success btn-sm" (click)="rateFarmer()">Submit review</button>
+                  <button class="btn btn-ml btn-sm" (click)="rateFarmer()">Submit review</button>
                 } @else {
-                  <button class="btn btn-outline-success btn-sm" (click)="rateTarget.set('farmer')">Write a farmer review</button>
+                  <button class="btn btn-outline-ml btn-sm" (click)="rateTarget.set('farmer')">Write a farmer review</button>
                 }
               </div>
             </div>
@@ -123,7 +123,7 @@ import { money, date, statusLabel, statusBadge } from '../../core/utils';
               </div>
               <div class="modal-footer">
                 <button class="btn btn-outline-secondary" (click)="rateItem.set(null)">Close</button>
-                <button class="btn btn-success" (click)="rateProduct(item)">Submit</button>
+                <button class="btn btn-ml" (click)="rateProduct(item)">Submit</button>
               </div>
             </div>
           </div>

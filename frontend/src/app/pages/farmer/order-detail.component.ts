@@ -68,14 +68,14 @@ import { money, date, statusLabel, statusBadge } from '../../core/utils';
           <div class="d-grid gap-2">
             @switch (true) {
               @case (order.status === 'placed') {
-                <button class="btn btn-success" (click)="act('accept', 'Order accepted.')">Accept</button>
+                <button class="btn btn-ml" (click)="act('accept', 'Order accepted.')">Accept</button>
                 <button class="btn btn-outline-danger" (click)="act('decline', 'Order declined.')">Decline</button>
               }
               @case (order.status === 'accepted') {
                 <button class="btn btn-info" (click)="act('ready', 'Marked as ready for pickup.')">Mark ready</button>
               }
               @case (order.status === 'ready_for_pickup') {
-                <button class="btn btn-success" (click)="act('complete', 'Order completed.')">Complete (paid in person)</button>
+                <button class="btn btn-ml" (click)="act('complete', 'Order completed.')">Complete (paid in person)</button>
               }
               @default { <div class="alert alert-light small mb-0">No actions available for this status.</div> }
             }

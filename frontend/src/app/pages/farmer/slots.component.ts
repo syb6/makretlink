@@ -23,7 +23,7 @@ import { money, date, statusBadge, statusLabel } from '../../core/utils';
         </div></div>
         <div class="col-md-3"><label class="form-label small mb-1">Cutoff (before)</label><input class="form-control form-control-sm" type="datetime-local" name="cutoff" [(ngModel)]="n.cutoff_at"></div>
         <div class="col-md-2"><label class="form-label small mb-1">Max orders</label><input class="form-control form-control-sm" type="number" min="1" name="max" [(ngModel)]="n.max_orders"></div>
-        <div class="col-md-2 d-grid"><button class="btn btn-sm btn-success" (click)="create()">Create</button></div>
+        <div class="col-md-2 d-grid"><button class="btn btn-sm btn-ml" (click)="create()">Create</button></div>
       </div>
     </div>
 
@@ -41,7 +41,7 @@ import { money, date, statusBadge, statusLabel } from '../../core/utils';
                 <td>{{ s.order_count }}/@if (s.max_orders) { {{ s.max_orders }} } @else { ∞ }</td>
                 <td><span class="badge" [class]="'text-bg-' + badge(s.status)">{{ label(s.status) }}</span></td>
                 <td class="text-end">
-                  <button class="btn btn-sm me-1" [class.btn-outline-secondary]="s.status === 'active'" [class.btn-outline-success]="s.status !== 'active'" (click)="toggle(s)">
+                  <button class="btn btn-sm me-1" [class.btn-outline-secondary]="s.status === 'active'" [class.btn-outline-ml]="s.status !== 'active'" (click)="toggle(s)">
                     {{ s.status === 'active' ? 'Deactivate' : 'Activate' }}
                   </button>
                   <button class="btn btn-outline-danger btn-sm" (click)="remove(s)"><i class="bi bi-trash"></i></button>

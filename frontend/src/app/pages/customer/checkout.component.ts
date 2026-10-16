@@ -67,7 +67,7 @@ import { date, formatTime, imageError, img, money } from '../../core/utils';
               <div class="d-flex justify-content-between fs-5 fw-bold"><span>Total</span><span>{{ money(grandTotal()) }}</span></div>
               <div class="text-muted small mt-1">Pay in person at pickup.</div>
               <div class="mb-2"><label class="form-label small">Note to farmers (optional)</label><textarea class="form-control form-control-sm" name="note" [(ngModel)]="note" rows="2" maxlength="1000"></textarea></div>
-              <button class="btn btn-success w-100" (click)="place()" [disabled]="busy()">@if (busy()) { <span class="spinner-border spinner-border-sm me-1"></span> }Place orders</button>
+              <button class="btn btn-ml w-100" (click)="place()" [disabled]="busy()">@if (busy()) { <span class="spinner-border spinner-border-sm me-1"></span> }Place orders</button>
             </div>
           </div>
         </div>

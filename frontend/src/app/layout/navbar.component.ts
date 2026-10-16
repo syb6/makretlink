@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, inject, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../core/auth.service';
 import { PersonAvatarComponent } from '../core/person-avatar.component';
 import { ToastService } from '../core/toast.service';
+import { ConfirmService } from '../core/confirm.service';
 
 @Component({
   selector: 'app-navbar',
@@ -45,7 +46,7 @@ import { ToastService } from '../core/toast.service';
               @if (auth.unread() > 0) { <span class="badge rounded-pill bg-danger">{{ auth.unread() }}</span> }
             </a>
             <div class="dropdown">
-              <button class="profile-badge dropdown-toggle border-0" type="button"
+              <button class="profile-badge dropdown-toggle" type="button" style="border:none;background:var(--primary-light)"
                       (click)="userMenu = !userMenu" [attr.aria-expanded]="userMenu">
                 <app-person-avatar [name]="u.name" [src]="u.avatar" class="avatar-sm rounded-circle" />
                 <span class="d-none d-lg-inline">{{ firstName(u.name) }}</span>
@@ -60,10 +61,8 @@ import { ToastService } from '../core/toast.service';
                   <li><a class="dropdown-item" routerLink="/farmer/dashboard" (click)="userMenu = false"><i class="bi bi-speedometer2 me-2"></i>Farmer Dashboard</a></li>
                   <li><a class="dropdown-item" routerLink="/farmer/stalls" (click)="userMenu = false"><i class="bi bi-shop me-2"></i>My Stalls</a></li>
                   <li><a class="dropdown-item" routerLink="/farmer/orders" (click)="userMenu = false"><i class="bi bi-cart-check me-2"></i>Pre-Orders</a></li>
-                  <li><a class="dropdown-item" routerLink="/farmer/profile" (click)="userMenu = false"><i class="bi bi-person-gear me-2"></i>Profile</a></li>
                 } @else if (auth.isAdmin()) {
                   <li><a class="dropdown-item" routerLink="/admin/dashboard" (click)="userMenu = false"><i class="bi bi-speedometer2 me-2"></i>Admin Dashboard</a></li>
-                  <li><a class="dropdown-item" routerLink="/admin/profile" (click)="userMenu = false"><i class="bi bi-person-gear me-2"></i>Profile</a></li>
                 }
                 <li><hr class="dropdown-divider"></li>
                 <li><button class="dropdown-item" type="button" (click)="logout()"><i class="bi bi-box-arrow-right me-2"></i>Logout</button></li>
@@ -104,16 +103,29 @@ import { ToastService } from '../core/toast.service';
     .avatar-sm { width: 28px; height: 28px; object-fit: cover; }
   `,
 })
-export class NavbarComponent implements OnInit {
+export class NavbarComponent implements OnInit, OnDestroy {
   readonly auth = inject(AuthService);
   private router = inject(Router);
   private toast = inject(ToastService);
+  private confirm = inject(ConfirmService);
 
   open = false;
   userMenu = false;
   theme: 'light' | 'dark' = 'light';
+  private pollTimer: ReturnType<typeof setInterval> | null = null;
+
   ngOnInit(): void {
     this.theme = document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'dark' : 'light';
+    // Refresh the notification badge every 30s while the tab is visible,
+    // matching the @auth script in layouts/app.blade.php.
+    this.pollTimer = setInterval(() => {
+      if (document.hidden || !this.auth.user()) return;
+      void this.auth.load();
+    }, 30000);
+  }
+
+  ngOnDestroy(): void {
+    if (this.pollTimer) clearInterval(this.pollTimer);
   }
 
   firstName(name: string): string {
@@ -130,6 +142,12 @@ export class NavbarComponent implements OnInit {
 
   async logout(): Promise<void> {
     this.userMenu = false;
+    const confirmed = await this.confirm.confirm('Sign out of MarketLink?', {
+      title: 'See you soon!',
+      danger: false,
+      okLabel: 'Sign out',
+    });
+    if (!confirmed) return;
     try {
       await this.auth.logout();
       await this.router.navigate(['/']);
