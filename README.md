@@ -51,6 +51,8 @@ The repo ships with `railway.json` (frontend/backend build and start commands). 
 `preDeployCommand` applies migrations, links storage and warms Laravel's production
 caches. It deliberately does not run demo seeders: they create accounts with the
 publicly documented `password` password and would overwrite sample data on redeploy.
+The root `package.json` pins Railway's Nixpacks Node selection to Node 22 because the
+Nixpkgs snapshot used by the reported build does not provide `nodejs_24`.
 
 ### One-time setup
 
