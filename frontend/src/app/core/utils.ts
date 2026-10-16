@@ -78,7 +78,9 @@ export function initials(name: string | null | undefined): string {
 export function imageLoaded(event: Event): void {
   const image = event.currentTarget;
   if (image instanceof HTMLImageElement) {
-    image.classList.add('is-loaded');
+    // Keep the manual (load) wiring working: MotionService writes .image-ready,
+    // but any template that still binds (load) should land on the same class.
+    image.classList.add('image-ready');
   }
 }
 

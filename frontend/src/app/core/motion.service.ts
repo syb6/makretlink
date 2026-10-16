@@ -77,6 +77,7 @@ export class MotionService {
 
   private scanWholePage(): void {
     document.querySelectorAll<HTMLImageElement>('img').forEach((image) => this.prepareImage(image));
+    document.querySelectorAll<HTMLImageElement>('img.image-loading').forEach((image) => this.prepareImage(image));
 
     const matched = document.querySelectorAll<HTMLElement>(`${REVEAL_SELECTOR}, .stat-number`);
 
@@ -118,6 +119,13 @@ export class MotionService {
       image.classList.remove('image-loading');
       image.classList.add('image-failed');
     }
+  }
+
+  /** Re-run image-loading observers after Angular swaps template images (route change,
+   *  modal open, infinite scroll append). Kept idempotent via the source-key guard in
+   *  prepareImage(). */
+  reobserveImages(): void {
+    document.querySelectorAll<HTMLImageElement>('img').forEach((image) => this.prepareImage(image));
   }
 
   private prepareReveal(el: HTMLElement): void {

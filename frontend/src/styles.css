@@ -262,6 +262,55 @@ img.image-loading {
   }
 }
 
+./* ---------- Universal image loading state ----------
+   Single source of truth: MotionService.prepareImage() drives these three
+   classes on every <img> across the SPA (hero, cards, categories, related,
+   avatars, map popups). No per-template (load)/(error) wiring needed.
+   - .image-loading  : shimmer skeleton sized by the image's own width/height attrs
+   - .image-ready    : fade in the real photo
+   - .image-failed   : hide silently (fallbacks handled by img() + error handler)
+   ========================================================= */
+img {
+  background-color: var(--surface-2, #faf9f5);
+}
+
+img.image-loading {
+  background: linear-gradient(
+    100deg,
+    color-mix(in srgb, var(--primary, #a2b231) 8%, var(--surface, #fff)) 35%,
+    color-mix(in srgb, var(--primary, #a2b231) 20%, var(--surface, #fff)) 50%,
+    color-mix(in srgb, var(--primary, #a2b231) 8%, var(--surface, #fff)) 65%
+  );
+  background-size: 220% 100%;
+  animation: image-loading-shimmer 1.4s ease-in-out infinite;
+  object-fit: cover;
+}
+
+img.image-ready {
+  opacity: 1;
+  transition: opacity 0.45s ease;
+}
+
+img.image-failed {
+  /* hide silently — fallback is handled by img() + the (error) handler;
+     keep the element in the DOM so layout doesn't jump */
+  visibility: hidden;
+}
+
+@keyframes image-loading-shimmer {
+  to { background-position-x: -220%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  img.image-loading {
+    animation: none;
+    background-size: 100% 100%;
+  }
+  img.image-ready {
+    transition: none;
+  }
+}
+
 .card-img-cover {
   width: 100%;
   height: 180px;

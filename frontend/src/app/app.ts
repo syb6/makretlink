@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { AuthService } from './core/auth.service';
 import { ApiService } from './core/api.service';
 import { MotionService } from './core/motion.service';
@@ -63,6 +64,7 @@ export class App implements OnInit {
   private router = inject(Router);
   readonly api = inject(ApiService);
   private motion = inject(MotionService);
+  private routerEventsSubscription: Subscription | null = null;
 
   online = signal(navigator.onLine);
   backOnline = signal(false);
@@ -88,6 +90,14 @@ export class App implements OnInit {
         // Blade hides the assistant on login/register/password/* pages.
         this.isAuthPage.set(/^\/(login|register|forgot-password|reset-password)/.test(url));
       });
+      // Every route change (including back/forward) re-drives image + reveal
+      // observers so freshly rendered <img>s get the shimmer→fade flow.
+      this.routerEventsSubscription = this.router.events.subscribe((event: any) => {
+        if (event instanceof NavigationEnd) {
+          // Defer until the new route template is rendered.
+          requestAnimationFrame(() => this.motion.reobserveImages());
+        }
+      });
   }
 
   ngOnInit(): void {
@@ -105,5 +115,9 @@ export class App implements OnInit {
 
   dismissFailure(): void {
     this.api.clearFailure();
+  }
+
+  ngOnDestroy(): void {
+    this.routerEventsSubscription?.unsubscribe();
   }
 }
