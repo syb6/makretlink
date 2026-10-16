@@ -47,12 +47,12 @@ Demo accounts (seeded): `admin@marketlink.test`, `farmer1@marketlink.test`,
 
 ## Deploying to Railway
 
-The repo ships with `railway.json` (frontend/backend build and start commands). Its
-`preDeployCommand` applies migrations, links storage and warms Laravel's production
-caches. It deliberately does not run demo seeders: they create accounts with the
-publicly documented `password` password and would overwrite sample data on redeploy.
-The root `package.json` pins Railway's Nixpacks Node selection to Node 22 because the
-Nixpkgs snapshot used by the reported build does not provide `nodejs_24`.
+The repo ships with `railway.json` and a multi-stage `Dockerfile`: Angular builds on
+Node 22.22.3, and Laravel runs on PHP 8.3 with MySQL support. The pre-deploy command
+applies database migrations. Startup creates the storage link and warms Laravel's
+production caches. The deploy deliberately does not run demo seeders: they create
+accounts with the publicly documented `password` password and would overwrite sample
+data on redeploy.
 
 ### One-time setup
 
