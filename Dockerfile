@@ -10,7 +10,13 @@ RUN npm run build
 
 FROM php:8.3-cli-bookworm
 
-RUN docker-php-ext-install pdo_mysql
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libzip-dev unzip \
+    && docker-php-ext-install pdo_mysql zip \
+    && apt-get purge -y --auto-remove libzip-dev \
+    && apt-get install -y --no-install-recommends libzip4 \
+    && php -r 'exit(extension_loaded("pdo_mysql") && extension_loaded("zip") ? 0 : 1);' \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
