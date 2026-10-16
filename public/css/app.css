@@ -1731,23 +1731,17 @@ a.product-title:hover {
     background: var(--surface-2);
 }
 
-/* ---------- Dynamic card images: soft placeholder, fade-in on load ---------- */
+/* ---------- Dynamic card images: soft placeholder, shimmer → fade on load ---------- */
+/* MotionService.prepareImage() drives .image-loading/.image-ready/.image-failed
+   on every <img>, so card images reuse the same shimmer + fade flow as the rest
+   of the SPA. The soft placeholder gradient is now the .image-loading background. */
 .card-img {
-    background:
-        linear-gradient(
-            135deg,
-            color-mix(in srgb, var(--primary-light) 60%, var(--surface)),
-            var(--surface-2)
-        );
-    opacity: 0;
-    transition: opacity 0.45s ease;
-}
-.card-img.is-loaded {
+    background: transparent;
     opacity: 1;
+    transition: none;
 }
 @media (prefers-reduced-motion: reduce) {
     .card-img {
-        opacity: 1;
         transition: none;
     }
 }
@@ -5691,12 +5685,15 @@ body.page-enter:not(.page-leaving) {
     transition: opacity 0.5s var(--ease-out);
 }
 
-/* Product images cross-fade in via .is-loaded (onload attr in
-   products._image partial) */
+/* Product images cross-fade in via .image-ready (MotionService.prepareImage()) */
+/* The SPA uses MotionService for the shimmer→fade flow on all images, including
+   product cards rendered via the _card/_image Blade partials when served from Laravel.
+   .image-ready fades in; .image-loading shows the shimmer; .image-failed hides. */
 .card-img {
     opacity: 0;
+    transition: opacity 0.45s ease;
 }
-.card-img.is-loaded {
+.card-img.image-ready {
     opacity: 1;
 }
 /* If onload never fires (cached edge case), force-show after a beat */
