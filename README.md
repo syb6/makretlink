@@ -65,6 +65,7 @@ publicly documented `password` password and would overwrite sample data on redep
    APP_NAME=MarketLink
    APP_URL=https://<your-railway-domain>
    SANCTUM_STATEFUL_DOMAINS=<your-railway-domain>
+   SESSION_SECURE_COOKIE=true
 
    DB_CONNECTION=mysql
    DB_URL=${{MySQL.DATABASE_URL}}
@@ -83,7 +84,12 @@ publicly documented `password` password and would overwrite sample data on redep
 4. **Deploy**. The pre-deploy command runs migrations and builds Laravel's caches.
 5. In the app service: **Settings → Networking → Generate Domain** to get a public URL.
    HTTPS is enforced automatically behind Railway's proxy.
-6. Create the initial administrator through a controlled one-time operation. Do not
+6. If users will upload profile, product, category, or market images, add a Railway
+   volume mounted at `/app/storage/app/public` before accepting uploads. The app serves
+   those files through `/storage`; the volume keeps them across deploys. Railway volumes
+   are attached to a single replica, so use S3-compatible object storage before scaling
+   the app horizontally.
+7. Create the initial administrator through a controlled one-time operation. Do not
    run `php artisan db:seed` against production; it creates demo users. To promote a
    pre-registered account, open the app service shell and run `php artisan tinker`,
    then:
@@ -102,11 +108,9 @@ publicly documented `password` password and would overwrite sample data on redep
 
 ### Notes
 
-- **Uploaded images need persistent storage before production use.** Product, market and
-  category images are currently written directly under `public/images/placeholders/`,
-  and profile images use Laravel's local public disk. Railway's filesystem is ephemeral,
-  so uploads can disappear on redeploy. Use a persistent volume or migrate both upload
-  paths to durable object storage before relying on user uploads in production.
+- New product, market, category, and profile uploads use Laravel's public storage disk;
+  mount the Railway volume at `/app/storage/app/public` to persist them across deploys.
+  Bundled placeholder images remain part of the application release.
 - Run `php artisan migrate --force` through the pre-deploy step; seed demo data only in
   local/test environments.
 - Logs go to **stderr** so they appear in `railway logs`.
