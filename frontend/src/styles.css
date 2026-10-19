@@ -262,7 +262,7 @@ img.image-loading {
   }
 }
 
-./* ---------- Universal image loading state ----------
+/* ---------- Universal image loading state ----------
    Single source of truth: MotionService.prepareImage() drives these three
    classes on every <img> across the SPA (hero, cards, categories, related,
    avatars, map popups). No per-template (load)/(error) wiring needed.

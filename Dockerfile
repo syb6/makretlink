@@ -6,6 +6,7 @@ COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci
 
 COPY frontend/ ./
+COPY public/css/app.css /app/public/css/app.css
 RUN npm run build
 
 FROM php:8.3-cli-bookworm
